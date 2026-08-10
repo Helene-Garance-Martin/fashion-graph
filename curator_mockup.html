@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THREAD — an inspiration atlas for The Costume Institute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  :root{
+    --ground:#141419; --ground-2:#1c1c24; --ink:#e8e6e0; --ink-dim:#8a8792;
+    --gold:#c9a24b; --marble:#d8cdb8; --line:#33323c;
+    --rose:#d98a8a; --slate:#7fa8c9; --champ:#c9b98a; --lanvin:#6f7fd9;
+    --sage:#9caf88; --aubergine:#9a7fae; --shocking:#e368a6; --garnet:#b45f6c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--ground);color:var(--ink);
+    font-family:"Cormorant Garamond",Georgia,serif;overflow:hidden}
+  .label{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+    text-transform:uppercase;letter-spacing:.18em;font-size:10px;color:var(--ink-dim)}
+  /* top bar */
+  header{position:fixed;top:0;left:0;right:0;height:64px;z-index:20;
+    display:flex;align-items:center;gap:24px;padding:0 24px;
+    background:linear-gradient(180deg,rgba(20,20,25,.95),rgba(20,20,25,.6));
+    border-bottom:1px solid var(--line)}
+  .brand{font-size:26px;letter-spacing:.34em;font-weight:600}
+  .brand small{display:block;letter-spacing:.2em;font-size:9px;color:var(--ink-dim);
+    text-transform:uppercase;font-family:-apple-system,sans-serif;margin-top:-2px}
+  .search{flex:1;max-width:520px;position:relative}
+  .search input{width:100%;background:var(--ground-2);border:1px solid var(--line);
+    color:var(--ink);border-radius:22px;padding:10px 16px;font-size:16px;
+    font-family:"Cormorant Garamond",serif;outline:none}
+  .search input:focus{border-color:var(--gold)}
+  .search .hint{position:absolute;right:16px;top:12px;pointer-events:none}
+  /* stage */
+  #stage{position:fixed;inset:64px 360px 0 0}
+  svg{width:100%;height:100%;display:block;cursor:grab}
+  .link{stroke:var(--line);stroke-width:1}
+  .link.inspired{stroke:var(--gold);stroke-width:1.4}
+  .link.collab{stroke:var(--shocking);stroke-dasharray:2 3}
+  .link.rival{stroke:#6b5563;stroke-dasharray:4 4}
+  .link.explore{stroke:var(--gold);stroke-dasharray:1 4;opacity:.8}
+  .node circle{stroke:rgba(255,255,255,.14);stroke-width:1.5;cursor:pointer}
+  .node text{font-size:13px;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:var(--ground);stroke-width:3px}
+  .node.source text{font-size:15px;fill:var(--gold)}
+  .dim{opacity:.12;transition:opacity .3s}
+  .lit{opacity:1;transition:opacity .3s}
+  /* panel */
+  aside{position:fixed;top:64px;right:0;bottom:0;width:360px;z-index:20;
+    background:var(--ground-2);border-left:1px solid var(--line);
+    display:flex;flex-direction:column}
+  .walllabel{padding:26px 24px 22px;border-bottom:1px solid var(--line)}
+  .walllabel .kind{color:var(--gold)}
+  .walllabel h2{font-size:30px;font-weight:500;margin:8px 0 2px;line-height:1.05}
+  .walllabel .origin{font-style:italic;color:var(--ink-dim);font-size:17px;margin-bottom:14px}
+  .walllabel p{font-size:17px;line-height:1.45;margin:0 0 16px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .chip{font-family:-apple-system,sans-serif;font-size:11px;letter-spacing:.04em;
+    border:1px solid var(--line);border-radius:12px;padding:4px 10px;color:var(--ink);
+    cursor:pointer;background:var(--ground)}
+  .chip.gold{border-color:var(--gold);color:var(--gold)}
+  .add{width:100%;background:var(--gold);color:#1a1508;border:none;border-radius:22px;
+    padding:11px;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer;font-weight:600}
+  .add:disabled{background:var(--line);color:var(--ink-dim);cursor:default}
+  /* tray */
+  .tray{flex:1;display:flex;flex-direction:column;padding:20px 24px;overflow:hidden}
+  .tray h3{font-size:15px;margin:0}
+  .exh-title{font-size:22px;font-weight:500;background:none;border:none;border-bottom:1px dashed var(--line);
+    color:var(--ink);width:100%;font-family:"Cormorant Garamond",serif;padding:6px 0;margin:6px 0 14px;outline:none}
+  .exh-title:focus{border-color:var(--gold)}
+  .tray ul{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+  .tray li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px}
+  .tray li .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .tray li .rm{margin-left:auto;color:var(--ink-dim);cursor:pointer;font-size:14px}
+  .tray .empty{color:var(--ink-dim);font-style:italic;font-size:16px;margin-top:8px}
+  .tray .count{margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">THREAD<small>an inspiration atlas · the costume institute</small></div>
+  <div class="search">
+    <input id="q" placeholder="Explore The Met for inspiration — try “workwear”, “kimono”, “Greek”…" autocomplete="off">
+    <span class="hint label">↵ search</span>
+  </div>
+</header>
+
+<div id="stage"><svg></svg></div>
+
+<aside>
+  <div class="walllabel" id="wall">
+    <div class="kind label">designer</div>
+    <h2>—</h2>
+    <div class="origin"></div>
+    <p></p>
+    <div class="label" style="margin-bottom:6px">inspired by</div>
+    <div class="chips"></div>
+    <button class="add">Add to exhibition</button>
+  </div>
+  <div class="tray">
+    <h3 class="label" style="font-size:10px">the exhibition</h3>
+    <input class="exh-title" id="exhTitle" value="Claire McCardell: The American Line">
+    <ul id="trayList"></ul>
+    <div class="count label"></div>
+  </div>
+</aside>
+
+<script>
+// ---------- the curated spine (fake but faithful) ----------
+const HOUSE = {
+  mccardell:'#9caf88', vionnet:'#d98a8a', gres:'#7fa8c9', chanel:'#c9b98a',
+  lanvin:'#6f7fd9', balenciaga:'#b45f6c', schiaparelli:'#e368a6', james:'#9a7fae'
+};
+const NODES = [
+  {id:'mccardell',label:'Claire McCardell',type:'designer',color:HOUSE.mccardell,origin:'American · 1905–1958',
+   blurb:'Mother of American sportswear. Stripped couture of fuss — the popover, separates, denim, function as elegance.'},
+  {id:'vionnet',label:'Madeleine Vionnet',type:'designer',color:HOUSE.vionnet,origin:'French · 1876–1975',
+   blurb:'Queen of the bias cut. Draped cloth on the living body — the Parthenon made wearable.'},
+  {id:'gres',label:'Madame Grès',type:'designer',color:HOUSE.gres,origin:'French · 1903–1993',
+   blurb:'Sculptor in silk jersey. Pleated goddess-gowns worked directly on the form.'},
+  {id:'balenciaga',label:'Cristóbal Balenciaga',type:'designer',color:HOUSE.balenciaga,origin:'Spanish · 1895–1972',
+   blurb:'“The master of us all.” Sombre, sculptural volumes drawn from Spanish art and dress.'},
+  {id:'chanel',label:'Gabrielle Chanel',type:'designer',color:HOUSE.chanel,origin:'French · 1883–1971',
+   blurb:'Modernism in cloth — menswear, jersey, the total wardrobe of the working woman.'},
+  {id:'lanvin',label:'Jeanne Lanvin',type:'designer',color:HOUSE.lanvin,origin:'French · 1867–1946',
+   blurb:'The robe de style and a famous blue drawn from medieval and early-Renaissance art.'},
+  {id:'schiaparelli',label:'Elsa Schiaparelli',type:'designer',color:HOUSE.schiaparelli,origin:'Italian · 1890–1973',
+   blurb:'Surrealism worn — the lobster dress, the shoe hat, collaborations with Dalí and Cocteau.'},
+  {id:'james',label:'Charles James',type:'designer',color:HOUSE.james,origin:'American · 1906–1978',
+   blurb:'Dressmaking as architecture and mathematics — the Clover Leaf, the Swan.'},
+
+  {id:'greek',label:'Ancient Greek sculpture',type:'source',color:'#c9a24b',
+   blurb:'Draped marble — korai, Nikai, grave stelai. The source of classical drapery.'},
+  {id:'kimono',label:'Japanese kimono',type:'source',color:'#c9a24b',
+   blurb:'Flat, geometric construction that works with the uncut rectangle of cloth.'},
+  {id:'spanish',label:'Spanish painting',type:'source',color:'#c9a24b',
+   blurb:'El Greco, Velázquez, Goya — the infantas’ volumes, ecclesiastical black.'},
+  {id:'medieval',label:'Medieval art',type:'source',color:'#c9a24b',
+   blurb:'Illuminated manuscripts, stained glass, the heraldic and the sacred.'},
+  {id:'surreal',label:'Surrealism & Dada',type:'source',color:'#c9a24b',
+   blurb:'A living avant-garde — reached across to, not back toward.'},
+
+  {id:'popover',label:'Popover dress',type:'garment',color:HOUSE.mccardell,house:'mccardell'},
+  {id:'monastic',label:'Monastic dress',type:'garment',color:HOUSE.mccardell,house:'mccardell'},
+  {id:'biasgown',label:'Bias evening gown',type:'garment',color:HOUSE.vionnet,house:'vionnet'},
+];
+const LINKS = [
+  {source:'greek',target:'vionnet',kind:'inspired'},
+  {source:'greek',target:'gres',kind:'inspired'},
+  {source:'kimono',target:'vionnet',kind:'inspired'},
+  {source:'vionnet',target:'mccardell',kind:'inspired'},
+  {source:'spanish',target:'balenciaga',kind:'inspired'},
+  {source:'medieval',target:'lanvin',kind:'inspired'},
+  {source:'surreal',target:'schiaparelli',kind:'collab'},
+  {source:'chanel',target:'schiaparelli',kind:'rival'},
+  {source:'mccardell',target:'popover',kind:'created'},
+  {source:'mccardell',target:'monastic',kind:'created'},
+  {source:'vionnet',target:'biasgown',kind:'created'},
+];
+
+// what a live Met search would return (fake), by concept
+const MET = {
+  workwear:[['Work apron, 19th c.','workwear'],['Chore jacket','workwear'],['Sailor’s dungarees','denim']],
+  denim:[['Sailor’s dungarees','denim'],['Riveted work trousers','denim']],
+  utility:[['Utility coverall','workwear'],['Feed-sack dress','thrift']],
+  kimono:[['Kimono, Edo period','kimono'],['Ukiyo-e print','kimono']],
+  greek:[['Marble statue of a woman','greek'],['Grave stele of a woman','greek']],
+  spanish:[['Zurbarán — a monk','spanish'],['Infanta portrait','spanish']],
+  monastic:[['A nun’s habit','monastic'],['Cowled saint (panel)','monastic']],
+};
+
+// ---------- render ----------
+const svg = d3.select("svg");
+let W = window.innerWidth-360, H = window.innerHeight-64;
+const root = svg.append("g");
+svg.call(d3.zoom().scaleExtent([.4,2.5]).on("zoom",e=>root.attr("transform",e.transform)));
+
+let nodes = NODES.map(d=>({...d}));
+let links = LINKS.map(d=>({...d}));
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d=>d.id).distance(l=>l.kind==="created"?55:130).strength(.5))
+  .force("charge", d3.forceManyBody().strength(-420))
+  .force("center", d3.forceCenter(W/2,H/2))
+  .force("collide", d3.forceCollide(34));
+
+let linkSel = root.append("g").selectAll("line");
+let nodeSel = root.append("g").selectAll("g");
+let selected = null;
+
+function radius(d){ return d.type==="source"?20 : d.type==="designer"?15 : 8; }
+
+function draw(){
+  linkSel = linkSel.data(links, d=>d.source.id+"-"+d.target.id);
+  linkSel.exit().remove();
+  linkSel = linkSel.enter().append("line")
+    .attr("class",d=>"link "+d.kind).merge(linkSel);
+
+  nodeSel = nodeSel.data(nodes, d=>d.id);
+  nodeSel.exit().remove();
+  const g = nodeSel.enter().append("g")
+    .attr("class",d=>"node "+d.type)
+    .call(d3.drag()
+      .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+    .on("click",(e,d)=>{select(d.id);e.stopPropagation();});
+  g.append("circle").attr("r",radius).attr("fill",d=>d.color);
+  g.append("text").attr("x",d=>radius(d)+6).attr("dy",".35em").text(d=>d.label);
+  nodeSel = g.merge(nodeSel);
+
+  sim.nodes(nodes); sim.force("link").links(links); sim.alpha(.8).restart();
+}
+
+sim.on("tick",()=>{
+  linkSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+         .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  nodeSel.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+// ---------- selection + lineage highlight ----------
+function neighbours(id){
+  const near = new Set([id]);
+  links.forEach(l=>{
+    const s=l.source.id||l.source, t=l.target.id||l.target;
+    if(s===id) near.add(t); if(t===id) near.add(s);
+  });
+  return near;
+}
+function select(id){
+  selected = id;
+  const near = neighbours(id);
+  nodeSel.classed("dim",d=>!near.has(d.id)).classed("lit",d=>near.has(d.id));
+  linkSel.classed("dim",d=>{
+    const s=d.source.id||d.source, t=d.target.id||d.target;
+    return !(near.has(s)&&near.has(t));
+  });
+  wallLabel(nodes.find(n=>n.id===id));
+}
+svg.on("click",()=>{ // click empty space clears
+  selected=null; nodeSel.classed("dim",false).classed("lit",false);
+  linkSel.classed("dim",false);
+});
+
+// ---------- wall label ----------
+const wall = document.getElementById("wall");
+function wallLabel(d){
+  if(!d) return;
+  const inspiredBy = links.filter(l=>(l.target.id||l.target)===d.id && (l.kind==="inspired"||l.kind==="collab"))
+    .map(l=>nodes.find(n=>n.id===(l.source.id||l.source)));
+  wall.querySelector(".kind").textContent = d.type;
+  wall.querySelector("h2").textContent = d.label;
+  wall.querySelector(".origin").textContent = d.origin||"";
+  wall.querySelector("p").textContent = d.blurb||"An object drawn into the field for inspiration.";
+  const chips = wall.querySelector(".chips");
+  chips.innerHTML = inspiredBy.length
+    ? inspiredBy.map(s=>`<span class="chip gold" data-go="${s.id}">${s.label}</span>`).join("")
+    : `<span class="chip" style="color:var(--ink-dim)">— a source, or a starting point —</span>`;
+  chips.querySelectorAll("[data-go]").forEach(c=>c.onclick=()=>select(c.dataset.go));
+  const add = wall.querySelector(".add");
+  add.disabled = tray.includes(d.id);
+  add.textContent = tray.includes(d.id) ? "In the exhibition ✓" : "Add to exhibition";
+  add.onclick = ()=>addToTray(d.id);
+  wall.style.opacity=0; requestAnimationFrame(()=>{wall.style.transition="opacity .35s";wall.style.opacity=1;});
+}
+
+// ---------- exhibition tray ----------
+let tray = [];
+const trayList = document.getElementById("trayList");
+function addToTray(id){ if(!tray.includes(id)){tray.push(id); renderTray(); if(selected===id)wallLabel(nodes.find(n=>n.id===id));} }
+function removeFromTray(id){ tray = tray.filter(x=>x!==id); renderTray(); if(selected)wallLabel(nodes.find(n=>n.id===selected)); }
+function renderTray(){
+  const list = tray.map(id=>nodes.find(n=>n.id===id)).filter(Boolean);
+  trayList.innerHTML = list.length
+    ? list.map(n=>`<li><span class="dot" style="background:${n.color}"></span>${n.label}<span class="rm" data-rm="${n.id}">remove</span></li>`).join("")
+    : `<li class="empty">Click a marble, a garment, a source — anything that could hang on the wall — and add it here. The tray is your show.</li>`;
+  trayList.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeFromTray(b.dataset.rm));
+  wall.parentNode.querySelector(".count").textContent =
+    list.length ? `${list.length} object${list.length>1?"s":""} — your exhibition takes shape` : "";
+}
+
+// ---------- explore the Met (live-ish) ----------
+document.getElementById("q").addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const term = e.target.value.trim().toLowerCase();
+  const key = Object.keys(MET).find(k=>term.includes(k));
+  const results = key?MET[key]:[[`“${e.target.value.trim()}” — textile study`,"met"],[`“${e.target.value.trim()}” — object`,"met"]];
+  const anchor = selected && nodes.find(n=>n.id===selected&&n.type==="designer") ? selected : "mccardell";
+  // route known source concepts to the house they truly fed
+  const route = {kimono:"vionnet",greek:"vionnet",spanish:"balenciaga",monastic:"balenciaga"};
+  const target = route[key]||anchor;
+  results.forEach((r,i)=>{
+    const id = "met_"+Math.random().toString(36).slice(2,7);
+    const a = nodes.find(n=>n.id===target);
+    nodes.push({id,label:r[0],type:"met",color:"#d8cdb8",origin:"The Met · open access",
+      blurb:`Pulled live from the collection on “${e.target.value.trim()}”. A candidate thread of inspiration.`,
+      x:(a?a.x:W/2)+ (Math.random()*80-40), y:(a?a.y:H/2)+(Math.random()*80-40)});
+    links.push({source:id,target:target,kind:"explore"});
+  });
+  draw();
+  e.target.value="";
+  setTimeout(()=>select(target),400); // relight the house its new inspiration attached to
+});
+
+// ---------- go ----------
+draw();
+setTimeout(()=>select("mccardell"),300);
+window.addEventListener("resize",()=>{
+  W=window.innerWidth-360;H=window.innerHeight-64;
+  sim.force("center",d3.forceCenter(W/2,H/2)).alpha(.3).restart();
+});
+</script>
+</body>
+</html>
