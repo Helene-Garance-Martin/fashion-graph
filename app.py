@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from neo4j import GraphDatabase
 
 # --- house colours, mirrored from the graph so the API is self-describing ---
@@ -84,6 +85,11 @@ def to_node(n):
     else:
         out.update(label=str(n.get("name") or n.get("value")))
     return out
+
+
+@app.get("/")
+def index():
+    return FileResponse("thread.html")
 
 
 @app.get("/health")
