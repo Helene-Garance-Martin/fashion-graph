@@ -1,35 +1,48 @@
 """
-load_neo4j.py — Step 3: load your garments into Neo4j Aura.
-
-Reads data/objects.json and builds the graph in your Aura instance:
+load_neo4j.py — load the garments into Neo4j, scoped to each house's founder era.
+ 
+Reads data/objects.json and builds the graph in your local Neo4j:
     (Designer)-[:CREATED]->(Garment)-[:MADE_IN]->(Year)
                            (Garment)-[:OF_TYPE]->(Category)
     (Designer)-[:FROM]->(Country)
-
+ 
+Founder-era scoping (a curatorial decision — see DESIGN.md): each house keeps
+only garments dated within its founder's operative years. This is applied HERE,
+at load time, so the raw data in objects.json stays complete and the cut stays
+explicit and reversible. Successor creative directors (Lagerfeld, Elbaz, ...)
+fall outside the windows and are excluded automatically.
+ 
 Setup:
     pip install neo4j
-    # create a file called .env with your Aura details (see the message)
+    # Aura details / local details in a .env file (or Codespace secrets)
     python load_neo4j.py
-
-Your password lives in .env, which .gitignore already keeps out of GitHub,
-so it never leaves your machine.
 """
-
+ 
 import json
 import os
 from pathlib import Path
 from neo4j import GraphDatabase
-
-# Same category logic as the quick-view graph: fall back to the title when
-# the Costume Institute leaves 'classification' blank.
+ 
+# Founder-era windows (inclusive). Scope each house to its founder's years.
+WINDOWS = {
+    "Vionnet":       (1912, 1939),
+    "Grès":          (1934, 1988),
+    "Lanvin":        (1909, 1946),
+    "Chanel":        (1913, 1971),   # Gabrielle's own span; excludes Lagerfeld (1983+)
+    "Schiaparelli":  (1927, 1954),
+    "McCardell":     (1931, 1958),
+    "Charles James": (1928, 1958),
+    "Balenciaga":    (1937, 1968),
+}
+ 
 TYPE_WORDS = [
     "evening dress", "dinner dress", "wedding dress", "afternoon dress",
     "ball gown", "dress", "gown", "coat", "cape", "jacket", "suit",
     "ensemble", "skirt", "blouse", "bodice", "hat", "shoes", "gloves",
     "fan", "bag", "scarf", "robe",
 ]
-
-
+ 
+ 
 def category_of(obj):
     c = (obj.get("classification") or "").strip()
     if c:
@@ -39,10 +52,19 @@ def category_of(obj):
         if w in title:
             return w.title()
     return "Other"
-
-
+ 
+ 
+def in_window(designer, year):
+    """Keep a garment only if it falls inside its house's founder window."""
+    w = WINDOWS.get(designer)
+    if w is None:
+        return True  # no window defined -> don't scope
+    if not isinstance(year, int) or year <= 0:
+        return False  # founder-era scoping needs a date
+    return w[0] <= year <= w[1]
+ 
+ 
 def load_env():
-    """Read simple KEY=VALUE lines from a .env file, if present."""
     env = Path(".env")
     if not env.exists():
         return
@@ -51,14 +73,22 @@ def load_env():
         if line and not line.startswith("#") and "=" in line:
             key, val = line.split("=", 1)
             os.environ.setdefault(key.strip(), val.strip())
-
-
+ 
+ 
 def build_rows(objects):
+    """Return (rows, stats) with founder-era scoping applied."""
     rows = []
+    stats = {}  # designer -> {"kept": n, "dropped": n}
     for obj in objects:
+        designer = obj.get("designer") or obj.get("artistDisplayName") or "Unknown"
         year = obj.get("objectBeginDate")
+        s = stats.setdefault(designer, {"kept": 0, "dropped": 0})
+        if not in_window(designer, year):
+            s["dropped"] += 1
+            continue
+        s["kept"] += 1
         rows.append({
-            "designer": obj.get("designer") or obj.get("artistDisplayName") or "Unknown",
+            "designer": designer,
             "id": obj["objectID"],
             "title": obj.get("title") or "Untitled",
             "date": obj.get("objectDate") or "",
@@ -69,9 +99,9 @@ def build_rows(objects):
             "category": category_of(obj),
             "nationality": (obj.get("artistNationality") or "").strip(),
         })
-    return rows
-
-
+    return rows, stats
+ 
+ 
 CONSTRAINTS = [
     "CREATE CONSTRAINT designer_name IF NOT EXISTS FOR (d:Designer) REQUIRE d.name IS UNIQUE",
     "CREATE CONSTRAINT garment_id   IF NOT EXISTS FOR (g:Garment)  REQUIRE g.id   IS UNIQUE",
@@ -79,7 +109,12 @@ CONSTRAINTS = [
     "CREATE CONSTRAINT category_name IF NOT EXISTS FOR (c:Category) REQUIRE c.name IS UNIQUE",
     "CREATE CONSTRAINT country_name IF NOT EXISTS FOR (co:Country) REQUIRE co.name IS UNIQUE",
 ]
-
+ 
+# Clear only this project's nodes, so each load is a clean, correctly-scoped
+# rebuild. Raw data lives in objects.json, so nothing is lost.
+CLEAR = ("MATCH (n) WHERE n:Designer OR n:Garment OR n:Year OR n:Category "
+         "OR n:Country DETACH DELETE n")
+ 
 LOAD = """
 UNWIND $rows AS row
 MERGE (d:Designer {name: row.designer})
@@ -98,29 +133,36 @@ FOREACH (_ IN CASE WHEN row.nationality = '' THEN [] ELSE [1] END |
   MERGE (d)-[:FROM]->(co)
 )
 """
-
-
+ 
+ 
 def main():
     load_env()
     uri = os.environ.get("NEO4J_URI")
     user = os.environ.get("NEO4J_USER", "neo4j")
     password = os.environ.get("NEO4J_PASSWORD")
-
+ 
     if not uri or not password:
-        print("I can't find your Aura details yet. Create a file called .env")
-        print("next to this script, with these three lines (your real values):\n")
-        print("  NEO4J_URI=neo4j+s://xxxxxxxx.databases.neo4j.io")
+        print("I can't find your Neo4j details yet. Create a .env file with:\n")
+        print("  NEO4J_URI=bolt://localhost:7687")
         print("  NEO4J_USER=neo4j")
-        print("  NEO4J_PASSWORD=your-saved-password\n")
+        print("  NEO4J_PASSWORD=fashiongraph\n")
         print("Then run  python load_neo4j.py  again.")
         return
-
+ 
     objects = json.loads(Path("data/objects.json").read_text())
-    rows = build_rows(objects)
-    print(f"Loading {len(rows)} garments into Neo4j...")
-
+    rows, stats = build_rows(objects)
+ 
+    print("Founder-era scoping (kept / dropped per house):")
+    for house in WINDOWS:
+        s = stats.get(house, {"kept": 0, "dropped": 0})
+        lo, hi = WINDOWS[house]
+        print(f"  {house:<14} {lo}-{hi}   kept {s['kept']:>4}   "
+              f"dropped {s['dropped']:>4}")
+    print(f"\nLoading {len(rows)} garments (after scoping) into Neo4j...")
+ 
     driver = GraphDatabase.driver(uri, auth=(user, password))
     with driver.session() as session:
+        session.run(CLEAR)
         for c in CONSTRAINTS:
             session.run(c)
         session.run(LOAD, rows=rows)
@@ -131,8 +173,8 @@ def main():
         for r in result:
             print(f"  {r['c']:>5}  {r['label']}")
     driver.close()
-    print("\nOpen the Aura console and click 'Query' to start exploring.")
-
-
+    print("\nEach house is now scoped to its founder's years.")
+ 
+ 
 if __name__ == "__main__":
     main()
