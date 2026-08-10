@@ -158,6 +158,35 @@ def build_network(objects):
             node(n_id, nat, COUNTRY_COLOR, 20)
             net.add_edge(d_id, n_id, color="#3a3a45")
 
+    # --- source-worlds: real, open-access images at last ---
+    src_path = Path("data/sources.json")
+    if src_path.exists():
+        sources = json.loads(src_path.read_text())
+        for src in sources:
+            sw = src.get("sourceWorld") or "Source"
+            sw_id = f"source::{sw}"
+            node(sw_id, sw, "#c9a24b", 34)  # gold source-world hub
+
+            a_id = f"artwork::{src['objectID']}"
+            img = (src.get("primaryImageSmall") or "").strip()
+            tip = (f"{src.get('title') or 'Artwork'} — {src.get('objectDate') or ''}"
+                   f"\n{src.get('culture') or ''}\n(click to view at the Met)")
+            url = (src.get("objectURL") or "").strip()
+            if a_id not in added:
+                if img:
+                    net.add_node(a_id, label=" ", shape="circularImage", image=img,
+                                 color="#d8cdb8", size=26, borderWidth=3,
+                                 title=tip, url=url)
+                else:
+                    net.add_node(a_id, label=" ", shape="dot", color="#d8cdb8",
+                                 size=8, title=tip, url=url)
+                added.add(a_id)
+            net.add_edge(a_id, sw_id, color="#5a4a2a")
+            for house in (src.get("inspires") or []):
+                d_id = f"designer::{house}"
+                if d_id in added:
+                    net.add_edge(sw_id, d_id, color="#c9a24b")
+
     return net, with_photo, rendered, houses
 
 
