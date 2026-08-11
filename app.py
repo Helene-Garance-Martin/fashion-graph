@@ -15,7 +15,11 @@ Then (Codespaces will offer to forward port 8000) open:
 """
 
 import os
+import json
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -47,6 +51,13 @@ URI = os.environ.get("NEO4J_URI")
 USER = os.environ.get("NEO4J_USER", "neo4j")
 PWD = os.environ.get("NEO4J_PASSWORD")
 driver = GraphDatabase.driver(URI, auth=(USER, PWD)) if (URI and PWD) else None
+if driver:
+    try:
+        with driver.session() as _s:
+            _s.run("CREATE CONSTRAINT exhibition_id IF NOT EXISTS "
+                   "FOR (e:Exhibition) REQUIRE e.id IS UNIQUE")
+    except Exception:
+        pass
 
 app = FastAPI(title="THREAD — an inspiration atlas")
 # open CORS so the mockup (opened as a local file) can call this API
@@ -168,3 +179,78 @@ def source(name: str):
         nodes[node_id(d)] = to_node(d)
         links.append({"source": node_id(sw), "target": node_id(d), "kind": "inspired"})
     return {"nodes": list(nodes.values()), "links": links}
+
+
+# ---------- exhibitions: Create / Read / Update / Delete ----------
+# A saved show. Its items are stored as a JSON blob (label, image, url, type...)
+# so the diaporama is self-contained. Reloading the couture graph does NOT touch
+# exhibitions — the CLEAR in load_neo4j.py leaves :Exhibition alone.
+
+class ExhibitionIn(BaseModel):
+    title: str = "Untitled exhibition"
+    items: list[dict] = []
+
+
+def _exhib_out(e):
+    return {"id": e["id"], "title": e["title"],
+            "items": json.loads(e.get("items") or "[]"),
+            "updated": e.get("updated")}
+
+
+@app.post("/exhibitions")
+def create_exhibition(ex: ExhibitionIn):
+    _require_db()
+    eid = uuid.uuid4().hex[:12]
+    now = datetime.now(timezone.utc).isoformat()
+    with driver.session() as s:
+        s.run("CREATE (e:Exhibition {id:$id, title:$title, items:$items, updated:$updated})",
+              id=eid, title=ex.title, items=json.dumps(ex.items), updated=now)
+    return {"id": eid, "title": ex.title, "items": ex.items, "updated": now}
+
+
+@app.get("/exhibitions")
+def list_exhibitions():
+    _require_db()
+    with driver.session() as s:
+        rows = s.run("MATCH (e:Exhibition) RETURN e ORDER BY e.updated DESC")
+        out = []
+        for r in rows:
+            e = r["e"]
+            out.append({"id": e["id"], "title": e["title"],
+                        "count": len(json.loads(e.get("items") or "[]")),
+                        "updated": e.get("updated")})
+        return out
+
+
+@app.get("/exhibitions/{eid}")
+def get_exhibition(eid: str):
+    _require_db()
+    with driver.session() as s:
+        r = s.run("MATCH (e:Exhibition {id:$id}) RETURN e", id=eid).single()
+    if not r:
+        raise HTTPException(404, f"No exhibition '{eid}'")
+    return _exhib_out(r["e"])
+
+
+@app.put("/exhibitions/{eid}")
+def update_exhibition(eid: str, ex: ExhibitionIn):
+    _require_db()
+    now = datetime.now(timezone.utc).isoformat()
+    with driver.session() as s:
+        r = s.run("MATCH (e:Exhibition {id:$id}) "
+                  "SET e.title=$title, e.items=$items, e.updated=$updated RETURN e",
+                  id=eid, title=ex.title, items=json.dumps(ex.items), updated=now).single()
+    if not r:
+        raise HTTPException(404, f"No exhibition '{eid}'")
+    return {"id": eid, "title": ex.title, "items": ex.items, "updated": now}
+
+
+@app.delete("/exhibitions/{eid}")
+def delete_exhibition(eid: str):
+    _require_db()
+    with driver.session() as s:
+        r = s.run("MATCH (e:Exhibition {id:$id}) WITH e, e.id AS existed "
+                  "DETACH DELETE e RETURN existed", id=eid).single()
+    if not r:
+        raise HTTPException(404, f"No exhibition '{eid}'")
+    return {"deleted": eid}
