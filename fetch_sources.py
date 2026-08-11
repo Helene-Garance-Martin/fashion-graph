@@ -1,14 +1,12 @@
 """
-fetch_sources.py — the first source-world: ancient Greek sculpture.
+fetch_sources.py — the source-worlds behind the couture.
 
-Pulls drapery-rich, OPEN-ACCESS works from the Met's Greek and Roman Art
-department (department 13). Because these are thousands of years old they're
-public domain, so — unlike the couture — they come WITH full-resolution images,
-free and no permission needed.
+Pulls OPEN-ACCESS works from the Met that inspired the houses — so, unlike the
+rights-reserved couture, they come WITH images. Each source-world knows which
+department to search, which terms, which houses it fed, and what materials count.
 
-Each work is tagged with the source-world it belongs to and the houses it
-inspired, so the loader can draw:
-    (Artwork)-[:EXAMPLE_OF]->(SourceWorld)-[:INSPIRED]->(Designer)
+Currently: Ancient Greek sculpture (drapery) and the Japanese kimono.
+Re-running is safe: source-worlds already saved are skipped, not re-fetched.
 
 Run:  python fetch_sources.py
 Out:  ./data/sources.json
@@ -22,30 +20,33 @@ import urllib.error
 from pathlib import Path
 
 API = "https://collectionapi.metmuseum.org/public/collection/v1"
-GREEK_AND_ROMAN = 13  # department id
-
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36")
+MAX_KEEP = 50  # per source-world — a curated selection, not a data dump
 
-# This source-world, and the houses it fed. (Grès and Vionnet are the classical
-# drapers; see DESIGN.md.)
-SOURCE_WORLD = "Ancient Greek sculpture"
-INSPIRES = ["Vionnet", "Grès"]
-
-# Drapery-focused searches — we want the draped body, not coins or fragments.
-TERMS = [
-    "marble statue draped", "marble kore", "peplos figure", "himation",
-    "statue of Nike", "statue of Aphrodite", "draped goddess", "marble grave stele woman",
+SOURCE_WORLDS = [
+    {
+        "name": "Ancient Greek sculpture", "dept": 13,
+        "inspires": ["Vionnet", "Grès"],
+        "terms": ["marble statue draped", "marble kore", "peplos figure",
+                  "himation", "statue of Nike", "statue of Aphrodite",
+                  "draped goddess", "marble grave stele woman"],
+        "keep": ["marble", "stone", "statue", "sculpture", "terracotta", "limestone"],
+    },
+    {
+        "name": "Japanese kimono", "dept": 6,
+        "inspires": ["Vionnet"],
+        "terms": ["kimono", "kosode", "furisode", "uchikake",
+                  "noh costume", "robe japan"],
+        "keep": ["silk", "cotton", "kimono", "robe", "textile", "costume",
+                 "crepe", "damask", "paper"],
+    },
 ]
 
-# How many to keep — a curated selection beats a data dump for an inspiration tool.
-MAX_KEEP = 60
-
-KEEP = [
+KEEP_FIELDS = [
     "objectID", "title", "artistDisplayName", "culture",
     "objectDate", "objectBeginDate", "objectEndDate",
-    "classification", "medium", "primaryImageSmall", "objectURL",
-    "isPublicDomain",
+    "classification", "medium", "primaryImageSmall", "objectURL", "isPublicDomain",
 ]
 
 
@@ -54,84 +55,86 @@ def get_json(url, max_retries=6):
     for attempt in range(1, max_retries + 1):
         try:
             req = urllib.request.Request(
-                url, headers={"User-Agent": UA, "Accept": "application/json"}
-            )
+                url, headers={"User-Agent": UA, "Accept": "application/json"})
             with urllib.request.urlopen(req, timeout=30) as r:
                 return json.load(r)
         except (urllib.error.HTTPError, urllib.error.URLError) as e:
             code = getattr(e, "code", None)
             if attempt < max_retries and code in (403, 429, 500, 502, 503, None):
-                print(f"    (Met said wait — pausing {delay:.0f}s, try {attempt})")
+                print(f"    (Met said wait — pausing {delay:.0f}s)")
                 time.sleep(delay)
                 delay *= 2
                 continue
             raise
 
 
-def search_ids(term):
-    q = urllib.parse.urlencode({
-        "departmentId": GREEK_AND_ROMAN,
-        "hasImages": "true",   # only works with a picture — the whole point here
-        "q": term,
-    })
-    data = get_json(f"{API}/search?{q}")
-    return data.get("objectIDs") or []
+def search_ids(dept, term):
+    q = urllib.parse.urlencode({"departmentId": dept, "hasImages": "true", "q": term})
+    return (get_json(f"{API}/search?{q}").get("objectIDs")) or []
 
 
-def keep_fields(full):
-    row = {k: full.get(k) for k in KEEP}
-    row["sourceWorld"] = SOURCE_WORLD
-    row["inspires"] = INSPIRES
-    return row
-
-
-def usable(row):
-    """A striking, showable marble: has an image and is public-domain sculpture."""
+def usable(row, keep_terms):
     if not (row.get("primaryImageSmall") or "").strip():
         return False
     if not row.get("isPublicDomain"):
         return False
-    text = ((row.get("classification") or "") + " " + (row.get("medium") or "")).lower()
-    return "marble" in text or "stone" in text or "sculpture" in text or "statue" in text
+    hay = " ".join(str(row.get(k) or "") for k in ("classification", "medium", "title")).lower()
+    return any(t in hay for t in keep_terms)
 
 
-def main():
-    out = Path("data")
-    out.mkdir(exist_ok=True)
-
+def fetch_world(world):
+    print(f"\n— {world['name']} (dept {world['dept']}) —")
     ids = []
-    for term in TERMS:
+    for term in world["terms"]:
         try:
-            found = search_ids(term)
+            found = search_ids(world["dept"], term)
         except Exception as e:
             print(f"  ! search '{term}' failed: {e}")
             continue
         print(f"  search '{term}': {len(found)} candidates")
         ids.extend(found)
         time.sleep(0.2)
-    ids = list(dict.fromkeys(ids))  # de-dupe, keep order
-    print(f"\n{len(ids)} unique candidates; fetching until we have {MAX_KEEP} good ones...")
+    ids = list(dict.fromkeys(ids))
 
     kept = []
     for i, oid in enumerate(ids, 1):
         if len(kept) >= MAX_KEEP:
             break
         try:
-            row = keep_fields(get_json(f"{API}/objects/{oid}"))
+            full = get_json(f"{API}/objects/{oid}")
         except Exception as e:
             print(f"  ! skipped {oid}: {e}")
             continue
-        if usable(row):
+        row = {k: full.get(k) for k in KEEP_FIELDS}
+        if usable(row, world["keep"]):
+            row["sourceWorld"] = world["name"]
+            row["inspires"] = world["inspires"]
             kept.append(row)
         time.sleep(0.2)
         if i % 25 == 0:
             print(f"  ...checked {i}/{len(ids)}, kept {len(kept)}")
+    print(f"  ✓ kept {len(kept)} works for {world['name']}")
+    return kept
 
-    (out / "sources.json").write_text(
-        json.dumps(kept, indent=2, ensure_ascii=False)
-    )
-    print(f"\nDone. {len(kept)} Greek sculptures saved to data/sources.json"
-          f" — all with images, all linked to {', '.join(INSPIRES)}.")
+
+def main():
+    out = Path("data")
+    out.mkdir(exist_ok=True)
+    path = out / "sources.json"
+
+    existing = json.loads(path.read_text()) if path.exists() else []
+    have = {e.get("sourceWorld") for e in existing}
+    combined = list(existing)
+
+    for world in SOURCE_WORLDS:
+        if world["name"] in have:
+            print(f"— {world['name']} — already saved, skipping")
+            continue
+        combined.extend(fetch_world(world))
+
+    path.write_text(json.dumps(combined, indent=2, ensure_ascii=False))
+    worlds = sorted({e.get("sourceWorld") for e in combined})
+    print(f"\nDone. {len(combined)} source works across: {', '.join(worlds)}")
 
 
 if __name__ == "__main__":

@@ -76,6 +76,16 @@
   .tray li .rm{margin-left:auto;color:var(--ink-dim);cursor:pointer;font-size:13px}
   .tray .empty{color:var(--ink-dim);font-style:italic;font-size:15px;margin-top:8px}
   .count{margin-top:8px}
+  .peekbtn{width:100%;background:none;color:var(--gold);border:1px solid var(--gold);
+    border-radius:22px;padding:9px;font-family:-apple-system,sans-serif;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;cursor:pointer;margin-bottom:8px}
+  #peek{display:none;position:fixed;inset:0;z-index:50;background:rgba(10,10,14,.92);
+    flex-direction:column;padding:24px}
+  #peek .bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--ink)}
+  #peek .bar b{font-size:20px;font-weight:500}
+  #peek .bar .note{font-size:13px;color:var(--ink-dim);font-style:italic;margin-left:auto}
+  #peek .x{cursor:pointer;font-size:22px;color:var(--ink)}
+  #peek iframe{flex:1;width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
 </style>
 </head>
 <body>
@@ -99,6 +109,7 @@
     <p></p>
     <div class="label" style="margin-bottom:6px">inspired by</div>
     <div class="chips"></div>
+    <button class="peekbtn" style="display:none">Peek inside THREAD ⧉</button>
     <a class="metlink" target="_blank" style="display:none"></a>
     <button class="add">Add to exhibition</button>
   </div>
@@ -264,8 +275,11 @@ function wallLabel(d){
     : `<span class="chip" style="color:var(--ink-dim)">— a source, or a starting point —</span>`;
   chips.querySelectorAll("[data-go]").forEach(c=>c.onclick=()=>select(c.dataset.go));
   const ml = wall.querySelector(".metlink");
-  if(d.url){ ml.style.display="inline-block"; ml.href=d.url; ml.textContent="View at The Met ↗"; }
-  else ml.style.display="none";
+  const pk = wall.querySelector(".peekbtn");
+  if(d.url){
+    ml.style.display="inline-block"; ml.href=d.url; ml.textContent="View at The Met \u2197";
+    pk.style.display="block"; pk.onclick=()=>openPeek(d.url);
+  } else { ml.style.display="none"; pk.style.display="none"; }
   const add = wall.querySelector(".add");
   add.disabled = tray.includes(d.id);
   add.textContent = tray.includes(d.id) ? "In the exhibition ✓" : "Add to exhibition";
@@ -318,6 +332,15 @@ function exploreMet(term){
   draw(); setTimeout(()=>select(anchorId),350);
 }
 
+// ---------- peek (try to embed the Met page inline) ----------
+function openPeek(url){
+  const ov=document.getElementById("peek");
+  if(!ov) return;
+  ov.querySelector("iframe").src=url;
+  ov.querySelector(".x").onclick=()=>{ ov.style.display="none"; ov.querySelector("iframe").src="about:blank"; };
+  ov.style.display="flex";
+}
+
 // ---------- boot ----------
 (async function(){
   try{
@@ -335,5 +358,13 @@ function exploreMet(term){
 addEventListener("resize",()=>{W=innerWidth-360;H=innerHeight-64;
   sim.force("center",d3.forceCenter(W/2,H/2)).alpha(.3).restart();});
 </script>
+<div id="peek">
+  <div class="bar">
+    <b>Peek — The Met</b>
+    <span class="note">if this stays blank, the Met blocks embedding; use “View at The Met”.</span>
+    <span class="x" id="peekClose">✕</span>
+  </div>
+  <iframe title="Met object"></iframe>
+</div>
 </body>
 </html>

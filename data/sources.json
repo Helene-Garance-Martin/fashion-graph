@@ -1138,5 +1138,905 @@
       "Vionnet",
       "Grès"
     ]
+  },
+  {
+    "objectID": 125954,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japanese",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/1978.157.1_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125954",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 125956,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1961,
+    "classification": "Main dress",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI61.15.3_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125956",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 126315,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japanese",
+    "objectDate": "1895–1900",
+    "objectBeginDate": 1895,
+    "objectEndDate": 1900,
+    "classification": "Costumes",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/LC-1975_294_2-001.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/126315",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 125950,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "1800–1941",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1941,
+    "classification": "Main dress-Womenswear",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI41.165_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125950",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 88309,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japanese",
+    "objectDate": "ca. 1875",
+    "objectBeginDate": 1870,
+    "objectEndDate": 1880,
+    "classification": "Main dress-Womenswear",
+    "medium": "Linen",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/LC-1977_359a-001.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/88309",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 125959,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "1800–1941",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1941,
+    "classification": "Main dress-Womenswear",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI41.110.69_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125959",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 126003,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1957,
+    "classification": "Main dress",
+    "medium": "[no medium available]",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI57.57.11_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/126003",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 125958,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "1800–1941",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1941,
+    "classification": "Main dress-Womenswear",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI41.110.68_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125958",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 88305,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japanese",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Main dress-Womenswear",
+    "medium": "silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI41.110.70_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/88305",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 125953,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Main dress-Womenswear",
+    "medium": "silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI53.22.10_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/125953",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 126436,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Main dress",
+    "medium": "grass cloth, cotton",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI50.2.20_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/126436",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 88312,
+    "title": "Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Main dress-Womenswear",
+    "medium": "silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/CI53.22.9_F.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/88312",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 53446,
+    "title": "Woman in a Black Kimono",
+    "artistDisplayName": "Katsukawa Shunshō 勝川春章",
+    "culture": "Japan",
+    "objectDate": "1783–89",
+    "objectBeginDate": 1600,
+    "objectEndDate": 1870,
+    "classification": "Paintings",
+    "medium": "Hanging scroll; ink, color, and gold on silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP-12232-128.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/53446",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 670961,
+    "title": "Kimono Rack (Ikō) with Scrolling Foliage and Tokugawa Family Crest",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "18th century",
+    "objectBeginDate": 1700,
+    "objectEndDate": 1799,
+    "classification": "Lacquer",
+    "medium": "Lacquered wood with gold hiramaki-e on nashiji (“pear-skin” ground); gilt bronze fittings",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/TR_10_121_2015.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/670961",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 916573,
+    "title": "Courtesan",
+    "artistDisplayName": "Utagawa Kunisada",
+    "culture": "Japan",
+    "objectDate": "mid-19th century",
+    "objectBeginDate": 1834,
+    "objectEndDate": 1866,
+    "classification": "Paintings",
+    "medium": "Hanging scroll; ink and color on kimono silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP-39319-002.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/916573",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 69947,
+    "title": "Woman's Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/147490.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/69947",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 69946,
+    "title": "Woman's Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/147489.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/69946",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 65755,
+    "title": "Kimono (Shijira)",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "mid-19th century",
+    "objectBeginDate": 1844,
+    "objectEndDate": 1866,
+    "classification": "Costumes",
+    "medium": "Extended plain-weave silk",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP-22455-003.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/65755",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 70778,
+    "title": "Short Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "early 20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1933,
+    "classification": "Costumes",
+    "medium": "Silk kasuri / Damask",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/245445.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/70778",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 45416,
+    "title": "Summer Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "early 20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1933,
+    "classification": "Costumes",
+    "medium": "Ramie plain-weave crepe with geometric warp and weft kasuri (ikat) patterning",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/RT790A.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/45416",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 49820,
+    "title": "Wedding ensemble with cranes, pines, and rising-cloud patterns",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "early 20th century",
+    "objectBeginDate": 1912,
+    "objectEndDate": 1926,
+    "classification": "Costumes",
+    "medium": "Crepe silk with resist-dyed patterns and gold-and-silk thread embroidery",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP-43840-001.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/49820",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 50806,
+    "title": "Sashiko Kimono",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "mid-19th century",
+    "objectBeginDate": 1834,
+    "objectEndDate": 1866,
+    "classification": "Costumes",
+    "medium": "Indigo-dyed plain-weave cotton, quilted and embroidered with white cotton thread",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/217906.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/50806",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 56379,
+    "title": "Kimono rack",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Furniture",
+    "medium": "Lacquered wood",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/1984_497.JPG",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/56379",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 56371,
+    "title": "Kimono rack",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1999,
+    "classification": "Furniture",
+    "medium": "Lacquer on wood",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/X_634.JPG",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/56371",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 399894,
+    "title": "Woman in green kimono",
+    "artistDisplayName": "Anonymous",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1700,
+    "objectEndDate": 1899,
+    "classification": "Prints",
+    "medium": "Color woodcut",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP832059.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/399894",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 57839,
+    "title": "Book of Kimono Patterns",
+    "artistDisplayName": "Unidentified artist",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1615,
+    "objectEndDate": 1868,
+    "classification": "Illustrated Books",
+    "medium": "Ink drawings on paper",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/LC-JIB_148_016_crd.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/57839",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 49822,
+    "title": "Kimono Ensemble with Chrysanthemums",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1912,
+    "objectEndDate": 1926,
+    "classification": "Costumes",
+    "medium": "Silk, metallic thread",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP157069.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/49822",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 73146,
+    "title": "Unlined Summer Kimono (Hito-e) with Carp, Water Lilies, and Morning Glories",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "ca. 1876",
+    "objectBeginDate": 1866,
+    "objectEndDate": 1886,
+    "classification": "Costumes",
+    "medium": "Resist-dyed, painted, and embroidered silk gauze with plain-weave patterning",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP148278.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/73146",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 73142,
+    "title": "Kimono with Cockscomb Flowers",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1912,
+    "objectEndDate": 1926,
+    "classification": "Costumes",
+    "medium": "Paste-resist dyed (yūzen) and painted satin damask",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP277428.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/73142",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 56688,
+    "title": "Two Beauties Looking at Kimono",
+    "artistDisplayName": "Isoda Koryūsai",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1735,
+    "objectEndDate": 1790,
+    "classification": "Prints",
+    "medium": "Woodblock print; ink and color on paper",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP124248.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/56688",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76986,
+    "title": "Kimono with Pheasants amid Peonies",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "first half of the 20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1949,
+    "classification": "Costumes",
+    "medium": "Paste-resist dyeing with silk embroidered accents on silk crepe",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258884.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76986",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76984,
+    "title": "Kimono with Pines and Mist",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second quarter 20th century",
+    "objectBeginDate": 1926,
+    "objectEndDate": 1950,
+    "classification": "Costumes",
+    "medium": "Plain-weave crepe silk with paste-resist dying (yūzen) and application of gold",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258867.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76984",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 646998,
+    "title": "Boy’s Kimono with Streamline Train",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "ca. mid-1930s",
+    "objectBeginDate": 1930,
+    "objectEndDate": 1939,
+    "classification": "Costumes",
+    "medium": "Plain-weave wool muslin with printing",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/TR_128_8_2014.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/646998",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76989,
+    "title": "Kimono with Stylized Flowing Water",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second quarter of the 20th century",
+    "objectBeginDate": 1926,
+    "objectEndDate": 1950,
+    "classification": "Textiles-Costumes",
+    "medium": "Silk; paste-resist dyed with gold- and silver-painted accents",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258923.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76989",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 45385,
+    "title": "Kimono with Blossoming Plum Tree",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second half of the 19th century",
+    "objectBeginDate": 1850,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Plain-weave silk with resist dyeing, ink, pigments, silk and metallic-thread embroidery",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP-22456-001.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/45385",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 78777,
+    "title": "Contemporary Kimono Patterns (Tōsei hiinagata) 当世ひいな形",
+    "artistDisplayName": "Hishikawa Moronobu 菱川師宣",
+    "culture": "Japan",
+    "objectDate": "1677",
+    "objectBeginDate": 1677,
+    "objectEndDate": 1677,
+    "classification": "Illustrated Books",
+    "medium": "First volume from a set of woodblock-printed books; ink on paper",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/2013_887_14_crd.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/78777",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 61846,
+    "title": "Long-Sleeved Kimono (Furisode) with Hydrangeas and Cherry Blossoms",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "early 20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1933,
+    "classification": "Costumes",
+    "medium": "Resist-dyed and painted silk satin",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258847.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/61846",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76985,
+    "title": "Kimono with Pines, Bamboo, and Plum",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second quarter 20th century",
+    "objectBeginDate": 1926,
+    "objectEndDate": 1949,
+    "classification": "Costumes",
+    "medium": "Figured satin silk (rinzu) with hand-painted details and silk embroidery",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258874.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76985",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 53916,
+    "title": "Woman's Summer Kimono with Design of Small Crosses",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Ikat-patterned plain-weave ramie",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/1999_247_10_O1.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/53916",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 45402,
+    "title": "Unlined Summer Kimono (Hito-e) with Landscape and Poem",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second half of the 18th century",
+    "objectBeginDate": 1750,
+    "objectEndDate": 1799,
+    "classification": "Costumes",
+    "medium": "Embroidered and resist-dyed silk gauze (ro)",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DT10764.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/45402",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 73145,
+    "title": "Summer Kimono (Hito-e) with Heron and Reeds",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "late 19th century",
+    "objectBeginDate": 1867,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Resist-dyed, painted, and embroidered silk gauze (ro)",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP261418.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/73145",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 36791,
+    "title": "Asao Tamesaburo as a Stout Man with a Green Kimono",
+    "artistDisplayName": "Katsukawa Shun'ei 勝川春英",
+    "culture": "Japan",
+    "objectDate": "ca. 1795",
+    "objectBeginDate": 1785,
+    "objectEndDate": 1805,
+    "classification": "Prints",
+    "medium": "Woodblock print; ink and color on paper",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP136892.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/36791",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 56588,
+    "title": "Woman In Loosened Kimono Coming From the Bath",
+    "artistDisplayName": "Okumura Masanobu",
+    "culture": "Japan",
+    "objectDate": "ca. 1755",
+    "objectBeginDate": 1745,
+    "objectEndDate": 1765,
+    "classification": "Prints",
+    "medium": "Woodblock print; ink and color on paper",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP124512.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/56588",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76987,
+    "title": "Summer Kimono with Design of Plovers, Waves, Chinese Bellflowers, Pinks, Pines, Carriages, and Fences",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "first quarter of the 20th century",
+    "objectBeginDate": 1912,
+    "objectEndDate": 1926,
+    "classification": "Costumes",
+    "medium": "Silk gauze; paste-resist dyeing",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258912.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76987",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 49811,
+    "title": "Unlined Summer Kimono (Hito-e) with Plovers in Flight over Stylized Waves",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "",
+    "objectBeginDate": 1912,
+    "objectEndDate": 1926,
+    "classification": "Costumes",
+    "medium": "Embroidered and resist-dyed silk gauze (ro)",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258838.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/49811",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 44287,
+    "title": "Child's Kimono with Pine, Bamboo, Plum Blossoms, and Fans",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "late 19th–early 20th century",
+    "objectBeginDate": 1867,
+    "objectEndDate": 1933,
+    "classification": "Costumes",
+    "medium": "Ikat-patterned plain-weave bast fiber (asa)",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP330784.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/44287",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 65613,
+    "title": "Girl's Summer Kimono with Design of Sea Bream and Bamboo",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "19th century",
+    "objectBeginDate": 1800,
+    "objectEndDate": 1899,
+    "classification": "Costumes",
+    "medium": "Ikat-patterned plain-weave ramie",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/RT765.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/65613",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 76988,
+    "title": "Kimono with Design of Lilies, Chinese Bellflowers, and Pinks",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "second quarter of the 20th century",
+    "objectBeginDate": 1926,
+    "objectEndDate": 1950,
+    "classification": "Textiles-Costumes",
+    "medium": "Figured crepe silk with woven diagonal fret pattern; hand-painted with gold accents, embroidered crest",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DP258909.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/76988",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 50807,
+    "title": "Unlined Summer Kimono (Hito-e) with Crickets, Grasshoppers, Cricket Cages, and Pampas Grass",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "early 20th century",
+    "objectBeginDate": 1900,
+    "objectEndDate": 1933,
+    "classification": "Costumes",
+    "medium": "Paste-resist dyed (yūzen) and painted silk gauze with embroidery",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/DT4775.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/50807",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
+  },
+  {
+    "objectID": 785509,
+    "title": "Kimono-Shaped Coverlet (Yogi) with Chinese Lions and Peonies",
+    "artistDisplayName": "",
+    "culture": "Japan",
+    "objectDate": "late 17th century",
+    "objectBeginDate": 1667,
+    "objectEndDate": 1699,
+    "classification": "Costumes",
+    "medium": "Figured satin-weave silk with paste-resist dyeing, tie-dyeing, and ink painting",
+    "primaryImageSmall": "https://images.metmuseum.org/CRDImages/as/web-large/LC-2018_635-001.jpg",
+    "objectURL": "https://www.metmuseum.org/art/collection/search/785509",
+    "isPublicDomain": true,
+    "sourceWorld": "Japanese kimono",
+    "inspires": [
+      "Vionnet"
+    ]
   }
 ]
