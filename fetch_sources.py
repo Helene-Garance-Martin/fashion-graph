@@ -41,6 +41,16 @@ SOURCE_WORLDS = [
         "keep": ["silk", "cotton", "kimono", "robe", "textile", "costume",
                  "crepe", "damask", "paper"],
     },
+    {
+        "name": "Spanish painting", "dept": 11,   # European Paintings
+        "inspires": ["Balenciaga"],
+        "terms": ["El Greco", "Velázquez", "Goya", "Zurbarán", "Murillo",
+                  "Ribera", "infanta"],
+        "keep": ["oil", "canvas", "painting", "panel", "tempera", "wood"],
+        # second guard: the work must actually be Spanish-attributed
+        "match": ["spanish", "greco", "velázquez", "velazquez", "goya",
+                  "zurbarán", "zurbaran", "murillo", "ribera"],
+    },
 ]
 
 KEEP_FIELDS = [
@@ -69,17 +79,25 @@ def get_json(url, max_retries=6):
 
 
 def search_ids(dept, term):
-    q = urllib.parse.urlencode({"departmentId": dept, "hasImages": "true", "q": term})
+    q = urllib.parse.urlencode({"departmentId": dept, "hasImages": "true",
+                                "artistOrCulture": "true", "q": term})
     return (get_json(f"{API}/search?{q}").get("objectIDs")) or []
 
 
-def usable(row, keep_terms):
+def usable(row, world):
     if not (row.get("primaryImageSmall") or "").strip():
         return False
     if not row.get("isPublicDomain"):
         return False
     hay = " ".join(str(row.get(k) or "") for k in ("classification", "medium", "title")).lower()
-    return any(t in hay for t in keep_terms)
+    if not any(t in hay for t in world["keep"]):
+        return False
+    match = world.get("match")
+    if match:
+        who = (str(row.get("artistDisplayName") or "") + " " + str(row.get("culture") or "")).lower()
+        if not any(m in who for m in match):
+            return False
+    return True
 
 
 def fetch_world(world):
@@ -106,7 +124,7 @@ def fetch_world(world):
             print(f"  ! skipped {oid}: {e}")
             continue
         row = {k: full.get(k) for k in KEEP_FIELDS}
-        if usable(row, world["keep"]):
+        if usable(row, world):
             row["sourceWorld"] = world["name"]
             row["inspires"] = world["inspires"]
             kept.append(row)
