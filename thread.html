@@ -130,6 +130,7 @@ const DESC = {
 
 // ---------- graph state ----------
 const svg = d3.select("svg"), root = svg.append("g");
+const defs = svg.append("defs");
 let W = innerWidth-360, H = innerHeight-64;
 svg.call(d3.zoom().scaleExtent([.3,2.5]).on("zoom",e=>root.attr("transform",e.transform)));
 const byId = new Map();        // id -> node
@@ -145,7 +146,12 @@ const sim = d3.forceSimulation(nodes)
 let linkSel = root.append("g").selectAll("line");
 let nodeSel = root.append("g").selectAll("g");
 
-function radius(d){ return d.type==="sourceworld"?20 : d.type==="designer"?15 : d.type==="artwork"?9 : 7; }
+function radius(d){
+  if(d.type==="sourceworld") return 20;
+  if(d.type==="designer") return 15;
+  if(d.type==="artwork") return d.image?18:9;
+  return 7;
+}
 
 function mergeGraph(g){
   (g.nodes||[]).forEach(n=>{ if(!byId.has(n.id)){ byId.set(n.id,n); nodes.push(n); } });
@@ -177,11 +183,25 @@ function draw(){
       .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
       .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
     .on("click",(e,d)=>{ onNodeClick(d); e.stopPropagation(); });
-  g.append("circle").attr("r",radius).attr("fill",d=>d.color||"#8a8792");
+  g.each(function(d){
+    const sel=d3.select(this), r=radius(d);
+    if(d.type==="artwork" && d.image){
+      const cid="clip-"+d.id.replace(/[^a-z0-9]/gi,"");
+      if(defs.select("#"+cid).empty())
+        defs.append("clipPath").attr("id",cid).append("circle").attr("r",r);
+      sel.append("image").attr("href",d.image).attr("xlink:href",d.image)
+        .attr("x",-r).attr("y",-r).attr("width",2*r).attr("height",2*r)
+        .attr("preserveAspectRatio","xMidYMid slice").attr("clip-path","url(#"+cid+")");
+      sel.append("circle").attr("class","ring").attr("r",r).attr("fill","none")
+        .attr("stroke",d.color||"#d8cdb8").attr("stroke-width",2);
+    } else {
+      sel.append("circle").attr("class","fill").attr("r",r).attr("fill",d.color||"#8a8792");
+    }
+  });
   g.append("text").attr("x",d=>radius(d)+6).attr("dy",".35em")
     .text(d=>["designer","sourceworld"].includes(d.type)?d.label:"");
   nodeSel = g.merge(nodeSel);
-  nodeSel.select("circle").attr("fill",d=>d.color||"#8a8792"); // refresh garment colours
+  nodeSel.select("circle.fill").attr("fill",d=>d.color||"#8a8792"); // refresh garment colours
 
   sim.nodes(nodes); sim.force("link").links(links); sim.alpha(.7).restart();
 }
