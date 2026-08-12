@@ -1,0 +1,4 @@
+{
+  "_how": "Authored visual descriptions, keyed by Met objectID (the number at the end of an object's Met URL, or in its node id 'garment:NNNNN' / 'artwork:NNNNN'). Each is used three ways: the text-card slide, the screen-reader alt text, and the read-aloud audio. Describe what MATTERS about the object — colour, shape, drama — not just what it is. Replace the example key below with a real objectID.",
+  "EXAMPLE_REPLACE_WITH_OBJECTID": "Rose-pink silk-satin evening ensemble, back view on a headless mannequin; a voluminous cape falls in sculptural folds from the shoulders to below the waist, the satin catching the light."
+}

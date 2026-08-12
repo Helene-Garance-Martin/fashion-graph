@@ -75,7 +75,16 @@ def load_env():
             os.environ.setdefault(key.strip(), val.strip())
 
 
-def build_rows(objects):
+def load_descriptions():
+    p = Path("descriptions.json")
+    if not p.exists():
+        return {}
+    raw = json.loads(p.read_text())
+    return {k: v for k, v in raw.items() if not k.startswith("_")}
+
+
+def build_rows(objects, descriptions=None):
+    descriptions = descriptions or {}
     """Return (rows, stats) with founder-era scoping applied."""
     rows = []
     stats = {}  # designer -> {"kept": n, "dropped": n}
@@ -98,11 +107,13 @@ def build_rows(objects):
             "year": year if (isinstance(year, int) and year > 0) else None,
             "category": category_of(obj),
             "nationality": (obj.get("artistNationality") or "").strip(),
+            "description": descriptions.get(str(obj["objectID"]), ""),
         })
     return rows, stats
 
 
-def build_source_rows(sources):
+def build_source_rows(sources, descriptions=None):
+    descriptions = descriptions or {}
     rows = []
     for src in sources:
         rows.append({
@@ -114,6 +125,7 @@ def build_source_rows(sources):
             "url": src.get("objectURL") or "",
             "sourceWorld": src.get("sourceWorld") or "Unknown source",
             "inspires": src.get("inspires") or [],
+            "description": descriptions.get(str(src["objectID"]), ""),
         })
     return rows
 
@@ -122,7 +134,7 @@ SOURCE_LOAD = """
 UNWIND $rows AS row
 MERGE (a:Artwork {id: row.id})
   SET a.title = row.title, a.date = row.date, a.culture = row.culture,
-      a.image = row.image, a.url = row.url
+      a.image = row.image, a.url = row.url, a.description = row.description
 MERGE (sw:SourceWorld {name: row.sourceWorld})
 MERGE (a)-[:EXAMPLE_OF]->(sw)
 WITH sw, row
@@ -152,7 +164,8 @@ UNWIND $rows AS row
 MERGE (d:Designer {name: row.designer})
 MERGE (g:Garment {id: row.id})
   SET g.title = row.title, g.date = row.date,
-      g.medium = row.medium, g.image = row.image, g.url = row.url
+      g.medium = row.medium, g.image = row.image, g.url = row.url,
+      g.description = row.description
 MERGE (d)-[:CREATED]->(g)
 MERGE (c:Category {name: row.category})
 MERGE (g)-[:OF_TYPE]->(c)
@@ -181,8 +194,9 @@ def main():
         print("Then run  python load_neo4j.py  again.")
         return
 
+    descriptions = load_descriptions()
     objects = json.loads(Path("data/objects.json").read_text())
-    rows, stats = build_rows(objects)
+    rows, stats = build_rows(objects, descriptions)
 
     print("Founder-era scoping (kept / dropped per house):")
     for house in WINDOWS:
@@ -201,7 +215,7 @@ def main():
 
         src_path = Path("data/sources.json")
         if src_path.exists():
-            srows = build_source_rows(json.loads(src_path.read_text()))
+            srows = build_source_rows(json.loads(src_path.read_text()), descriptions)
             session.run(SOURCE_LOAD, rows=srows)
             print(f"  + {len(srows)} source artworks linked into the graph")
         else:

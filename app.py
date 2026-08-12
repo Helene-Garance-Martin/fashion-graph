@@ -86,13 +86,13 @@ def to_node(n):
     elif lab == "Garment":
         out.update(label=n.get("title") or "Garment", color="#8a8792",
                    image=n.get("image") or "", url=n.get("url") or "",
-                   date=n.get("date") or "")
+                   date=n.get("date") or "", description=n.get("description") or "")
     elif lab == "SourceWorld":
         out.update(label=n.get("name"), color=GOLD)
     elif lab == "Artwork":
         out.update(label=n.get("title") or "Artwork", color=MARBLE,
                    image=n.get("image") or "", url=n.get("url") or "",
-                   culture=n.get("culture") or "")
+                   culture=n.get("culture") or "", description=n.get("description") or "")
     else:
         out.update(label=str(n.get("name") or n.get("value")))
     return out
@@ -186,9 +186,18 @@ def source(name: str):
 # so the diaporama is self-contained. Reloading the couture graph does NOT touch
 # exhibitions — the CLEAR in load_neo4j.py leaves :Exhibition alone.
 
+class Item(BaseModel):
+    id: str
+    label: str = ""
+    type: str = ""
+    image: str | None = None
+    url: str | None = None
+    description: str | None = None   # authored: text-card + alt + audio
+
+
 class ExhibitionIn(BaseModel):
     title: str = "Untitled exhibition"
-    items: list[dict] = []
+    items: list[Item] = []
 
 
 def _exhib_out(e):
@@ -204,7 +213,7 @@ def create_exhibition(ex: ExhibitionIn):
     now = datetime.now(timezone.utc).isoformat()
     with driver.session() as s:
         s.run("CREATE (e:Exhibition {id:$id, title:$title, items:$items, updated:$updated})",
-              id=eid, title=ex.title, items=json.dumps(ex.items), updated=now)
+              id=eid, title=ex.title, items=json.dumps([i.model_dump() for i in ex.items]), updated=now)
     return {"id": eid, "title": ex.title, "items": ex.items, "updated": now}
 
 
@@ -239,7 +248,7 @@ def update_exhibition(eid: str, ex: ExhibitionIn):
     with driver.session() as s:
         r = s.run("MATCH (e:Exhibition {id:$id}) "
                   "SET e.title=$title, e.items=$items, e.updated=$updated RETURN e",
-                  id=eid, title=ex.title, items=json.dumps(ex.items), updated=now).single()
+                  id=eid, title=ex.title, items=json.dumps([i.model_dump() for i in ex.items]), updated=now).single()
     if not r:
         raise HTTPException(404, f"No exhibition '{eid}'")
     return {"id": eid, "title": ex.title, "items": ex.items, "updated": now}

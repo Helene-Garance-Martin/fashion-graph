@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <style>
   :root{
     --ground:#141419; --ground-2:#1c1c24; --ink:#e8e6e0; --ink-dim:#8a8792;
@@ -86,6 +87,48 @@
   #peek .bar .note{font-size:13px;color:var(--ink-dim);font-style:italic;margin-left:auto}
   #peek .x{cursor:pointer;font-size:22px;color:var(--ink)}
   #peek iframe{flex:1;width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+  #compose,#present{display:none;position:fixed;inset:0;z-index:60;background:var(--ground);flex-direction:column}
+  #compose .top{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+  #compose .top h2{font-size:24px;font-weight:500;margin:0}
+  #compose .grid{flex:1;overflow-y:auto;padding:24px;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;align-content:start}
+  .card{background:var(--ground-2);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;cursor:grab;display:flex;flex-direction:column}
+  .card img{width:100%;height:150px;object-fit:cover;display:block;background:#20202a}
+  .card .txt{height:150px;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:16px;color:var(--ink);background:linear-gradient(135deg,#22222d,#17171f)}
+  .card .cap{padding:8px 10px;font-size:14px;color:var(--ink);border-top:1px solid var(--line)}
+  .card .cap .k{font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.12em;
+    font-size:9px;color:var(--ink-dim);display:block;margin-bottom:2px}
+  .sortable-ghost{opacity:.25}
+  .ghostbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:20px;
+    padding:8px 16px;cursor:pointer;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.08em}
+  .gold-btn{background:var(--gold);color:#1a1508;border:none;border-radius:20px;padding:9px 18px;
+    cursor:pointer;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600}
+  #present .slide{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:20px}
+  #present .slide img{max-height:66vh;max-width:82vw;border-radius:6px;border:1px solid var(--line)}
+  #present .txtbig{font-size:44px;color:var(--ink);text-align:center;max-width:70vw;line-height:1.1}
+  .plate{width:min(420px,70vw);aspect-ratio:3/4;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(135deg,#1b1b23,#141419);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center}
+  .plate .frame{font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:10px;color:var(--ink-dim)}
+  .plate .ttl{font-size:26px;color:var(--ink);line-height:1.15}
+  .plate .meta{font-size:15px;color:var(--ink-dim);font-style:italic}
+  .card .txt .frame{display:block;font-family:-apple-system,sans-serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:8px;color:var(--ink-dim);margin-bottom:8px}
+  #present .cap{font-size:22px;color:var(--ink);text-align:center}
+  #present .cap .k{display:block;font-family:-apple-system,sans-serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:11px;color:var(--gold);margin-bottom:6px}
+  #present .nav{position:absolute;top:50%;transform:translateY(-50%);font-size:40px;color:var(--ink-dim);
+    cursor:pointer;user-select:none;padding:20px}
+  #present .prev{left:8px} #present .next{right:8px}
+  #present .counter{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:var(--ink-dim);
+    font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.12em}
+  #present .close{position:absolute;top:16px;right:20px}
+  #present .sdesc{max-width:60vw;text-align:center;color:var(--ink-dim);font-size:18px;line-height:1.4}
+  #present .slide .ghostbtn{margin-top:6px}
 </style>
 </head>
 <body>
@@ -109,6 +152,7 @@
     <p></p>
     <div class="label" style="margin-bottom:6px">inspired by</div>
     <div class="chips"></div>
+    <button class="peekbtn" id="listenBtn" style="display:none">🔊 Listen to description</button>
     <button class="peekbtn" style="display:none">Peek inside THREAD ⧉</button>
     <a class="metlink" target="_blank" style="display:none"></a>
     <button class="add">Add to exhibition</button>
@@ -118,11 +162,21 @@
     <input class="exh-title" id="exhTitle" value="A new show, taking shape">
     <ul id="trayList"></ul>
     <div class="count label"></div>
+    <button id="composeBtn" class="gold-btn" style="display:none;margin-top:14px;width:100%">Compose the show ▶</button>
   </div>
 </aside>
 
 <script>
 const API = ""; // same origin — served by FastAPI
+function esc(t){ return String(t||"").replace(/"/g,"&quot;"); }
+function altText(n){
+  return n.description || [n.label, n.culture, n.date].filter(Boolean).join(", ");
+}
+function speak(text){
+  if(!text || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
 
 // editorial copy the graph doesn't hold (structure is live; voice is curated)
 const DESC = {
@@ -211,6 +265,10 @@ function draw(){
   });
   g.append("text").attr("x",d=>radius(d)+6).attr("dy",".35em")
     .text(d=>["designer","sourceworld"].includes(d.type)?d.label:"");
+  g.append("title").text(d=>{
+    const kind = d.type==="sourceworld" ? "source-world" : d.type;
+    return d.label + " · " + kind + (d.type==="garment" ? " — click for the Met link" : "");
+  });
   nodeSel = g.merge(nodeSel);
   nodeSel.select("circle.fill").attr("fill",d=>d.color||"#8a8792"); // refresh garment colours
 
@@ -265,10 +323,16 @@ function wallLabel(d){
   wall.querySelector("h2").textContent = d.label;
   wall.querySelector(".origin").textContent = desc.o || d.culture || d.date || "";
   wall.querySelector(".imgwrap").innerHTML = d.image ? `<img src="${d.image}" alt="">` : "";
-  wall.querySelector("p").textContent = desc.b ||
+  wall.querySelector("p").textContent = d.description || desc.b ||
     (d.type==="garment" ? "20th-century couture — rights-reserved, so we link to the Met rather than embed."
      : d.type==="artwork" ? "Open-access from the Met — a candidate thread of inspiration."
      : "A node in the atlas.");
+  const lb = wall.querySelector("#listenBtn");
+  const sayable = d.description || desc.b || d.label;
+  if(lb){
+    if(sayable){ lb.style.display="block"; lb.onclick=()=>speak(sayable); }
+    else lb.style.display="none";
+  }
   const chips = wall.querySelector(".chips");
   chips.innerHTML = inspiredBy.length
     ? inspiredBy.map(s=>`<span class="chip gold" data-go="${s.id}">${s.label}</span>`).join("")
@@ -298,6 +362,7 @@ function renderTray(){
     : `<li class="empty">Click a garment, a marble, a house — anything that could hang on the wall — and add it here. The tray is your show.</li>`;
   trayList.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeFromTray(b.dataset.rm));
   document.querySelector(".count").textContent = list.length ? `${list.length} object${list.length>1?"s":""} — your exhibition takes shape` : "";
+  const cb=document.getElementById("composeBtn"); if(cb) cb.style.display = list.length ? "block" : "none";
 }
 
 // ---------- the search: seed a house, a source, or explore The Met ----------
@@ -341,6 +406,79 @@ function openPeek(url){
   ov.style.display="flex";
 }
 
+// ---------- compose: see the show, drag to reorder ----------
+function cardMedia(n){
+  return n.image ? '<img src="'+n.image+'" alt="'+esc(altText(n))+'">'
+                 : '<div class="txt"><span class="frame">image at The Met</span>'+(n.label||'Untitled')+'</div>';
+}
+function openCompose(){
+  const items = tray.map(id=>byId.get(id)).filter(Boolean);
+  if(!items.length) return;
+  document.getElementById("composeTitle").textContent =
+    document.getElementById("exhTitle").value || "A new show";
+  document.getElementById("composeCount").textContent = items.length+" objects · drag to reorder";
+  const grid=document.getElementById("composeGrid");
+  grid.innerHTML = items.map(n=>
+    '<div class="card" data-id="'+n.id+'">'+cardMedia(n)+
+    '<div class="cap"><span class="k">'+n.type+'</span>'+(n.label||'')+'</div></div>').join("");
+  document.getElementById("compose").style.display="flex";
+  if(window._sortable) window._sortable.destroy();
+  window._sortable = Sortable.create(grid,{animation:150,ghostClass:"sortable-ghost",onEnd:syncOrder});
+  document.getElementById("composeClose").onclick=()=>document.getElementById("compose").style.display="none";
+  document.getElementById("playBtn").onclick=startPresent;
+}
+function syncOrder(){
+  tray = [...document.querySelectorAll("#composeGrid .card")].map(c=>c.dataset.id);
+  renderTray();
+}
+
+// ---------- present: the diaporama (basic; the accessible/React version comes next) ----------
+let slideIdx=0;
+function startPresent(){
+  if(!tray.length) return;
+  slideIdx=0;
+  document.getElementById("present").style.display="flex";
+  renderSlide();
+  document.getElementById("presentClose").onclick=closePresent;
+  document.getElementById("prevSlide").onclick=()=>move(-1);
+  document.getElementById("nextSlide").onclick=()=>move(1);
+  document.addEventListener("keydown",presentKeys);
+}
+function presentKeys(e){
+  if(document.getElementById("present").style.display!=="flex") return;
+  if(e.key==="ArrowRight") move(1);
+  else if(e.key==="ArrowLeft") move(-1);
+  else if(e.key==="Escape") closePresent();
+}
+function move(d){ slideIdx=(slideIdx+d+tray.length)%tray.length; renderSlide(); }
+function renderSlide(){
+  const n=byId.get(tray[slideIdx]); if(!n) return;
+  const hasImg = !!n.image;
+  let media;
+  if(hasImg){
+    media = '<img src="'+n.image+'" alt="'+esc(altText(n))+'">';
+  } else if(n.description){
+    media = '<div class="txtbig">'+n.description+'</div>';
+  } else {
+    media = '<div class="plate"><div class="frame">image courtesy pending</div>'
+          + '<div class="ttl">'+(n.label||'Untitled')+'</div>'
+          + '<div class="meta">'+(n.type||'')+(n.date?' · '+n.date:'')+'</div>'
+          + '<div class="frame">view at The Met</div></div>';
+  }
+  let html = media + '<div class="cap"><span class="k">'+n.type+'</span>'+(n.label||'')+'</div>';
+  if(hasImg && n.description) html += '<div class="sdesc">'+n.description+'</div>';
+  html += '<button class="ghostbtn" id="slideListen">🔊 Listen</button>';
+  document.getElementById("slide").innerHTML = html;
+  document.getElementById("slideListen").onclick=()=>speak(n.description||n.label);
+  document.getElementById("presentCounter").textContent=(slideIdx+1)+" / "+tray.length;
+}
+function closePresent(){
+  document.getElementById("present").style.display="none";
+  document.removeEventListener("keydown",presentKeys);
+}
+const _composeBtn=document.getElementById("composeBtn");
+if(_composeBtn) _composeBtn.onclick=openCompose;
+
 // ---------- boot ----------
 (async function(){
   try{
@@ -365,6 +503,23 @@ addEventListener("resize",()=>{W=innerWidth-360;H=innerHeight-64;
     <span class="x" id="peekClose">✕</span>
   </div>
   <iframe title="Met object"></iframe>
+</div>
+<div id="compose">
+  <div class="top">
+    <h2 id="composeTitle">A new show</h2>
+    <span class="label" id="composeCount"></span>
+    <span style="margin-left:auto"></span>
+    <button class="gold-btn" id="playBtn">Present ▶</button>
+    <button class="ghostbtn" id="composeClose">Close</button>
+  </div>
+  <div class="grid" id="composeGrid"></div>
+</div>
+<div id="present">
+  <button class="ghostbtn close" id="presentClose">✕ back to edit</button>
+  <div class="prev nav" id="prevSlide">‹</div>
+  <div class="next nav" id="nextSlide">›</div>
+  <div class="slide" id="slide"></div>
+  <div class="counter" id="presentCounter"></div>
 </div>
 </body>
 </html>
