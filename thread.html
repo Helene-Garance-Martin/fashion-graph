@@ -33,6 +33,17 @@
   .search .hint{position:absolute;right:16px;top:12px;pointer-events:none}
   #status{font-size:14px;color:var(--ink-dim);font-style:italic;white-space:nowrap}
   #stage{position:fixed;inset:64px 360px 0 0}
+  #shelf{position:fixed;top:64px;right:0;bottom:0;width:212px;z-index:15;background:var(--ground-2);
+    border-left:1px solid var(--line);display:flex;flex-direction:column;padding:14px 0}
+  #shelf .head{padding:0 18px 10px;display:flex;align-items:center;justify-content:space-between}
+  #shelf .new{cursor:pointer;color:var(--gold);font-size:22px;line-height:1;font-family:-apple-system,sans-serif}
+  #shelf ul{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+  #shelf li{padding:11px 18px;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px;color:var(--ink)}
+  #shelf li:hover{background:rgba(201,162,75,.08)}
+  #shelf li.active{border-left:3px solid var(--gold);background:rgba(201,162,75,.06);padding-left:15px}
+  #shelf li .meta{display:block;font-family:-apple-system,sans-serif;font-size:10px;letter-spacing:.08em;
+    color:var(--ink-dim);margin-top:3px}
+  #shelf .empty{padding:14px 18px;color:var(--ink-dim);font-style:italic;font-size:14px;line-height:1.4}
   svg{width:100%;height:100%;display:block;cursor:grab}
   .link{stroke:var(--line);stroke-width:1}
   .link.inspired{stroke:var(--gold);stroke-width:1.5}
@@ -90,6 +101,10 @@
   #compose,#present{display:none;position:fixed;inset:0;z-index:60;background:var(--ground);flex-direction:column}
   #compose .top{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
   #compose .top h2{font-size:24px;font-weight:500;margin:0}
+  #compose .top .ctitle{font-size:24px;font-weight:500;background:none;border:none;
+    border-bottom:1px dashed transparent;color:var(--ink);font-family:"Cormorant Garamond",serif;
+    outline:none;min-width:300px;padding:4px 0}
+  #compose .top .ctitle:hover,#compose .top .ctitle:focus{border-bottom-color:var(--line)}
   #compose .grid{flex:1;overflow-y:auto;padding:24px;display:grid;
     grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;align-content:start}
   .card{background:var(--ground-2);border:1px solid var(--line);border-radius:8px;
@@ -101,6 +116,16 @@
   .card .cap .k{font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.12em;
     font-size:9px;color:var(--ink-dim);display:block;margin-bottom:2px}
   .sortable-ghost{opacity:.25}
+  #compose .cbody{flex:1;display:flex;overflow:hidden}
+  #compose .shelf2{width:250px;flex:0 0 250px;border-left:1px solid var(--line);
+    overflow-y:auto;padding:20px 18px;background:var(--ground-2)}
+  #compose .shelf2 .crow{display:flex;justify-content:space-between;align-items:baseline;
+    padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px;color:var(--ink)}
+  #compose .shelf2 .crow:hover{background:rgba(201,162,75,.08)}
+  #compose .shelf2 .crow.active{color:var(--gold)}
+  #compose .shelf2 .crow span{font-family:-apple-system,sans-serif;font-size:10px;
+    letter-spacing:.08em;color:var(--ink-dim)}
+  #compose .shelf2 .empty{color:var(--ink-dim);font-style:italic;font-size:14px;margin-top:8px}
   .ghostbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:20px;
     padding:8px 16px;cursor:pointer;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.08em}
   .gold-btn{background:var(--gold);color:#1a1508;border:none;border-radius:20px;padding:9px 18px;
@@ -162,7 +187,7 @@
     <input class="exh-title" id="exhTitle" value="A new show, taking shape">
     <ul id="trayList"></ul>
     <div class="count label"></div>
-    <button id="composeBtn" class="gold-btn" style="display:none;margin-top:14px;width:100%">Compose the show ▶</button>
+    <button id="composeBtn" class="gold-btn" style="display:block;margin-top:14px;width:100%">Compose · my shows ▶</button>
   </div>
 </aside>
 
@@ -292,10 +317,16 @@ async function expandSource(name){ setStatus("loading "+name+"…"); mergeGraph(
 function setStatus(t){ document.getElementById("status").textContent = t; }
 
 // ---------- click: select + expand ----------
+const expanded = new Set();
 function onNodeClick(d){
   select(d.id);
-  if(d.type==="designer") expandHouse(d.label).then(()=>select(d.id));
-  else if(d.type==="sourceworld") expandSource(d.label).then(()=>select(d.id));
+  if(d.type==="designer" && !expanded.has(d.id)){
+    expanded.add(d.id);
+    expandHouse(d.label).then(()=>select(d.id)).catch(e=>console.error(e));
+  } else if(d.type==="sourceworld" && !expanded.has(d.id)){
+    expanded.add(d.id);
+    expandSource(d.label).then(()=>select(d.id)).catch(e=>console.error(e));
+  }
 }
 function neighbours(id){
   const near = new Set([id]);
@@ -362,7 +393,7 @@ function renderTray(){
     : `<li class="empty">Click a garment, a marble, a house — anything that could hang on the wall — and add it here. The tray is your show.</li>`;
   trayList.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeFromTray(b.dataset.rm));
   document.querySelector(".count").textContent = list.length ? `${list.length} object${list.length>1?"s":""} — your exhibition takes shape` : "";
-  const cb=document.getElementById("composeBtn"); if(cb) cb.style.display = list.length ? "block" : "none";
+  const cb=document.getElementById("composeBtn"); if(cb) cb.style.display="block";
 }
 
 // ---------- the search: seed a house, a source, or explore The Met ----------
@@ -414,8 +445,9 @@ function cardMedia(n){
 function openCompose(){
   const items = tray.map(id=>byId.get(id)).filter(Boolean);
   if(!items.length) return;
-  document.getElementById("composeTitle").textContent =
-    document.getElementById("exhTitle").value || "A new show";
+  const _cti=document.getElementById("composeTitleInput");
+  if(_cti){ _cti.value = document.getElementById("exhTitle").value || "A new show, taking shape";
+    _cti.oninput = ()=>{ const et=document.getElementById("exhTitle"); if(et) et.value=_cti.value; }; }
   document.getElementById("composeCount").textContent = items.length+" objects · drag to reorder";
   const grid=document.getElementById("composeGrid");
   grid.innerHTML = items.map(n=>
@@ -426,10 +458,26 @@ function openCompose(){
   window._sortable = Sortable.create(grid,{animation:150,ghostClass:"sortable-ghost",onEnd:syncOrder});
   document.getElementById("composeClose").onclick=()=>document.getElementById("compose").style.display="none";
   document.getElementById("playBtn").onclick=startPresent;
+  const _sb=document.getElementById("saveBtn"); if(_sb) _sb.onclick=saveShow;
 }
 function syncOrder(){
   tray = [...document.querySelectorAll("#composeGrid .card")].map(c=>c.dataset.id);
   renderTray();
+}
+
+function renderComposeShelf(shows){
+  const el=document.getElementById("composeShelf");
+  if(!el) return;
+  if(!shows){ loadShelf(); return; }
+  try{
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="label">My exhibitions</span><span id="composeNew" style="cursor:pointer;color:var(--gold);font-size:20px;line-height:1">+</span></div>'+
+      (shows.length
+        ? shows.map(x=>'<div class="crow '+(x.id===currentExhibitionId?'active':'')+'" data-id="'+x.id+'">'+
+            (x.title||'Untitled')+'<span>'+x.count+'</span></div>').join('')
+        : '<div class="empty">No saved shows yet. Save this one to start your shelf.</div>');
+    el.querySelectorAll("[data-id]").forEach(r=>r.onclick=()=>openSavedShow(r.dataset.id));
+    const nb=el.querySelector("#composeNew"); if(nb) nb.onclick=newShow;
+  }catch(e){ el.innerHTML='<div class="empty">—</div>'; }
 }
 
 // ---------- present: the diaporama (basic; the accessible/React version comes next) ----------
@@ -479,6 +527,68 @@ function closePresent(){
 const _composeBtn=document.getElementById("composeBtn");
 if(_composeBtn) _composeBtn.onclick=openCompose;
 
+// ---------- the shelf: save / list / load exhibitions ----------
+let currentExhibitionId = null;
+
+async function loadShelf(){
+  let shows=[];
+  try{ shows=await api("/exhibitions"); }catch(e){ /* no DB yet */ }
+  renderShelf(shows);
+  renderComposeShelf(shows);
+}
+function renderShelf(shows){
+  const ul=document.getElementById("shelfList");
+  if(!ul) return;
+  if(!shows.length){
+    ul.innerHTML='<li class="empty">No saved shows yet. Build one, then hit Save.</li>';
+    return;
+  }
+  ul.innerHTML = shows.map(x=>
+    '<li data-id="'+x.id+'" class="'+(x.id===currentExhibitionId?'active':'')+'">'+
+    (x.title||'Untitled')+'<span class="meta">'+x.count+' object'+(x.count!==1?'s':'')+'</span></li>').join("");
+  ul.querySelectorAll("[data-id]").forEach(li=>li.onclick=()=>openSavedShow(li.dataset.id));
+}
+async function saveShow(){
+  const items = tray.map(id=>byId.get(id)).filter(Boolean).map(n=>({
+    id:n.id, label:n.label||"", type:n.type||"", color:n.color||"",
+    image:n.image||"", url:n.url||"", description:n.description||""
+  }));
+  const title = document.getElementById("exhTitle").value || "Untitled exhibition";
+  const body = JSON.stringify({title, items});
+  setStatus("saving\u2026");
+  try{
+    const path = currentExhibitionId ? "/exhibitions/"+currentExhibitionId : "/exhibitions";
+    const method = currentExhibitionId ? "PUT" : "POST";
+    const res = await fetch(API+path,{method,headers:{"Content-Type":"application/json"},body});
+    const data = await res.json();
+    currentExhibitionId = data.id;
+    await loadShelf();
+    setStatus("saved \u2713");
+  }catch(e){ setStatus("save failed"); console.error(e); }
+}
+async function openSavedShow(id){
+  try{
+    const ex = await api("/exhibitions/"+id);
+    (ex.items||[]).forEach(it=>{ if(!byId.has(it.id)) byId.set(it.id, it); });
+    tray = (ex.items||[]).map(it=>it.id);
+    currentExhibitionId = ex.id;
+    document.getElementById("exhTitle").value = ex.title || "";
+    renderTray();
+    await loadShelf();
+    openCompose();
+  }catch(e){ setStatus("could not open"); }
+}
+function newShow(){
+  tray=[]; currentExhibitionId=null;
+  const t="A new show, taking shape";
+  const et=document.getElementById("exhTitle"); if(et) et.value=t;
+  const cti=document.getElementById("composeTitleInput"); if(cti) cti.value=t;
+  renderTray();
+  const grid=document.getElementById("composeGrid"); if(grid) grid.innerHTML="";
+  loadShelf();
+}
+const _newShow=document.getElementById("newShow"); if(_newShow) _newShow.onclick=newShow;
+
 // ---------- boot ----------
 (async function(){
   try{
@@ -506,13 +616,17 @@ addEventListener("resize",()=>{W=innerWidth-360;H=innerHeight-64;
 </div>
 <div id="compose">
   <div class="top">
-    <h2 id="composeTitle">A new show</h2>
+    <input id="composeTitleInput" class="ctitle" value="A new show, taking shape">
     <span class="label" id="composeCount"></span>
     <span style="margin-left:auto"></span>
+    <button class="ghostbtn" id="saveBtn">Save</button>
     <button class="gold-btn" id="playBtn">Present ▶</button>
     <button class="ghostbtn" id="composeClose">Close</button>
   </div>
-  <div class="grid" id="composeGrid"></div>
+  <div class="cbody">
+    <div class="grid" id="composeGrid"></div>
+    <div class="shelf2" id="composeShelf"></div>
+  </div>
 </div>
 <div id="present">
   <button class="ghostbtn close" id="presentClose">✕ back to edit</button>
