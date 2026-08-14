@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THREAD — an inspiration atlas for The Costume Institute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<style>
+  :root{
+    --ground:#141419; --ground-2:#1c1c24; --ink:#e8e6e0; --ink-dim:#8a8792;
+    --gold:#c9a24b; --marble:#d8cdb8; --line:#33323c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--ground);color:var(--ink);
+    font-family:"Cormorant Garamond",Georgia,serif;overflow:hidden}
+  .label{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+    text-transform:uppercase;letter-spacing:.18em;font-size:10px;color:var(--ink-dim)}
+  header{position:fixed;top:0;left:0;right:0;height:64px;z-index:20;
+    display:flex;align-items:center;gap:24px;padding:0 24px;
+    background:linear-gradient(180deg,rgba(20,20,25,.95),rgba(20,20,25,.6));
+    border-bottom:1px solid var(--line)}
+  .brand{font-size:26px;letter-spacing:.34em;font-weight:600;white-space:nowrap}
+  .brand small{display:block;letter-spacing:.2em;font-size:9px;color:var(--ink-dim);
+    text-transform:uppercase;font-family:-apple-system,sans-serif;margin-top:-2px}
+  .search{flex:1;max-width:540px;position:relative}
+  .search input{width:100%;background:var(--ground-2);border:1px solid var(--line);
+    color:var(--ink);border-radius:22px;padding:10px 16px;font-size:16px;
+    font-family:"Cormorant Garamond",serif;outline:none}
+  .search input:focus{border-color:var(--gold)}
+  .search .hint{position:absolute;right:16px;top:12px;pointer-events:none}
+  #status{font-size:14px;color:var(--ink-dim);font-style:italic;white-space:nowrap}
+  #stage{position:fixed;inset:64px 360px 0 0}
+  #shelf{position:fixed;top:64px;right:0;bottom:0;width:212px;z-index:15;background:var(--ground-2);
+    border-left:1px solid var(--line);display:flex;flex-direction:column;padding:14px 0}
+  #shelf .head{padding:0 18px 10px;display:flex;align-items:center;justify-content:space-between}
+  #shelf .new{cursor:pointer;color:var(--gold);font-size:22px;line-height:1;font-family:-apple-system,sans-serif}
+  #shelf ul{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+  #shelf li{padding:11px 18px;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px;color:var(--ink)}
+  #shelf li:hover{background:rgba(201,162,75,.08)}
+  #shelf li.active{border-left:3px solid var(--gold);background:rgba(201,162,75,.06);padding-left:15px}
+  #shelf li .meta{display:block;font-family:-apple-system,sans-serif;font-size:10px;letter-spacing:.08em;
+    color:var(--ink-dim);margin-top:3px}
+  #shelf .empty{padding:14px 18px;color:var(--ink-dim);font-style:italic;font-size:14px;line-height:1.4}
+  svg{width:100%;height:100%;display:block;cursor:grab}
+  .link{stroke:var(--line);stroke-width:1}
+  .link.inspired{stroke:var(--gold);stroke-width:1.5}
+  .link.example_of{stroke:#5a4a2a;stroke-width:1}
+  .link.explore{stroke:var(--gold);stroke-dasharray:1 4;opacity:.8}
+  .node circle{stroke:rgba(255,255,255,.14);stroke-width:1.5;cursor:pointer}
+  .node text{font-size:13px;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:var(--ground);stroke-width:3px}
+  .node.sourceworld text{font-size:15px;fill:var(--gold)}
+  .dim{opacity:.1;transition:opacity .3s}
+  .lit{opacity:1;transition:opacity .3s}
+  aside{position:fixed;top:64px;right:0;bottom:0;width:360px;z-index:20;
+    background:var(--ground-2);border-left:1px solid var(--line);
+    display:flex;flex-direction:column}
+  .walllabel{padding:22px 24px;border-bottom:1px solid var(--line);overflow-y:auto;max-height:56%}
+  .walllabel .kind{color:var(--gold)}
+  .walllabel h2{font-size:28px;font-weight:500;margin:8px 0 2px;line-height:1.06}
+  .walllabel .origin{font-style:italic;color:var(--ink-dim);font-size:16px;margin-bottom:12px}
+  .walllabel img{width:100%;border-radius:6px;margin:6px 0 12px;display:block;
+    border:1px solid var(--line)}
+  .walllabel p{font-size:16px;line-height:1.45;margin:0 0 14px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chip{font-family:-apple-system,sans-serif;font-size:11px;letter-spacing:.04em;
+    border:1px solid var(--line);border-radius:12px;padding:4px 10px;color:var(--ink);
+    cursor:pointer;background:var(--ground)}
+  .chip.gold{border-color:var(--gold);color:var(--gold)}
+  .metlink{display:inline-block;font-family:-apple-system,sans-serif;font-size:12px;
+    letter-spacing:.04em;color:var(--gold);text-decoration:none;margin-bottom:14px}
+  .add{width:100%;background:var(--gold);color:#1a1508;border:none;border-radius:22px;
+    padding:11px;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer;font-weight:600}
+  .add:disabled{background:var(--line);color:var(--ink-dim);cursor:default}
+  .tray{flex:1;display:flex;flex-direction:column;padding:18px 24px;overflow:hidden}
+  .exh-title{font-size:21px;font-weight:500;background:none;border:none;
+    border-bottom:1px dashed var(--line);color:var(--ink);width:100%;
+    font-family:"Cormorant Garamond",serif;padding:6px 0;margin:6px 0 12px;outline:none}
+  .exh-title:focus{border-color:var(--gold)}
+  .tray ul{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+  .tray li{display:flex;align-items:center;gap:10px;padding:7px 0;
+    border-bottom:1px solid var(--line);font-size:15px}
+  .tray li .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .tray li .rm{margin-left:auto;color:var(--ink-dim);cursor:pointer;font-size:13px}
+  .tray .empty{color:var(--ink-dim);font-style:italic;font-size:15px;margin-top:8px}
+  .count{margin-top:8px}
+  .peekbtn{width:100%;background:none;color:var(--gold);border:1px solid var(--gold);
+    border-radius:22px;padding:9px;font-family:-apple-system,sans-serif;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;cursor:pointer;margin-bottom:8px}
+  #peek{display:none;position:fixed;inset:0;z-index:50;background:rgba(10,10,14,.92);
+    flex-direction:column;padding:24px}
+  #peek .bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--ink)}
+  #peek .bar b{font-size:20px;font-weight:500}
+  #peek .bar .note{font-size:13px;color:var(--ink-dim);font-style:italic;margin-left:auto}
+  #peek .x{cursor:pointer;font-size:22px;color:var(--ink)}
+  #peek iframe{flex:1;width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+  #compose,#present{display:none;position:fixed;inset:0;z-index:60;background:var(--ground);flex-direction:column}
+  #compose .top{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+  #compose .top h2{font-size:24px;font-weight:500;margin:0}
+  #compose .top .ctitle{font-size:24px;font-weight:500;background:none;border:none;
+    border-bottom:1px dashed transparent;color:var(--ink);font-family:"Cormorant Garamond",serif;
+    outline:none;min-width:300px;padding:4px 0}
+  #compose .top .ctitle:hover,#compose .top .ctitle:focus{border-bottom-color:var(--line)}
+  #compose .grid{flex:1;overflow-y:auto;padding:24px;display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;align-content:start}
+  .card{background:var(--ground-2);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;cursor:grab;display:flex;flex-direction:column}
+  .card img{width:100%;height:150px;object-fit:cover;display:block;background:#20202a}
+  .card .txt{height:150px;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:16px;color:var(--ink);background:linear-gradient(135deg,#22222d,#17171f)}
+  .card .cap{padding:8px 10px;font-size:14px;color:var(--ink);border-top:1px solid var(--line)}
+  .card .cap .k{font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.12em;
+    font-size:9px;color:var(--ink-dim);display:block;margin-bottom:2px}
+  .sortable-ghost{opacity:.25}
+  #compose .cbody{flex:1;display:flex;overflow:hidden}
+  #compose .shelf2{width:250px;flex:0 0 250px;border-left:1px solid var(--line);
+    overflow-y:auto;padding:20px 18px;background:var(--ground-2)}
+  #compose .shelf2 .crow{display:flex;justify-content:space-between;align-items:baseline;
+    padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px;color:var(--ink)}
+  #compose .shelf2 .crow:hover{background:rgba(201,162,75,.08)}
+  #compose .shelf2 .crow.active{color:var(--gold)}
+  #compose .shelf2 .crow span{font-family:-apple-system,sans-serif;font-size:10px;
+    letter-spacing:.08em;color:var(--ink-dim)}
+  #compose .shelf2 .empty{color:var(--ink-dim);font-style:italic;font-size:14px;margin-top:8px}
+  .ghostbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:20px;
+    padding:8px 16px;cursor:pointer;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.08em}
+  .gold-btn{background:var(--gold);color:#1a1508;border:none;border-radius:20px;padding:9px 18px;
+    cursor:pointer;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600}
+  #present .slide{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:20px}
+  #present .slide img{max-height:66vh;max-width:82vw;border-radius:6px;border:1px solid var(--line)}
+  #present .txtbig{font-size:44px;color:var(--ink);text-align:center;max-width:70vw;line-height:1.1}
+  .plate{width:min(420px,70vw);aspect-ratio:3/4;border:1px solid var(--line);border-radius:6px;
+    background:linear-gradient(135deg,#1b1b23,#141419);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center}
+  .plate .frame{font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:10px;color:var(--ink-dim)}
+  .plate .ttl{font-size:26px;color:var(--ink);line-height:1.15}
+  .plate .meta{font-size:15px;color:var(--ink-dim);font-style:italic}
+  .card .txt .frame{display:block;font-family:-apple-system,sans-serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:8px;color:var(--ink-dim);margin-bottom:8px}
+  #present .cap{font-size:22px;color:var(--ink);text-align:center}
+  #present .cap .k{display:block;font-family:-apple-system,sans-serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:11px;color:var(--gold);margin-bottom:6px}
+  #present .nav{position:absolute;top:50%;transform:translateY(-50%);font-size:40px;color:var(--ink-dim);
+    cursor:pointer;user-select:none;padding:20px}
+  #present .prev{left:8px} #present .next{right:8px}
+  #present .counter{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:var(--ink-dim);
+    font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.12em}
+  #present .close{position:absolute;top:16px;right:20px}
+  #present .sdesc{max-width:60vw;text-align:center;color:var(--ink-dim);font-size:18px;line-height:1.4}
+  #present .slide .ghostbtn{margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">THREAD<small>an inspiration atlas · live from the collection</small></div>
+  <div class="search">
+    <input id="q" placeholder="Seed a house (“Balenciaga”) · a source (“kimono”) · or explore The Met…" autocomplete="off">
+    <span class="hint label">↵</span>
+  </div>
+  <div id="status">connecting…</div>
+</header>
+
+<div id="stage"><svg></svg></div>
+
+<aside>
+  <div class="walllabel" id="wall">
+    <div class="kind label">—</div>
+    <h2>—</h2>
+    <div class="origin"></div>
+    <div class="imgwrap"></div>
+    <p></p>
+    <div class="label" style="margin-bottom:6px">inspired by</div>
+    <div class="chips"></div>
+    <button class="peekbtn" id="listenBtn" style="display:none">🔊 Listen to description</button>
+    <button class="peekbtn" style="display:none">Peek inside THREAD ⧉</button>
+    <a class="metlink" target="_blank" style="display:none"></a>
+    <button class="add">Add to exhibition</button>
+  </div>
+  <div class="tray">
+    <div class="label" style="font-size:10px">the exhibition</div>
+    <input class="exh-title" id="exhTitle" value="A new show, taking shape">
+    <ul id="trayList"></ul>
+    <div class="count label"></div>
+    <button id="composeBtn" class="gold-btn" style="display:block;margin-top:14px;width:100%">Compose · my shows ▶</button>
+  </div>
+</aside>
+
+<script>
+const API = ""; // same origin — served by FastAPI
+function esc(t){ return String(t||"").replace(/"/g,"&quot;"); }
+function altText(n){
+  return n.description || [n.label, n.culture, n.date].filter(Boolean).join(", ");
+}
+function speak(text){
+  if(!text || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
+
+// editorial copy the graph doesn't hold (structure is live; voice is curated)
+const DESC = {
+  "McCardell":{o:"American · 1905–1958",b:"Mother of American sportswear. Stripped couture of fuss — the popover, separates, denim, function as elegance."},
+  "Vionnet":{o:"French · 1876–1975",b:"Queen of the bias cut. Draped cloth on the living body — the Parthenon made wearable."},
+  "Grès":{o:"French · 1903–1993",b:"Sculptor in silk jersey. Pleated goddess-gowns worked directly on the form."},
+  "Balenciaga":{o:"Spanish · 1895–1972",b:"“The master of us all.” Sombre, sculptural volumes from Spanish art and dress."},
+  "Chanel":{o:"French · 1883–1971",b:"Modernism in cloth — menswear, jersey, the total wardrobe of the working woman."},
+  "Lanvin":{o:"French · 1867–1946",b:"The robe de style and a famous blue drawn from medieval and early-Renaissance art."},
+  "Schiaparelli":{o:"Italian · 1890–1973",b:"Surrealism worn — the lobster dress, the shoe hat, Dalí and Cocteau."},
+  "Charles James":{o:"American · 1906–1978",b:"Dressmaking as architecture and mathematics — the Clover Leaf, the Swan."},
+  "Ancient Greek sculpture":{o:"Greek & Roman Art · The Met",b:"Draped marble — korai, Nikai, grave stelai. The source of classical drapery."},
+  "Japanese kimono":{o:"Asian Art · The Met",b:"Flat, geometric construction that works with the uncut rectangle of cloth."},
+  "Spanish painting":{o:"European Paintings · The Met",b:"El Greco, Velázquez, Goya — the infantas’ volumes, ecclesiastical black."},
+};
+
+// ---------- graph state ----------
+const svg = d3.select("svg"), root = svg.append("g");
+const defs = svg.append("defs");
+let W = innerWidth-360, H = innerHeight-64;
+svg.call(d3.zoom().scaleExtent([.3,2.5]).on("zoom",e=>root.attr("transform",e.transform)));
+const byId = new Map();        // id -> node
+const linkKey = new Set();     // "a|b|kind"
+let nodes = [], links = [], houses = [], selected = null;
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d=>d.id).distance(l=>l.kind==="created"?45:l.kind==="example_of"?60:150).strength(.5))
+  .force("charge", d3.forceManyBody().strength(-380))
+  .force("center", d3.forceCenter(W/2,H/2))
+  .force("collide", d3.forceCollide(26));
+
+let linkSel = root.append("g").selectAll("line");
+let nodeSel = root.append("g").selectAll("g");
+
+function radius(d){
+  if(d.type==="sourceworld") return 20;
+  if(d.type==="designer") return 15;
+  if(d.type==="artwork") return d.image?18:9;
+  return 7;
+}
+
+function mergeGraph(g){
+  (g.nodes||[]).forEach(n=>{ if(!byId.has(n.id)){ byId.set(n.id,n); nodes.push(n); } });
+  (g.links||[]).forEach(l=>{
+    const k = l.source+"|"+l.target+"|"+l.kind;
+    if(!linkKey.has(k)){ linkKey.add(k); links.push({...l}); }
+  });
+  // colour garments by the house that created them, for coherent constellations
+  links.forEach(l=>{
+    if(l.kind==="created"){
+      const d = byId.get(typeof l.source==="object"?l.source.id:l.source);
+      const g2 = byId.get(typeof l.target==="object"?l.target.id:l.target);
+      if(d&&g2&&d.color) g2.color = d.color;
+    }
+  });
+  draw();
+}
+
+function draw(){
+  linkSel = linkSel.data(links, d=>(d.source.id||d.source)+"|"+(d.target.id||d.target)+"|"+d.kind);
+  linkSel.exit().remove();
+  linkSel = linkSel.enter().append("line").attr("class",d=>"link "+d.kind).merge(linkSel);
+
+  nodeSel = nodeSel.data(nodes, d=>d.id);
+  nodeSel.exit().remove();
+  const g = nodeSel.enter().append("g").attr("class",d=>"node "+d.type)
+    .call(d3.drag()
+      .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}))
+    .on("click",(e,d)=>{ onNodeClick(d); e.stopPropagation(); });
+  g.each(function(d){
+    const sel=d3.select(this), r=radius(d);
+    if(d.type==="artwork" && d.image){
+      const cid="clip-"+d.id.replace(/[^a-z0-9]/gi,"");
+      if(defs.select("#"+cid).empty())
+        defs.append("clipPath").attr("id",cid).append("circle").attr("r",r);
+      sel.append("image").attr("href",d.image).attr("xlink:href",d.image)
+        .attr("x",-r).attr("y",-r).attr("width",2*r).attr("height",2*r)
+        .attr("preserveAspectRatio","xMidYMid slice").attr("clip-path","url(#"+cid+")");
+      sel.append("circle").attr("class","ring").attr("r",r).attr("fill","none")
+        .attr("stroke",d.color||"#d8cdb8").attr("stroke-width",2);
+    } else {
+      sel.append("circle").attr("class","fill").attr("r",r).attr("fill",d.color||"#8a8792");
+    }
+  });
+  g.append("text").attr("x",d=>radius(d)+6).attr("dy",".35em")
+    .text(d=>["designer","sourceworld"].includes(d.type)?d.label:"");
+  g.append("title").text(d=>{
+    const kind = d.type==="sourceworld" ? "source-world" : d.type;
+    return d.label + " · " + kind + (d.type==="garment" ? " — click for the Met link" : "");
+  });
+  nodeSel = g.merge(nodeSel);
+  nodeSel.select("circle.fill").attr("fill",d=>d.color||"#8a8792"); // refresh garment colours
+
+  sim.nodes(nodes); sim.force("link").links(links); sim.alpha(.7).restart();
+}
+
+sim.on("tick",()=>{
+  linkSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+         .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  nodeSel.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+// ---------- fetching the real graph ----------
+let __DB=null;
+async function __loadDB(){ if(!__DB){ __DB = await (await fetch("data.json")).json(); } return __DB; }
+function __exhAll(){ try{ return JSON.parse(localStorage.getItem("thread_exhibitions")||"[]"); }catch(e){ return []; } }
+function __exhWrite(l){ localStorage.setItem("thread_exhibitions", JSON.stringify(l)); }
+function __exhPut(id, title, items){
+  const list=__exhAll(); const now=new Date().toISOString();
+  if(id){ const e=list.find(x=>x.id===id); if(e){ e.title=title; e.items=items; e.updated=now; __exhWrite(list); return e; } }
+  const e={ id:"loc"+Math.random().toString(36).slice(2,10), title, items, updated:now };
+  list.unshift(e); __exhWrite(list); return e;
+}
+async function api(path){
+  const db = await __loadDB();
+  if(path==="/health") return {ok:true, neo4j_configured:true};
+  if(path==="/houses") return db.houses;
+  if(path.indexOf("/house/")===0) return db.house[decodeURIComponent(path.slice(7))] || {nodes:[],links:[]};
+  if(path.indexOf("/source/")===0) return db.source[decodeURIComponent(path.slice(8))] || {nodes:[],links:[]};
+  if(path==="/exhibitions") return __exhAll().map(e=>({id:e.id,title:e.title,count:(e.items||[]).length,updated:e.updated}));
+  if(path.indexOf("/exhibitions/")===0){ const id=path.slice(13); return __exhAll().find(e=>e.id===id)||{id,title:"",items:[]}; }
+  throw new Error("static: no route "+path);
+}
+async function expandHouse(name){ setStatus("loading "+name+"…"); mergeGraph(await api("/house/"+encodeURIComponent(name))); setStatus(""); }
+async function expandSource(name){ setStatus("loading "+name+"…"); mergeGraph(await api("/source/"+encodeURIComponent(name))); setStatus(""); }
+function setStatus(t){ document.getElementById("status").textContent = t; }
+
+// ---------- click: select + expand ----------
+const expanded = new Set();
+function onNodeClick(d){
+  select(d.id);
+  if(d.type==="designer" && !expanded.has(d.id)){
+    expanded.add(d.id);
+    expandHouse(d.label).then(()=>select(d.id)).catch(e=>console.error(e));
+  } else if(d.type==="sourceworld" && !expanded.has(d.id)){
+    expanded.add(d.id);
+    expandSource(d.label).then(()=>select(d.id)).catch(e=>console.error(e));
+  }
+}
+function neighbours(id){
+  const near = new Set([id]);
+  links.forEach(l=>{const s=l.source.id||l.source,t=l.target.id||l.target;
+    if(s===id)near.add(t); if(t===id)near.add(s);});
+  return near;
+}
+function select(id){
+  selected = id;
+  const near = neighbours(id);
+  nodeSel.classed("dim",d=>!near.has(d.id)).classed("lit",d=>near.has(d.id));
+  linkSel.classed("dim",d=>{const s=d.source.id||d.source,t=d.target.id||d.target;return !(near.has(s)&&near.has(t));});
+  wallLabel(byId.get(id));
+}
+svg.on("click",()=>{selected=null;nodeSel.classed("dim",false).classed("lit",false);linkSel.classed("dim",false);});
+
+// ---------- wall label ----------
+const wall = document.getElementById("wall");
+function wallLabel(d){
+  if(!d) return;
+  const desc = DESC[d.label] || {};
+  const inspiredBy = links.filter(l=>(l.target.id||l.target)===d.id && l.kind==="inspired")
+                          .map(l=>byId.get(l.source.id||l.source)).filter(Boolean);
+  wall.querySelector(".kind").textContent = d.type==="sourceworld"?"source-world":d.type;
+  wall.querySelector("h2").textContent = d.label;
+  wall.querySelector(".origin").textContent = desc.o || d.culture || d.date || "";
+  wall.querySelector(".imgwrap").innerHTML = d.image ? `<img src="${d.image}" alt="">` : "";
+  wall.querySelector("p").textContent = d.description || desc.b ||
+    (d.type==="garment" ? "20th-century couture — rights-reserved, so we link to the Met rather than embed."
+     : d.type==="artwork" ? "Open-access from the Met — a candidate thread of inspiration."
+     : "A node in the atlas.");
+  const lb = wall.querySelector("#listenBtn");
+  const sayable = d.description || desc.b || d.label;
+  if(lb){
+    if(sayable){ lb.style.display="block"; lb.onclick=()=>speak(sayable); }
+    else lb.style.display="none";
+  }
+  const chips = wall.querySelector(".chips");
+  chips.innerHTML = inspiredBy.length
+    ? inspiredBy.map(s=>`<span class="chip gold" data-go="${s.id}">${s.label}</span>`).join("")
+    : `<span class="chip" style="color:var(--ink-dim)">— a source, or a starting point —</span>`;
+  chips.querySelectorAll("[data-go]").forEach(c=>c.onclick=()=>select(c.dataset.go));
+  const ml = wall.querySelector(".metlink");
+  const pk = wall.querySelector(".peekbtn");
+  if(d.url){
+    ml.style.display="inline-block"; ml.href=d.url; ml.textContent="View at The Met \u2197";
+    pk.style.display="block"; pk.onclick=()=>openPeek(d.url);
+  } else { ml.style.display="none"; pk.style.display="none"; }
+  const add = wall.querySelector(".add");
+  add.disabled = tray.includes(d.id);
+  add.textContent = tray.includes(d.id) ? "In the exhibition ✓" : "Add to exhibition";
+  add.onclick = ()=>addToTray(d.id);
+}
+
+// ---------- exhibition tray ----------
+let tray = [];
+const trayList = document.getElementById("trayList");
+function addToTray(id){ if(!tray.includes(id)){tray.push(id);renderTray();if(selected===id)wallLabel(byId.get(id));} }
+function removeFromTray(id){ tray=tray.filter(x=>x!==id);renderTray();if(selected)wallLabel(byId.get(selected)); }
+function renderTray(){
+  const list = tray.map(id=>byId.get(id)).filter(Boolean);
+  trayList.innerHTML = list.length
+    ? list.map(n=>`<li><span class="dot" style="background:${n.color||'#c9a24b'}"></span>${n.label}<span class="rm" data-rm="${n.id}">remove</span></li>`).join("")
+    : `<li class="empty">Click a garment, a marble, a house — anything that could hang on the wall — and add it here. The tray is your show.</li>`;
+  trayList.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>removeFromTray(b.dataset.rm));
+  document.querySelector(".count").textContent = list.length ? `${list.length} object${list.length>1?"s":""} — your exhibition takes shape` : "";
+  const cb=document.getElementById("composeBtn"); if(cb) cb.style.display="block";
+}
+
+// ---------- the search: seed a house, a source, or explore The Met ----------
+const MET = {
+  workwear:[["Work apron, 19th c."],["Chore jacket"],["Sailor’s dungarees"]],
+  denim:[["Riveted work trousers"],["Sailor’s dungarees"]],
+  utility:[["Utility coverall"],["Feed-sack dress"]],
+};
+document.getElementById("q").addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+  const term = e.target.value.trim(); if(!term) return;
+  const house = houses.find(h=>h.label.toLowerCase()===term.toLowerCase());
+  const src = Object.keys(DESC).find(k=>DESC[k] && k.toLowerCase().includes(term.toLowerCase()) && !houses.some(h=>h.label===k));
+  if(house){ expandHouse(house.label).then(()=>select(house.id)); }
+  else if(src){ expandSource(src).then(()=>select("sourceworld:"+src)); }
+  else exploreMet(term);
+  e.target.value="";
+});
+function exploreMet(term){
+  const key = Object.keys(MET).find(k=>term.toLowerCase().includes(k));
+  const results = key?MET[key]:[[`“${term}” — textile study`],[`“${term}” — object`]];
+  const anchorId = selected && byId.get(selected)?.type==="designer" ? selected : "designer:McCardell";
+  const a = byId.get(anchorId);
+  results.forEach(r=>{
+    const id="met:"+Math.random().toString(36).slice(2,7);
+    const n={id,label:r[0],type:"met",color:"#d8cdb8",
+      x:(a?a.x:W/2)+(Math.random()*80-40),y:(a?a.y:H/2)+(Math.random()*80-40)};
+    byId.set(id,n); nodes.push(n);
+    const k=id+"|"+anchorId+"|explore"; linkKey.add(k);
+    links.push({source:id,target:anchorId,kind:"explore"});
+  });
+  draw(); setTimeout(()=>select(anchorId),350);
+}
+
+// ---------- peek (try to embed the Met page inline) ----------
+function openPeek(url){
+  const ov=document.getElementById("peek");
+  if(!ov) return;
+  ov.querySelector("iframe").src=url;
+  ov.querySelector(".x").onclick=()=>{ ov.style.display="none"; ov.querySelector("iframe").src="about:blank"; };
+  ov.style.display="flex";
+}
+
+// ---------- compose: see the show, drag to reorder ----------
+function cardMedia(n){
+  return n.image ? '<img src="'+n.image+'" alt="'+esc(altText(n))+'">'
+                 : '<div class="txt"><span class="frame">image at The Met</span>'+(n.label||'Untitled')+'</div>';
+}
+function openCompose(){
+  const items = tray.map(id=>byId.get(id)).filter(Boolean);
+  if(!items.length) return;
+  const _cti=document.getElementById("composeTitleInput");
+  if(_cti){ _cti.value = document.getElementById("exhTitle").value || "A new show, taking shape";
+    _cti.oninput = ()=>{ const et=document.getElementById("exhTitle"); if(et) et.value=_cti.value; }; }
+  document.getElementById("composeCount").textContent = items.length+" objects · drag to reorder";
+  const grid=document.getElementById("composeGrid");
+  grid.innerHTML = items.map(n=>
+    '<div class="card" data-id="'+n.id+'">'+cardMedia(n)+
+    '<div class="cap"><span class="k">'+n.type+'</span>'+(n.label||'')+'</div></div>').join("");
+  document.getElementById("compose").style.display="flex";
+  if(window._sortable) window._sortable.destroy();
+  window._sortable = Sortable.create(grid,{animation:150,ghostClass:"sortable-ghost",onEnd:syncOrder});
+  document.getElementById("composeClose").onclick=()=>document.getElementById("compose").style.display="none";
+  document.getElementById("playBtn").onclick=startPresent;
+  const _sb=document.getElementById("saveBtn"); if(_sb) _sb.onclick=saveShow;
+}
+function syncOrder(){
+  tray = [...document.querySelectorAll("#composeGrid .card")].map(c=>c.dataset.id);
+  renderTray();
+}
+
+function renderComposeShelf(shows){
+  const el=document.getElementById("composeShelf");
+  if(!el) return;
+  if(!shows){ loadShelf(); return; }
+  try{
+    el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span class="label">My exhibitions</span><span id="composeNew" style="cursor:pointer;color:var(--gold);font-size:20px;line-height:1">+</span></div>'+
+      (shows.length
+        ? shows.map(x=>'<div class="crow '+(x.id===currentExhibitionId?'active':'')+'" data-id="'+x.id+'">'+
+            (x.title||'Untitled')+'<span>'+x.count+'</span></div>').join('')
+        : '<div class="empty">No saved shows yet. Save this one to start your shelf.</div>');
+    el.querySelectorAll("[data-id]").forEach(r=>r.onclick=()=>openSavedShow(r.dataset.id));
+    const nb=el.querySelector("#composeNew"); if(nb) nb.onclick=newShow;
+  }catch(e){ el.innerHTML='<div class="empty">—</div>'; }
+}
+
+// ---------- present: the diaporama (basic; the accessible/React version comes next) ----------
+let slideIdx=0;
+function startPresent(){
+  if(!tray.length) return;
+  slideIdx=0;
+  document.getElementById("present").style.display="flex";
+  renderSlide();
+  document.getElementById("presentClose").onclick=closePresent;
+  document.getElementById("prevSlide").onclick=()=>move(-1);
+  document.getElementById("nextSlide").onclick=()=>move(1);
+  document.addEventListener("keydown",presentKeys);
+}
+function presentKeys(e){
+  if(document.getElementById("present").style.display!=="flex") return;
+  if(e.key==="ArrowRight") move(1);
+  else if(e.key==="ArrowLeft") move(-1);
+  else if(e.key==="Escape") closePresent();
+}
+function move(d){ slideIdx=(slideIdx+d+tray.length)%tray.length; renderSlide(); }
+function renderSlide(){
+  const n=byId.get(tray[slideIdx]); if(!n) return;
+  const hasImg = !!n.image;
+  let media;
+  if(hasImg){
+    media = '<img src="'+n.image+'" alt="'+esc(altText(n))+'">';
+  } else if(n.description){
+    media = '<div class="txtbig">'+n.description+'</div>';
+  } else {
+    media = '<div class="plate"><div class="frame">image courtesy pending</div>'
+          + '<div class="ttl">'+(n.label||'Untitled')+'</div>'
+          + '<div class="meta">'+(n.type||'')+(n.date?' · '+n.date:'')+'</div>'
+          + '<div class="frame">view at The Met</div></div>';
+  }
+  let html = media + '<div class="cap"><span class="k">'+n.type+'</span>'+(n.label||'')+'</div>';
+  if(hasImg && n.description) html += '<div class="sdesc">'+n.description+'</div>';
+  html += '<button class="ghostbtn" id="slideListen">🔊 Listen</button>';
+  document.getElementById("slide").innerHTML = html;
+  document.getElementById("slideListen").onclick=()=>speak(n.description||n.label);
+  document.getElementById("presentCounter").textContent=(slideIdx+1)+" / "+tray.length;
+}
+function closePresent(){
+  document.getElementById("present").style.display="none";
+  document.removeEventListener("keydown",presentKeys);
+}
+const _composeBtn=document.getElementById("composeBtn");
+if(_composeBtn) _composeBtn.onclick=openCompose;
+
+// ---------- the shelf: save / list / load exhibitions ----------
+let currentExhibitionId = null;
+
+async function loadShelf(){
+  let shows=[];
+  try{ shows=await api("/exhibitions"); }catch(e){ /* no DB yet */ }
+  renderShelf(shows);
+  renderComposeShelf(shows);
+}
+function renderShelf(shows){
+  const ul=document.getElementById("shelfList");
+  if(!ul) return;
+  if(!shows.length){
+    ul.innerHTML='<li class="empty">No saved shows yet. Build one, then hit Save.</li>';
+    return;
+  }
+  ul.innerHTML = shows.map(x=>
+    '<li data-id="'+x.id+'" class="'+(x.id===currentExhibitionId?'active':'')+'">'+
+    (x.title||'Untitled')+'<span class="meta">'+x.count+' object'+(x.count!==1?'s':'')+'</span></li>').join("");
+  ul.querySelectorAll("[data-id]").forEach(li=>li.onclick=()=>openSavedShow(li.dataset.id));
+}
+async function saveShow(){
+  const items = tray.map(id=>byId.get(id)).filter(Boolean).map(n=>({
+    id:n.id, label:n.label||"", type:n.type||"", color:n.color||"",
+    image:n.image||"", url:n.url||"", description:n.description||""
+  }));
+  const title = document.getElementById("exhTitle").value || "Untitled exhibition";
+  const body = JSON.stringify({title, items});
+  setStatus("saving\u2026");
+  try{
+    const data = __exhPut(currentExhibitionId, title, items);
+    currentExhibitionId = data.id;
+    await loadShelf();
+    setStatus("saved \u2713");
+  }catch(e){ setStatus("save failed"); console.error(e); }
+}
+async function openSavedShow(id){
+  try{
+    const ex = await api("/exhibitions/"+id);
+    (ex.items||[]).forEach(it=>{ if(!byId.has(it.id)) byId.set(it.id, it); });
+    tray = (ex.items||[]).map(it=>it.id);
+    currentExhibitionId = ex.id;
+    document.getElementById("exhTitle").value = ex.title || "";
+    renderTray();
+    await loadShelf();
+    openCompose();
+  }catch(e){ setStatus("could not open"); }
+}
+function newShow(){
+  tray=[]; currentExhibitionId=null;
+  const t="A new show, taking shape";
+  const et=document.getElementById("exhTitle"); if(et) et.value=t;
+  const cti=document.getElementById("composeTitleInput"); if(cti) cti.value=t;
+  renderTray();
+  const grid=document.getElementById("composeGrid"); if(grid) grid.innerHTML="";
+  loadShelf();
+}
+const _newShow=document.getElementById("newShow"); if(_newShow) _newShow.onclick=newShow;
+
+// ---------- boot ----------
+(async function(){
+  try{
+    const h = await api("/health");
+    if(!h.neo4j_configured){ setStatus("Neo4j not connected"); }
+    houses = await api("/houses");
+    setStatus(houses.length+" houses");
+    await expandHouse("McCardell");   // seed the curator's session
+    select("designer:McCardell");
+  }catch(err){
+    setStatus("can’t reach the API — is uvicorn running?");
+    console.error(err);
+  }
+})();
+addEventListener("resize",()=>{W=innerWidth-360;H=innerHeight-64;
+  sim.force("center",d3.forceCenter(W/2,H/2)).alpha(.3).restart();});
+</script>
+<div id="peek">
+  <div class="bar">
+    <b>Peek — The Met</b>
+    <span class="note">if this stays blank, the Met blocks embedding; use “View at The Met”.</span>
+    <span class="x" id="peekClose">✕</span>
+  </div>
+  <iframe title="Met object"></iframe>
+</div>
+<div id="compose">
+  <div class="top">
+    <input id="composeTitleInput" class="ctitle" value="A new show, taking shape">
+    <span class="label" id="composeCount"></span>
+    <span style="margin-left:auto"></span>
+    <button class="ghostbtn" id="saveBtn">Save</button>
+    <button class="gold-btn" id="playBtn">Present ▶</button>
+    <button class="ghostbtn" id="composeClose">Close</button>
+  </div>
+  <div class="cbody">
+    <div class="grid" id="composeGrid"></div>
+    <div class="shelf2" id="composeShelf"></div>
+  </div>
+</div>
+<div id="present">
+  <button class="ghostbtn close" id="presentClose">✕ back to edit</button>
+  <div class="prev nav" id="prevSlide">‹</div>
+  <div class="next nav" id="nextSlide">›</div>
+  <div class="slide" id="slide"></div>
+  <div class="counter" id="presentCounter"></div>
+</div>
+</body>
+</html>
