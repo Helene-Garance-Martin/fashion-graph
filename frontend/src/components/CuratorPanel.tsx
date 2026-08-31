@@ -3,11 +3,13 @@ import type { GraphNode } from '../types/graph'
 
 type CuratorPanelProps = {
   selectedNode: GraphNode | null
+  isInExhibition: boolean
   onAddToExhibition: (node: GraphNode) => void
 }
 
 function CuratorPanel({
   selectedNode,
+  isInExhibition,
   onAddToExhibition,
 }: CuratorPanelProps) {
   if (!selectedNode) {
@@ -27,14 +29,18 @@ function CuratorPanel({
     return (
       <aside>
         <h2>Curator</h2>
+
         <p>{selectedNode.kind}</p>
         <h3>{selectedNode.label}</h3>
 
         <button
           type="button"
+          disabled={isInExhibition}
           onClick={() => onAddToExhibition(selectedNode)}
         >
-          Add to exhibition
+          {isInExhibition
+            ? 'In exhibition'
+            : 'Add to exhibition'}
         </button>
       </aside>
     )
@@ -61,9 +67,12 @@ function CuratorPanel({
 
       <button
         type="button"
+        disabled={isInExhibition}
         onClick={() => onAddToExhibition(selectedNode)}
       >
-        Add to exhibition
+        {isInExhibition
+          ? 'In exhibition'
+          : 'Add to exhibition'}
       </button>
     </aside>
   )

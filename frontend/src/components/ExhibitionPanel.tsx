@@ -1,4 +1,5 @@
 import type { GraphNode } from '../types/graph'
+import styles from './ExhibitionPanel.module.css'
 
 type ExhibitionPanelProps = {
   items: GraphNode[]
@@ -10,18 +11,28 @@ function ExhibitionPanel({
   onRemove,
 }: ExhibitionPanelProps) {
   return (
-    <section>
-      <h3>The Exhibition</h3>
+    <section className={styles.panel}>
+      <h3 className={styles.heading}>
+        The Exhibition
+      </h3>
 
       {items.length === 0 ? (
-        <p>No objects selected yet.</p>
+        <p className={styles.empty}>
+          No objects selected yet.
+        </p>
       ) : (
-        <ul>
+        <ul className={styles.list}>
           {items.map((item) => (
-            <li key={item.id}>
-              {item.label}{' '}
+            <li
+              key={item.id}
+              className={styles.item}
+            >
+              <span className={styles.label}>
+                {item.label}
+              </span>
 
               <button
+                className={styles.remove}
                 type="button"
                 onClick={() => onRemove(item.id)}
               >

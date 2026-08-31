@@ -33,6 +33,12 @@ function App() {
     )
   }
 
+  const isSelectedNodeInExhibition =
+    selectedNode !== null &&
+    exhibitionItems.some(
+      (item) => item.id === selectedNode.id
+    )
+
   return (
     <div className={styles.page}>
       <Header />
@@ -48,6 +54,7 @@ function App() {
         <div className={styles.curator}>
           <CuratorPanel
             selectedNode={selectedNode}
+            isInExhibition={isSelectedNodeInExhibition}
             onAddToExhibition={handleAddToExhibition}
           />
 
