@@ -1,16 +1,16 @@
-import type { ApiHouse } from '../types/api'
+import type { SearchOption } from '../types/api'
 import styles from './SearchBar.module.css'
 
 type SearchBarProps = {
   value: string
-  houses: ApiHouse[]
+  options: SearchOption[]
   onChange: (value: string) => void
   onSubmit: () => void
 }
 
 function SearchBar({
   value,
-  houses,
+  options,
   onChange,
   onSubmit,
 }: SearchBarProps) {
@@ -24,17 +24,22 @@ function SearchBar({
       <input
         className={styles.search}
         type="search"
-        list="house-options"
+        list="atlas-options"
         value={value}
-        placeholder="Search designers..."
+        placeholder="Search designers or source worlds..."
         onChange={(event) => onChange(event.target.value)}
       />
 
-      <datalist id="house-options">
-        {houses.map((house) => (
+      <datalist id="atlas-options">
+        {options.map((option) => (
           <option
-            key={house.id}
-            value={house.label}
+            key={option.id}
+            value={option.label}
+            label={
+              option.kind === 'HOUSE'
+                ? 'Designer'
+                : 'Source world'
+            }
           />
         ))}
       </datalist>

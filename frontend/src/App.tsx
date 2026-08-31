@@ -6,24 +6,56 @@ import ExhibitionPanel from './components/ExhibitionPanel'
 import {
   getHouse,
   getHouses,
+  getSource,
 } from './api/graphApi'
 import { toInfluenceGraph } from './adapters/graphAdapter'
-import type { ApiHouse } from './types/api'
+import type {
+  ApiHouse,
+  SearchOption,
+} from './types/api'
 import type {
   GraphData,
   GraphNode,
 } from './types/graph'
 import styles from './App.module.css'
 
+const SOURCE_OPTIONS: SearchOption[] = [
+  {
+    id: 'sourceworld:Ancient Greek sculpture',
+    label: 'Ancient Greek sculpture',
+    kind: 'SOURCE',
+    apiName: 'Ancient Greek sculpture',
+  },
+  {
+    id: 'sourceworld:Japanese kimono',
+    label: 'Japanese kimono',
+    kind: 'SOURCE',
+    apiName: 'Japanese kimono',
+  },
+  {
+    id: 'sourceworld:Spanish painting',
+    label: 'Spanish paintings',
+    kind: 'SOURCE',
+    apiName: 'Spanish painting',
+  },
+]
+
+const INITIAL_SELECTION: SearchOption = {
+  id: 'designer:Vionnet',
+  label: 'Vionnet',
+  kind: 'HOUSE',
+  apiName: 'Vionnet',
+}
+
 function App() {
   const [houses, setHouses] =
     useState<ApiHouse[]>([])
 
-  const [currentHouse, setCurrentHouse] =
-    useState('Vionnet')
+  const [currentSelection, setCurrentSelection] =
+    useState<SearchOption>(INITIAL_SELECTION)
 
   const [searchValue, setSearchValue] =
-    useState('Vionnet')
+    useState(INITIAL_SELECTION.label)
 
   const [graphData, setGraphData] =
     useState<GraphData | null>(null)
@@ -36,6 +68,19 @@ function App() {
 
   const [graphError, setGraphError] =
     useState(false)
+
+  const houseOptions: SearchOption[] =
+    houses.map((house) => ({
+      id: house.id,
+      label: house.label,
+      kind: 'HOUSE',
+      apiName: house.label,
+    }))
+
+  const searchOptions = [
+    ...houseOptions,
+    ...SOURCE_OPTIONS,
+  ]
 
   useEffect(() => {
     getHouses()
@@ -52,7 +97,12 @@ function App() {
     setSelectedNode(null)
     setGraphError(false)
 
-    getHouse(currentHouse)
+    const request =
+      currentSelection.kind === 'HOUSE'
+        ? getHouse(currentSelection.apiName)
+        : getSource(currentSelection.apiName)
+
+    request
       .then((response) => {
         const graph = toInfluenceGraph(response)
         setGraphData(graph)
@@ -60,13 +110,16 @@ function App() {
       .catch(() => {
         setGraphError(true)
       })
-  }, [currentHouse])
+  }, [currentSelection])
 
   const handleSearchSubmit = () => {
-    const match = houses.find(
-      (house) =>
-        house.label.toLowerCase() ===
-        searchValue.trim().toLowerCase()
+    const normalisedSearch =
+      searchValue.trim().toLowerCase()
+
+    const match = searchOptions.find(
+      (option) =>
+        option.label.toLowerCase() ===
+        normalisedSearch
     )
 
     if (!match) {
@@ -74,10 +127,12 @@ function App() {
     }
 
     setSearchValue(match.label)
-    setCurrentHouse(match.label)
+    setCurrentSelection(match)
   }
 
-  const handleAddToExhibition = (node: GraphNode) => {
+  const handleAddToExhibition = (
+    node: GraphNode
+  ) => {
     setExhibitionItems((currentItems) => {
       const alreadyExists = currentItems.some(
         (item) => item.id === node.id
@@ -91,7 +146,9 @@ function App() {
     })
   }
 
-  const handleRemoveFromExhibition = (nodeId: string) => {
+  const handleRemoveFromExhibition = (
+    nodeId: string
+  ) => {
     setExhibitionItems((currentItems) =>
       currentItems.filter(
         (item) => item.id !== nodeId
@@ -109,7 +166,7 @@ function App() {
     <div className={styles.page}>
       <Header
         searchValue={searchValue}
-        houses={houses}
+        searchOptions={searchOptions}
         onSearchChange={setSearchValue}
         onSearchSubmit={handleSearchSubmit}
       />
@@ -125,20 +182,28 @@ function App() {
               onNodeSelect={setSelectedNode}
             />
           ) : (
-            <p>Loading {currentHouse}…</p>
+            <p>
+              Loading {currentSelection.label}…
+            </p>
           )}
         </div>
 
         <div className={styles.curator}>
           <CuratorPanel
             selectedNode={selectedNode}
-            isInExhibition={isSelectedNodeInExhibition}
-            onAddToExhibition={handleAddToExhibition}
+            isInExhibition={
+              isSelectedNodeInExhibition
+            }
+            onAddToExhibition={
+              handleAddToExhibition
+            }
           />
 
           <ExhibitionPanel
             items={exhibitionItems}
-            onRemove={handleRemoveFromExhibition}
+            onRemove={
+              handleRemoveFromExhibition
+            }
           />
         </div>
       </main>

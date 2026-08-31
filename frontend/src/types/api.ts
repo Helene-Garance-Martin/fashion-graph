@@ -4,6 +4,13 @@ export type ApiHouse = {
   color: string
 }
 
+export type SearchOption = {
+  id: string
+  label: string
+  kind: 'HOUSE' | 'SOURCE'
+  apiName: string
+}
+
 export type ApiNodeType =
   | 'designer'
   | 'garment'

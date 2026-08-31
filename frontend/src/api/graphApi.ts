@@ -45,3 +45,17 @@ export async function getHouse(
 
   return response.json()
 }
+
+export async function getSource(
+  name: string
+): Promise<ApiGraphResponse> {
+  const response = await fetch(
+    `${API_URL}/source/${encodeURIComponent(name)}`
+  )
+
+  if (!response.ok) {
+    throw new Error(`Source request failed: ${response.status}`)
+  }
+
+  return response.json()
+}
