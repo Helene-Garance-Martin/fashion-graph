@@ -3,7 +3,9 @@ import { getHealth } from '../api/graphApi'
 import type { HealthResponse } from '../api/graphApi'
 
 function ApiStatus() {
-  const [health, setHealth] = useState<HealthResponse | null>(null)
+  const [health, setHealth] =
+    useState<HealthResponse | null>(null)
+
   const [error, setError] = useState(false)
 
   useEffect(() => {
@@ -24,12 +26,15 @@ function ApiStatus() {
     return <p>Checking API…</p>
   }
 
-  return (
-    <p>
-      API online · Neo4j{' '}
-      {health.neo4j_configured ? 'connected' : 'not connected'}
-    </p>
-  )
+  if (health.neo4j_connected) {
+    return <p>API online · Neo4j connected</p>
+  }
+
+  if (health.static_data_available) {
+    return <p>API online · static collection snapshot</p>
+  }
+
+  return <p>API online · collection unavailable</p>
 }
 
 export default ApiStatus

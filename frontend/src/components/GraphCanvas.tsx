@@ -1,26 +1,34 @@
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { mockGraph } from '../data/mockGraph'
-import type { GraphNode, GraphRelationship } from '../types/graph'
+import type {
+  GraphData,
+  GraphNode,
+  GraphRelationship,
+} from '../types/graph'
 
-type SimulationNode = GraphNode & d3.SimulationNodeDatum
+type SimulationNode =
+  GraphNode & d3.SimulationNodeDatum
 
-type SimulationLink = Omit<GraphRelationship, 'source' | 'target'> &
+type SimulationLink =
+  Omit<GraphRelationship, 'source' | 'target'> &
   d3.SimulationLinkDatum<SimulationNode> & {
     source: string | SimulationNode
     target: string | SimulationNode
   }
 
 type GraphCanvasProps = {
+  graph: GraphData
   selectedNode: GraphNode | null
   onNodeSelect: (node: GraphNode) => void
 }
 
 function GraphCanvas({
+  graph,
   selectedNode,
   onNodeSelect,
 }: GraphCanvasProps) {
-  const svgRef = useRef<SVGSVGElement | null>(null)
+  const svgRef =
+    useRef<SVGSVGElement | null>(null)
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -29,15 +37,15 @@ function GraphCanvas({
 
     svg.selectAll('*').remove()
 
-    const nodes: SimulationNode[] = mockGraph.nodes.map((node) => ({
-      ...node,
-    }))
+    const nodes: SimulationNode[] =
+      graph.nodes.map((node) => ({
+        ...node,
+      }))
 
-    const links: SimulationLink[] = mockGraph.relationships.map(
-      (relationship) => ({
+    const links: SimulationLink[] =
+      graph.relationships.map((relationship) => ({
         ...relationship,
-      })
-    )
+      }))
 
     const link = svg
       .selectAll<SVGLineElement, SimulationLink>('line')
@@ -46,11 +54,19 @@ function GraphCanvas({
       .attr('stroke', '#999')
 
     const node = svg
-      .selectAll<SVGCircleElement, SimulationNode>('circle')
+      .selectAll<SVGCircleElement, SimulationNode>(
+        'circle'
+      )
       .data(nodes)
       .join('circle')
-      .attr('r', (d) => (d.kind === 'DESIGNER' ? 24 : 16))
-      .attr('fill', (d) => (d.kind === 'DESIGNER' ? '#222' : '#aaa'))
+      .attr(
+        'r',
+        (d) => (d.kind === 'DESIGNER' ? 24 : 16)
+      )
+      .attr(
+        'fill',
+        (d) => (d.kind === 'DESIGNER' ? '#222' : '#aaa')
+      )
       .style('cursor', 'grab')
       .on('click', (_event, d) => {
         onNodeSelect(d)
@@ -70,12 +86,20 @@ function GraphCanvas({
       .force(
         'link',
         d3
-          .forceLink<SimulationNode, SimulationLink>(links)
+          .forceLink<SimulationNode, SimulationLink>(
+            links
+          )
           .id((d) => d.id)
           .distance(180)
       )
-      .force('charge', d3.forceManyBody().strength(-350))
-      .force('center', d3.forceCenter(300, 225))
+      .force(
+        'charge',
+        d3.forceManyBody().strength(-350)
+      )
+      .force(
+        'center',
+        d3.forceCenter(300, 225)
+      )
 
     const drag = d3
       .drag<SVGCircleElement, SimulationNode>()
@@ -104,10 +128,26 @@ function GraphCanvas({
 
     simulation.on('tick', () => {
       link
-        .attr('x1', (d) => (d.source as SimulationNode).x ?? 0)
-        .attr('y1', (d) => (d.source as SimulationNode).y ?? 0)
-        .attr('x2', (d) => (d.target as SimulationNode).x ?? 0)
-        .attr('y2', (d) => (d.target as SimulationNode).y ?? 0)
+        .attr(
+          'x1',
+          (d) =>
+            (d.source as SimulationNode).x ?? 0
+        )
+        .attr(
+          'y1',
+          (d) =>
+            (d.source as SimulationNode).y ?? 0
+        )
+        .attr(
+          'x2',
+          (d) =>
+            (d.target as SimulationNode).x ?? 0
+        )
+        .attr(
+          'y2',
+          (d) =>
+            (d.target as SimulationNode).y ?? 0
+        )
 
       node
         .attr('cx', (d) => d.x ?? 0)
@@ -115,13 +155,16 @@ function GraphCanvas({
 
       label
         .attr('x', (d) => d.x ?? 0)
-        .attr('y', (d) => (d.y ?? 0) + 40)
+        .attr(
+          'y',
+          (d) => (d.y ?? 0) + 40
+        )
     })
 
     return () => {
       simulation.stop()
     }
-  }, [onNodeSelect])
+  }, [graph, onNodeSelect])
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -129,19 +172,28 @@ function GraphCanvas({
     const svg = d3.select(svgRef.current)
 
     svg
-      .selectAll<SVGCircleElement, SimulationNode>('circle')
+      .selectAll<SVGCircleElement, SimulationNode>(
+        'circle'
+      )
       .attr('r', (d) => {
-        const baseRadius = d.kind === 'DESIGNER' ? 24 : 16
+        const baseRadius =
+          d.kind === 'DESIGNER' ? 24 : 16
 
         return d.id === selectedNode?.id
           ? baseRadius + 4
           : baseRadius
       })
-      .attr('stroke', (d) =>
-        d.id === selectedNode?.id ? '#111' : 'none'
+      .attr(
+        'stroke',
+        (d) =>
+          d.id === selectedNode?.id
+            ? '#111'
+            : 'none'
       )
-      .attr('stroke-width', (d) =>
-        d.id === selectedNode?.id ? 2 : 0
+      .attr(
+        'stroke-width',
+        (d) =>
+          d.id === selectedNode?.id ? 2 : 0
       )
   }, [selectedNode])
 

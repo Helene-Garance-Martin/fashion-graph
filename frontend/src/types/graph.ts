@@ -2,10 +2,12 @@ export type GraphNodeKind =
   | 'DESIGNER'
   | 'SOURCE'
   | 'GARMENT'
+  | 'ARTWORK'
 
 export type RelationshipType =
   | 'INSPIRED'
   | 'CREATED'
+  | 'EXAMPLE_OF'
   | 'COLLABORATED_WITH'
   | 'RIVAL_OF'
 
@@ -19,6 +21,11 @@ export type GraphNode = {
   id: string
   label: string
   kind: GraphNodeKind
+  image?: string
+  url?: string
+  date?: string
+  culture?: string
+  description?: string
 }
 
 export type GraphRelationship = {

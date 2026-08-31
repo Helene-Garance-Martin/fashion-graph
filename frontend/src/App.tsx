@@ -1,17 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import GraphCanvas from './components/GraphCanvas'
 import CuratorPanel from './components/CuratorPanel'
 import ExhibitionPanel from './components/ExhibitionPanel'
-import type { GraphNode } from './types/graph'
+import { getHouse } from './api/graphApi'
+import { toInfluenceGraph } from './adapters/graphAdapter'
+import type { GraphData, GraphNode } from './types/graph'
 import styles from './App.module.css'
 
 function App() {
+  const [graphData, setGraphData] =
+    useState<GraphData | null>(null)
+
   const [selectedNode, setSelectedNode] =
     useState<GraphNode | null>(null)
 
   const [exhibitionItems, setExhibitionItems] =
     useState<GraphNode[]>([])
+
+  const [graphError, setGraphError] =
+    useState(false)
+
+  useEffect(() => {
+    getHouse('Vionnet')
+      .then((response) => {
+        const graph = toInfluenceGraph(response)
+        setGraphData(graph)
+      })
+      .catch(() => {
+        setGraphError(true)
+      })
+  }, [])
 
   const handleAddToExhibition = (node: GraphNode) => {
     setExhibitionItems((currentItems) => {
@@ -45,10 +64,17 @@ function App() {
 
       <main className={styles.main}>
         <div className={styles.graph}>
-          <GraphCanvas
-            selectedNode={selectedNode}
-            onNodeSelect={setSelectedNode}
-          />
+          {graphError ? (
+            <p>Unable to load graph.</p>
+          ) : graphData ? (
+            <GraphCanvas
+              graph={graphData}
+              selectedNode={selectedNode}
+              onNodeSelect={setSelectedNode}
+            />
+          ) : (
+            <p>Loading collection…</p>
+          )}
         </div>
 
         <div className={styles.curator}>

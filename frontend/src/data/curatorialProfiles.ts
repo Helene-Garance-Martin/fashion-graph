@@ -2,7 +2,7 @@ import type { CuratorialProfile } from '../types/curation'
 
 export const curatorialProfiles: CuratorialProfile[] = [
   {
-    nodeId: 'vionnet',
+    nodeId: 'designer:Vionnet',
     eyebrow: 'Designer',
     title: 'Madeleine Vionnet',
     dates: '1876–1975',
@@ -15,7 +15,7 @@ export const curatorialProfiles: CuratorialProfile[] = [
     ],
   },
   {
-    nodeId: 'greek-sculpture',
+    nodeId: 'sourceworld:Ancient Greek sculpture',
     eyebrow: 'Source world',
     title: 'Ancient Greek sculpture',
     summary:
@@ -23,7 +23,7 @@ export const curatorialProfiles: CuratorialProfile[] = [
     themes: ['Drapery', 'Movement', 'Body'],
   },
   {
-    nodeId: 'japanese-kimono',
+    nodeId: 'sourceworld:Japanese kimono',
     eyebrow: 'Source world',
     title: 'Japanese kimono',
     summary:
