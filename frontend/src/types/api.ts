@@ -23,10 +23,14 @@ export type ApiNode = {
   label: string
   color?: string
   image?: string
+  imageSmall?: string
   url?: string
   date?: string
   culture?: string
   description?: string
+  artist?: string
+  artistRole?: string
+  artistPrefix?: string
   medium?: string
   dimensions?: string
   classification?: string

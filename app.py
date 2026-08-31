@@ -47,21 +47,85 @@ def load_static_data():
 
 STATIC_DATA = load_static_data()
 
-RAW_MET_PATH = Path("data/objects.json")
+RAW_MET_PATHS = [
+    Path("data/objects.json"),
+    Path("data/sources.json"),
+]
+
+
+def iter_met_objects(value):
+    """Find Met object records regardless of how the old JSON is nested."""
+    if isinstance(value, dict):
+        if value.get("objectID") is not None:
+            yield value
+
+        for child in value.values():
+            yield from iter_met_objects(child)
+
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_met_objects(child)
 
 
 def load_raw_met_objects():
-    if not RAW_MET_PATH.exists():
-        return {}
+    objects = {}
 
-    with RAW_MET_PATH.open("r", encoding="utf-8") as f:
-        objects = json.load(f)
+    for path in RAW_MET_PATHS:
+        if not path.exists():
+            continue
 
-    return {
-        str(obj.get("objectID")): obj
-        for obj in objects
-        if obj.get("objectID") is not None
-    }
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        for obj in iter_met_objects(payload):
+            object_id = obj.get("objectID")
+
+            if object_id is not None:
+                objects[str(object_id)] = obj
+
+    return objects
+
+
+RAW_MET_OBJECTS = load_raw_met_objects()
+
+
+RAW_MET_PATHS = [
+    Path("data/objects.json"),
+    Path("data/sources.json"),
+]
+
+
+def iter_met_objects(value):
+    """Find Met object records regardless of how the old JSON is nested."""
+    if isinstance(value, dict):
+        if value.get("objectID") is not None:
+            yield value
+
+        for child in value.values():
+            yield from iter_met_objects(child)
+
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_met_objects(child)
+
+
+def load_raw_met_objects():
+    objects = {}
+
+    for path in RAW_MET_PATHS:
+        if not path.exists():
+            continue
+
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        for obj in iter_met_objects(payload):
+            object_id = obj.get("objectID")
+
+            if object_id is not None:
+                objects[str(object_id)] = obj
+
+    return objects
 
 
 RAW_MET_OBJECTS = load_raw_met_objects()
@@ -82,12 +146,48 @@ def enrich_static_graph(graph):
         if not raw:
             continue
 
-        node["medium"] = raw.get("medium") or ""
-        node["dimensions"] = raw.get("dimensions") or ""
-        node["classification"] = raw.get("classification") or ""
+        node["artist"] = raw.get("artistDisplayName") or ""
+        node["artistRole"] = raw.get("artistRole") or ""
+        node["artistPrefix"] = raw.get("artistPrefix") or ""
+
+        node["date"] = (
+            raw.get("objectDate")
+            or node.get("date")
+            or ""
+        )
+
+        node["medium"] = (
+            raw.get("medium")
+            or node.get("medium")
+            or ""
+        )
+
+        node["dimensions"] = (
+            raw.get("dimensions")
+            or node.get("dimensions")
+            or ""
+        )
+
+        node["classification"] = (
+            raw.get("classification")
+            or node.get("classification")
+            or ""
+        )
 
         if not node.get("culture"):
             node["culture"] = raw.get("culture") or ""
+
+        if node.get("type") == "artwork":
+            node["imageSmall"] = (
+                raw.get("primaryImageSmall")
+                or ""
+            )
+
+            node["image"] = (
+                raw.get("primaryImage")
+                or node.get("image")
+                or ""
+            )
 
     return graph
 

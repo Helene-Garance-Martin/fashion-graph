@@ -56,7 +56,7 @@ function baseRadius(
       return 7
 
     case 'ARTWORK':
-      return 9
+      return 11
   }
 }
 
@@ -101,6 +101,40 @@ function GraphCanvas({
           node.kind === 'DESIGNER'
       )?.color ?? '#222'
 
+    const defs =
+      svg.append('defs')
+
+    const clipIds =
+      new Map<string, string>()
+
+    nodes.forEach(
+      (node, index) => {
+        if (
+          node.kind !== 'ARTWORK' ||
+          !(node.imageSmall || node.image)
+        ) {
+          return
+        }
+
+        const clipId =
+          `artwork-clip-${index}`
+
+        clipIds.set(
+          node.id,
+          clipId
+        )
+
+        defs
+          .append('clipPath')
+          .attr('id', clipId)
+          .append('circle')
+          .attr(
+            'r',
+            baseRadius(node)
+          )
+      }
+    )
+
     const link = svg
       .selectAll<
         SVGLineElement,
@@ -128,48 +162,21 @@ function GraphCanvas({
           return '#999'
         }
       )
+      .attr(
+        'stroke-width',
+        1
+      )
 
-    const node = svg
+    const nodeGroup = svg
       .selectAll<
-        SVGCircleElement,
+        SVGGElement,
         SimulationNode
-      >('circle')
+      >('g.graph-node')
       .data(nodes)
-      .join('circle')
+      .join('g')
       .attr(
-        'r',
-        (d) => baseRadius(d)
-      )
-      .attr(
-        'fill',
-        (d) => {
-          if (
-            d.kind === 'DESIGNER'
-          ) {
-            return d.color ?? '#222'
-          }
-
-          if (
-            d.kind === 'GARMENT'
-          ) {
-            return primaryDesignerColor
-          }
-
-          if (
-            d.kind === 'SOURCE'
-          ) {
-            return d.color ?? '#c9a24b'
-          }
-
-          return '#d8cdb8'
-        }
-      )
-      .attr(
-        'fill-opacity',
-        (d) =>
-          d.kind === 'GARMENT'
-            ? 0.45
-            : 1
+        'class',
+        'graph-node'
       )
       .style(
         'cursor',
@@ -220,26 +227,154 @@ function GraphCanvas({
         }
       )
 
-    const label = svg
-      .selectAll<
-        SVGTextElement,
-        SimulationNode
-      >('text')
-      .data(nodes)
-      .join('text')
-      .text((d) => {
-        if (
-          d.kind === 'GARMENT' ||
-          d.kind === 'ARTWORK'
-        ) {
-          return ''
-        }
+    nodeGroup
+      .append('circle')
+      .attr(
+        'class',
+        'node-shape'
+      )
+      .attr(
+        'r',
+        (d) => baseRadius(d)
+      )
+      .attr(
+        'fill',
+        (d) => {
+          if (
+            d.kind === 'DESIGNER'
+          ) {
+            return d.color ?? '#222'
+          }
 
-        return d.label
-      })
+          if (
+            d.kind === 'GARMENT'
+          ) {
+            return primaryDesignerColor
+          }
+
+          if (
+            d.kind === 'SOURCE'
+          ) {
+            return d.color ?? '#c9a24b'
+          }
+
+          return '#e3dccf'
+        }
+      )
+      .attr(
+        'fill-opacity',
+        (d) =>
+          d.kind === 'GARMENT'
+            ? 0.45
+            : 1
+      )
+
+    nodeGroup
+      .filter(
+        (d) =>
+          d.kind === 'ARTWORK' &&
+          Boolean(
+            d.imageSmall || d.image
+          )
+      )
+      .append('image')
+      .attr(
+        'href',
+        (d) =>
+          d.imageSmall ??
+          d.image ??
+          ''
+      )
+      .attr(
+        'x',
+        (d) =>
+          -baseRadius(d)
+      )
+      .attr(
+        'y',
+        (d) =>
+          -baseRadius(d)
+      )
+      .attr(
+        'width',
+        (d) =>
+          baseRadius(d) * 2
+      )
+      .attr(
+        'height',
+        (d) =>
+          baseRadius(d) * 2
+      )
+      .attr(
+        'preserveAspectRatio',
+        'xMidYMid slice'
+      )
+      .attr(
+        'clip-path',
+        (d) => {
+          const clipId =
+            clipIds.get(d.id)
+
+          return clipId
+            ? `url(#${clipId})`
+            : null
+        }
+      )
+      .attr(
+        'pointer-events',
+        'none'
+      )
+
+    nodeGroup
+      .append('circle')
+      .attr(
+        'class',
+        'node-outline'
+      )
+      .attr(
+        'r',
+        (d) =>
+          baseRadius(d)
+      )
+      .attr(
+        'fill',
+        'none'
+      )
+      .attr(
+        'stroke',
+        (d) =>
+          d.kind === 'ARTWORK'
+            ? '#b8b0a4'
+            : 'none'
+      )
+      .attr(
+        'stroke-width',
+        (d) =>
+          d.kind === 'ARTWORK'
+            ? 0.8
+            : 0
+      )
+      .attr(
+        'pointer-events',
+        'none'
+      )
+
+    nodeGroup
+      .filter(
+        (d) =>
+          d.kind === 'DESIGNER' ||
+          d.kind === 'SOURCE'
+      )
+      .append('text')
+      .text((d) => d.label)
       .attr(
         'text-anchor',
         'middle'
+      )
+      .attr(
+        'y',
+        (d) =>
+          baseRadius(d) + 18
       )
       .attr(
         'font-size',
@@ -300,7 +435,7 @@ function GraphCanvas({
             if (
               d.kind === 'ARTWORK'
             ) {
-              return -45
+              return -55
             }
 
             return -300
@@ -315,7 +450,7 @@ function GraphCanvas({
           >()
           .radius(
             (d) =>
-              baseRadius(d) + 5
+              baseRadius(d) + 6
           )
       )
 
@@ -329,7 +464,7 @@ function GraphCanvas({
 
     const drag = d3
       .drag<
-        SVGCircleElement,
+        SVGGElement,
         SimulationNode
       >()
 
@@ -368,7 +503,7 @@ function GraphCanvas({
         }
       )
 
-    node.call(drag)
+    nodeGroup.call(drag)
 
     simulation.on(
       'tick',
@@ -403,31 +538,11 @@ function GraphCanvas({
               ).y ?? 0
           )
 
-        node
-          .attr(
-            'cx',
-            (d) =>
-              d.x ?? 0
-          )
-          .attr(
-            'cy',
-            (d) =>
-              d.y ?? 0
-          )
-
-        label
-          .attr(
-            'x',
-            (d) =>
-              d.x ?? 0
-          )
-          .attr(
-            'y',
-            (d) =>
-              (d.y ?? 0) +
-              baseRadius(d) +
-              18
-          )
+        nodeGroup.attr(
+          'transform',
+          (d) =>
+            `translate(${d.x ?? 0}, ${d.y ?? 0})`
+        )
       }
     )
 
@@ -451,39 +566,50 @@ function GraphCanvas({
       .selectAll<
         SVGCircleElement,
         SimulationNode
-      >('circle')
-
-      .attr(
-        'r',
-        (d) => {
-          const radius =
-            baseRadius(d)
-
-          return d.id ===
-            selectedNode?.id
-            ? radius + 4
-            : radius
-        }
-      )
-
+      >('.node-outline')
       .attr(
         'stroke',
-        (d) =>
-          d.id ===
-          selectedNode?.id
-            ? '#111'
-            : 'none'
-      )
+        (d) => {
+          if (
+            d.id ===
+            selectedNode?.id
+          ) {
+            return '#111'
+          }
 
+          return d.kind ===
+            'ARTWORK'
+            ? '#b8b0a4'
+            : 'none'
+        }
+      )
       .attr(
         'stroke-width',
-        (d) =>
-          d.id ===
-          selectedNode?.id
-            ? 2
+        (d) => {
+          if (
+            d.id ===
+            selectedNode?.id
+          ) {
+            return 2
+          }
+
+          return d.kind ===
+            'ARTWORK'
+            ? 0.8
             : 0
+        }
       )
   }, [selectedNode])
+
+  const hoverImage =
+    hoveredNode?.node.kind ===
+    'ARTWORK'
+      ? (
+          hoveredNode.node
+            .imageSmall ??
+          hoveredNode.node.image
+        )
+      : undefined
 
   return (
     <section>
@@ -500,47 +626,78 @@ function GraphCanvas({
           <div
             className={styles.tooltip}
             style={{
-              left: hoveredNode.x + 14,
-              top: hoveredNode.y + 14,
+              left:
+                hoveredNode.x + 14,
+              top:
+                hoveredNode.y + 14,
             }}
           >
-            {hoveredNode.node.image && (
+            {hoverImage && (
               <img
-                className={styles.tooltipImage}
-                src={hoveredNode.node.image}
+                className={
+                  styles.tooltipImage
+                }
+                src={hoverImage}
                 alt=""
               />
             )}
 
-            <p className={styles.tooltipKind}>
+            <p
+              className={
+                styles.tooltipKind
+              }
+            >
               {hoveredNode.node.kind}
             </p>
 
-            <p className={styles.tooltipTitle}>
+            <p
+              className={
+                styles.tooltipTitle
+              }
+            >
               {hoveredNode.node.label}
             </p>
 
+            {hoveredNode.node.artist && (
+              <p
+                className={
+                  styles.tooltipArtist
+                }
+              >
+                {hoveredNode.node
+                  .artistPrefix
+                  ? `${hoveredNode.node.artistPrefix} ${hoveredNode.node.artist}`
+                  : hoveredNode.node.artist}
+              </p>
+            )}
+
             {hoveredNode.node.date && (
-              <p className={styles.tooltipMeta}>
+              <p
+                className={
+                  styles.tooltipMeta
+                }
+              >
                 {hoveredNode.node.date}
               </p>
             )}
 
             {hoveredNode.node.medium && (
-                <p className={styles.tooltipMeta}>
-                    {hoveredNode.node.medium}
-                </p>
+              <p
+                className={
+                  styles.tooltipMeta
+                }
+              >
+                {hoveredNode.node.medium}
+              </p>
             )}
 
             {hoveredNode.node.culture && (
-                <p className={styles.tooltipMeta}>
-                    {hoveredNode.node.culture}
-                </p>
-            )}
-
-            {hoveredNode.node.description && (
-              <p className={styles.tooltipDescription}>
-                {hoveredNode.node.description}
+              <p
+                className={
+                  styles.tooltipMeta
+                }
+              >
+                {hoveredNode.node.culture}
               </p>
             )}
           </div>
