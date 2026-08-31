@@ -1,22 +1,32 @@
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+
 import Header from './components/Header'
 import GraphCanvas from './components/GraphCanvas'
 import CuratorPanel from './components/CuratorPanel'
 import ExhibitionPanel from './components/ExhibitionPanel'
+
 import {
   getHouse,
   getHouses,
   getSource,
 } from './api/graphApi'
-import { toInfluenceGraph } from './adapters/graphAdapter'
+
+import { toGraphData } from './adapters/graphAdapter'
+
 import type {
   ApiHouse,
   SearchOption,
 } from './types/api'
+
 import type {
   GraphData,
   GraphNode,
 } from './types/graph'
+
 import styles from './App.module.css'
 
 const SOURCE_OPTIONS: SearchOption[] = [
@@ -47,6 +57,9 @@ const INITIAL_SELECTION: SearchOption = {
   apiName: 'Vionnet',
 }
 
+const GARMENT_BATCH_SIZE = 10
+const ARTWORK_BATCH_SIZE = 6
+
 function App() {
   const [houses, setHouses] =
     useState<ApiHouse[]>([])
@@ -66,6 +79,12 @@ function App() {
   const [exhibitionItems, setExhibitionItems] =
     useState<GraphNode[]>([])
 
+  const [garmentLimit, setGarmentLimit] =
+    useState(0)
+
+  const [artworkLimits, setArtworkLimits] =
+    useState<Record<string, number>>({})
+
   const [graphError, setGraphError] =
     useState(false)
 
@@ -84,9 +103,7 @@ function App() {
 
   useEffect(() => {
     getHouses()
-      .then((data) => {
-        setHouses(data)
-      })
+      .then(setHouses)
       .catch(() => {
         setGraphError(true)
       })
@@ -95,6 +112,8 @@ function App() {
   useEffect(() => {
     setGraphData(null)
     setSelectedNode(null)
+    setGarmentLimit(0)
+    setArtworkLimits({})
     setGraphError(false)
 
     const request =
@@ -104,23 +123,101 @@ function App() {
 
     request
       .then((response) => {
-        const graph = toInfluenceGraph(response)
-        setGraphData(graph)
+        setGraphData(toGraphData(response))
       })
       .catch(() => {
         setGraphError(true)
       })
   }, [currentSelection])
 
+  const visibleGraph = useMemo(() => {
+    if (!graphData) {
+      return null
+    }
+
+    const structuralNodes =
+      graphData.nodes.filter(
+        (node) =>
+          node.kind === 'DESIGNER' ||
+          node.kind === 'SOURCE'
+      )
+
+    const garments =
+      graphData.nodes
+        .filter(
+          (node) =>
+            node.kind === 'GARMENT'
+        )
+        .slice(0, garmentLimit)
+
+    const visibleArtworkIds = new Set<string>()
+
+    Object.entries(artworkLimits).forEach(
+      ([sourceId, limit]) => {
+        const artworkIds =
+          graphData.relationships
+            .filter(
+              (relationship) =>
+                relationship.type === 'EXAMPLE_OF' &&
+                relationship.target === sourceId
+            )
+            .map(
+              (relationship) =>
+                relationship.source
+            )
+            .slice(0, limit)
+
+        artworkIds.forEach((id) => {
+          visibleArtworkIds.add(id)
+        })
+      }
+    )
+
+    const artworks =
+      graphData.nodes.filter(
+        (node) =>
+          node.kind === 'ARTWORK' &&
+          visibleArtworkIds.has(node.id)
+      )
+
+    const nodes = [
+      ...structuralNodes,
+      ...garments,
+      ...artworks,
+    ]
+
+    const visibleIds =
+      new Set(
+        nodes.map((node) => node.id)
+      )
+
+    const relationships =
+      graphData.relationships.filter(
+        (relationship) =>
+          visibleIds.has(relationship.source) &&
+          visibleIds.has(relationship.target)
+      )
+
+    return {
+      nodes,
+      relationships,
+    }
+  }, [
+    graphData,
+    garmentLimit,
+    artworkLimits,
+  ])
+
   const handleSearchSubmit = () => {
-    const normalisedSearch =
+    const wanted =
       searchValue.trim().toLowerCase()
 
-    const match = searchOptions.find(
-      (option) =>
-        option.label.toLowerCase() ===
-        normalisedSearch
-    )
+    const match =
+      searchOptions.find(
+        (option) =>
+          option.label.toLowerCase() ===
+          wanted
+      )
 
     if (!match) {
       return
@@ -130,36 +227,93 @@ function App() {
     setCurrentSelection(match)
   }
 
+  const handleNodeSelect = (
+    node: GraphNode
+  ) => {
+    setSelectedNode(node)
+
+    if (!graphData) {
+      return
+    }
+
+    if (node.kind === 'DESIGNER') {
+      const totalGarments =
+        graphData.nodes.filter(
+          (candidate) =>
+            candidate.kind === 'GARMENT'
+        ).length
+
+      setGarmentLimit(
+        (currentLimit) =>
+          Math.min(
+            currentLimit + GARMENT_BATCH_SIZE,
+            totalGarments
+          )
+      )
+    }
+
+    if (node.kind === 'SOURCE') {
+      const totalArtworks =
+        graphData.relationships.filter(
+          (relationship) =>
+            relationship.type === 'EXAMPLE_OF' &&
+            relationship.target === node.id
+        ).length
+
+      setArtworkLimits(
+        (currentLimits) => ({
+          ...currentLimits,
+
+          [node.id]: Math.min(
+            (currentLimits[node.id] ?? 0) +
+              ARTWORK_BATCH_SIZE,
+            totalArtworks
+          ),
+        })
+      )
+    }
+  }
+
   const handleAddToExhibition = (
     node: GraphNode
   ) => {
-    setExhibitionItems((currentItems) => {
-      const alreadyExists = currentItems.some(
-        (item) => item.id === node.id
-      )
+    setExhibitionItems(
+      (currentItems) => {
+        const alreadyExists =
+          currentItems.some(
+            (item) =>
+              item.id === node.id
+          )
 
-      if (alreadyExists) {
-        return currentItems
+        if (alreadyExists) {
+          return currentItems
+        }
+
+        return [
+          ...currentItems,
+          node,
+        ]
       }
-
-      return [...currentItems, node]
-    })
+    )
   }
 
   const handleRemoveFromExhibition = (
     nodeId: string
   ) => {
-    setExhibitionItems((currentItems) =>
-      currentItems.filter(
-        (item) => item.id !== nodeId
-      )
+    setExhibitionItems(
+      (currentItems) =>
+        currentItems.filter(
+          (item) =>
+            item.id !== nodeId
+        )
     )
   }
 
   const isSelectedNodeInExhibition =
     selectedNode !== null &&
     exhibitionItems.some(
-      (item) => item.id === selectedNode.id
+      (item) =>
+        item.id === selectedNode.id
     )
 
   return (
@@ -174,16 +328,21 @@ function App() {
       <main className={styles.main}>
         <div className={styles.graph}>
           {graphError ? (
-            <p>Unable to load graph.</p>
-          ) : graphData ? (
+            <p>
+              Unable to load graph.
+            </p>
+          ) : visibleGraph ? (
             <GraphCanvas
-              graph={graphData}
+              graph={visibleGraph}
               selectedNode={selectedNode}
-              onNodeSelect={setSelectedNode}
+              onNodeSelect={
+                handleNodeSelect
+              }
             />
           ) : (
             <p>
-              Loading {currentSelection.label}…
+              Loading{' '}
+              {currentSelection.label}…
             </p>
           )}
         </div>

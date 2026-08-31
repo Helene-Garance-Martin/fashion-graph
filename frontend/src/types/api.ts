@@ -27,6 +27,9 @@ export type ApiNode = {
   date?: string
   culture?: string
   description?: string
+  medium?: string
+  dimensions?: string
+  classification?: string
 }
 
 export type ApiLinkKind =

@@ -21,11 +21,15 @@ export type GraphNode = {
   id: string
   label: string
   kind: GraphNodeKind
+  color?: string
   image?: string
   url?: string
   date?: string
   culture?: string
   description?: string
+  medium?: string
+  dimensions?: string
+  classification?: string
 }
 
 export type GraphRelationship = {

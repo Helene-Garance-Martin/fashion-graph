@@ -47,6 +47,50 @@ def load_static_data():
 
 STATIC_DATA = load_static_data()
 
+RAW_MET_PATH = Path("data/objects.json")
+
+
+def load_raw_met_objects():
+    if not RAW_MET_PATH.exists():
+        return {}
+
+    with RAW_MET_PATH.open("r", encoding="utf-8") as f:
+        objects = json.load(f)
+
+    return {
+        str(obj.get("objectID")): obj
+        for obj in objects
+        if obj.get("objectID") is not None
+    }
+
+
+RAW_MET_OBJECTS = load_raw_met_objects()
+
+
+def enrich_static_graph(graph):
+    if not graph:
+        return graph
+
+    for node in graph.get("nodes", []):
+        if node.get("type") not in {"garment", "artwork"}:
+            continue
+
+        _, _, object_id = node.get("id", "").partition(":")
+
+        raw = RAW_MET_OBJECTS.get(object_id)
+
+        if not raw:
+            continue
+
+        node["medium"] = raw.get("medium") or ""
+        node["dimensions"] = raw.get("dimensions") or ""
+        node["classification"] = raw.get("classification") or ""
+
+        if not node.get("culture"):
+            node["culture"] = raw.get("culture") or ""
+
+    return graph
+
 
 def load_env():
     env = Path(".env")
@@ -240,7 +284,7 @@ def house(name: str):
         static_house = STATIC_DATA["house"].get(name)
 
         if static_house:
-            return static_house
+            return enrich_static_graph(static_house)
 
     raise HTTPException(
         404,
@@ -302,7 +346,7 @@ def source(name: str):
         static_source = STATIC_DATA["source"].get(name)
 
         if static_source:
-            return static_source
+            return enrich_static_graph(static_source)
 
     raise HTTPException(
         404,

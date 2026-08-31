@@ -10,7 +10,9 @@ import type {
   GraphRelationship,
 } from '../types/graph'
 
-function toNodeKind(type: ApiNode['type']): GraphNodeKind {
+function toNodeKind(
+  type: ApiNode['type']
+): GraphNodeKind {
   switch (type) {
     case 'designer':
       return 'DESIGNER'
@@ -29,65 +31,58 @@ function toNodeKind(type: ApiNode['type']): GraphNodeKind {
 function toGraphNode(node: ApiNode): GraphNode {
   return {
     id: node.id,
+
     label:
       node.label === 'Spanish painting'
         ? 'Spanish paintings'
         : node.label,
+
     kind: toNodeKind(node.type),
+    color: node.color,
     image: node.image,
     url: node.url,
     date: node.date,
     culture: node.culture,
     description: node.description,
+    medium: node.medium,
+    dimensions: node.dimensions,
+    classification: node.classification,
   }
 }
 
-export function toInfluenceGraph(
+export function toGraphData(
   response: ApiGraphResponse
 ): GraphData {
-  const nodes = response.nodes
-    .filter(
-      (node) =>
-        node.type === 'designer' ||
-        node.type === 'sourceworld'
-    )
-    .map(toGraphNode)
-
-  const nodeIds = new Set(nodes.map((node) => node.id))
+  const nodes = response.nodes.map(toGraphNode)
 
   const relationships: GraphRelationship[] =
-    response.links
-      .filter(
-        (link) =>
-          nodeIds.has(link.source) &&
-          nodeIds.has(link.target)
-      )
-      .map((link) => {
-        if (link.kind === 'inspired') {
+    response.links.map((link) => {
+      switch (link.kind) {
+        case 'inspired':
           return {
             source: link.source,
             target: link.target,
             type: 'INSPIRED',
             provenance: 'CURATED',
           }
-        }
 
-        if (link.kind === 'created') {
+        case 'created':
           return {
             source: link.source,
             target: link.target,
             type: 'CREATED',
             provenance: 'MET_METADATA',
           }
-        }
 
-        return {
-          source: link.source,
-          target: link.target,
-          type: 'EXAMPLE_OF',
-          provenance: 'CURATED',
-        }
-      })
+        case 'example_of':
+          return {
+            source: link.source,
+            target: link.target,
+            type: 'EXAMPLE_OF',
+            provenance: 'MET_METADATA',
+          }
+      }
+    })
 
   return {
     nodes,
