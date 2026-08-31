@@ -14,7 +14,10 @@ function App() {
 
       <main className={styles.main}>
         <div className={styles.graph}>
-          <GraphCanvas onNodeSelect={setSelectedNode} />
+          <GraphCanvas
+            selectedNode={selectedNode}
+            onNodeSelect={setSelectedNode}
+          />
         </div>
 
         <div className={styles.curator}>

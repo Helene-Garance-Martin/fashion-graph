@@ -12,10 +12,14 @@ type SimulationLink = Omit<GraphRelationship, 'source' | 'target'> &
   }
 
 type GraphCanvasProps = {
+  selectedNode: GraphNode | null
   onNodeSelect: (node: GraphNode) => void
 }
 
-function GraphCanvas({ onNodeSelect }: GraphCanvasProps) {
+function GraphCanvas({
+  selectedNode,
+  onNodeSelect,
+}: GraphCanvasProps) {
   const svgRef = useRef<SVGSVGElement | null>(null)
 
   useEffect(() => {
@@ -36,7 +40,7 @@ function GraphCanvas({ onNodeSelect }: GraphCanvasProps) {
     )
 
     const link = svg
-      .selectAll('line')
+      .selectAll<SVGLineElement, SimulationLink>('line')
       .data(links)
       .join('line')
       .attr('stroke', '#999')
@@ -53,7 +57,7 @@ function GraphCanvas({ onNodeSelect }: GraphCanvasProps) {
       })
 
     const label = svg
-      .selectAll('text')
+      .selectAll<SVGTextElement, SimulationNode>('text')
       .data(nodes)
       .join('text')
       .text((d) => d.label)
@@ -118,6 +122,28 @@ function GraphCanvas({ onNodeSelect }: GraphCanvasProps) {
       simulation.stop()
     }
   }, [onNodeSelect])
+
+  useEffect(() => {
+    if (!svgRef.current) return
+
+    const svg = d3.select(svgRef.current)
+
+    svg
+      .selectAll<SVGCircleElement, SimulationNode>('circle')
+      .attr('r', (d) => {
+        const baseRadius = d.kind === 'DESIGNER' ? 24 : 16
+
+        return d.id === selectedNode?.id
+          ? baseRadius + 4
+          : baseRadius
+      })
+      .attr('stroke', (d) =>
+        d.id === selectedNode?.id ? '#111' : 'none'
+      )
+      .attr('stroke-width', (d) =>
+        d.id === selectedNode?.id ? 2 : 0
+      )
+  }, [selectedNode])
 
   return (
     <section>
