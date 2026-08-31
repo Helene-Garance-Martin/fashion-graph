@@ -1,8 +1,21 @@
 import SearchBar from './SearchBar'
 import ApiStatus from './ApiStatus'
+import type { ApiHouse } from '../types/api'
 import styles from './Header.module.css'
 
-function Header() {
+type HeaderProps = {
+  searchValue: string
+  houses: ApiHouse[]
+  onSearchChange: (value: string) => void
+  onSearchSubmit: () => void
+}
+
+function Header({
+  searchValue,
+  houses,
+  onSearchChange,
+  onSearchSubmit,
+}: HeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.titleGroup}>
@@ -17,7 +30,12 @@ function Header() {
         <ApiStatus />
       </div>
 
-      <SearchBar />
+      <SearchBar
+        value={searchValue}
+        houses={houses}
+        onChange={onSearchChange}
+        onSubmit={onSearchSubmit}
+      />
     </header>
   )
 }

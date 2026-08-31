@@ -1,4 +1,7 @@
-import type { ApiGraphResponse } from '../types/api'
+import type {
+  ApiGraphResponse,
+  ApiHouse,
+} from '../types/api'
 
 export type HealthResponse = {
   ok: boolean
@@ -14,6 +17,16 @@ export async function getHealth(): Promise<HealthResponse> {
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`)
+  }
+
+  return response.json()
+}
+
+export async function getHouses(): Promise<ApiHouse[]> {
+  const response = await fetch(`${API_URL}/houses`)
+
+  if (!response.ok) {
+    throw new Error(`Houses request failed: ${response.status}`)
   }
 
   return response.json()

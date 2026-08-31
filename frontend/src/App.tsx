@@ -3,12 +3,28 @@ import Header from './components/Header'
 import GraphCanvas from './components/GraphCanvas'
 import CuratorPanel from './components/CuratorPanel'
 import ExhibitionPanel from './components/ExhibitionPanel'
-import { getHouse } from './api/graphApi'
+import {
+  getHouse,
+  getHouses,
+} from './api/graphApi'
 import { toInfluenceGraph } from './adapters/graphAdapter'
-import type { GraphData, GraphNode } from './types/graph'
+import type { ApiHouse } from './types/api'
+import type {
+  GraphData,
+  GraphNode,
+} from './types/graph'
 import styles from './App.module.css'
 
 function App() {
+  const [houses, setHouses] =
+    useState<ApiHouse[]>([])
+
+  const [currentHouse, setCurrentHouse] =
+    useState('Vionnet')
+
+  const [searchValue, setSearchValue] =
+    useState('Vionnet')
+
   const [graphData, setGraphData] =
     useState<GraphData | null>(null)
 
@@ -22,7 +38,21 @@ function App() {
     useState(false)
 
   useEffect(() => {
-    getHouse('Vionnet')
+    getHouses()
+      .then((data) => {
+        setHouses(data)
+      })
+      .catch(() => {
+        setGraphError(true)
+      })
+  }, [])
+
+  useEffect(() => {
+    setGraphData(null)
+    setSelectedNode(null)
+    setGraphError(false)
+
+    getHouse(currentHouse)
       .then((response) => {
         const graph = toInfluenceGraph(response)
         setGraphData(graph)
@@ -30,7 +60,22 @@ function App() {
       .catch(() => {
         setGraphError(true)
       })
-  }, [])
+  }, [currentHouse])
+
+  const handleSearchSubmit = () => {
+    const match = houses.find(
+      (house) =>
+        house.label.toLowerCase() ===
+        searchValue.trim().toLowerCase()
+    )
+
+    if (!match) {
+      return
+    }
+
+    setSearchValue(match.label)
+    setCurrentHouse(match.label)
+  }
 
   const handleAddToExhibition = (node: GraphNode) => {
     setExhibitionItems((currentItems) => {
@@ -48,7 +93,9 @@ function App() {
 
   const handleRemoveFromExhibition = (nodeId: string) => {
     setExhibitionItems((currentItems) =>
-      currentItems.filter((item) => item.id !== nodeId)
+      currentItems.filter(
+        (item) => item.id !== nodeId
+      )
     )
   }
 
@@ -60,7 +107,12 @@ function App() {
 
   return (
     <div className={styles.page}>
-      <Header />
+      <Header
+        searchValue={searchValue}
+        houses={houses}
+        onSearchChange={setSearchValue}
+        onSearchSubmit={handleSearchSubmit}
+      />
 
       <main className={styles.main}>
         <div className={styles.graph}>
@@ -73,7 +125,7 @@ function App() {
               onNodeSelect={setSelectedNode}
             />
           ) : (
-            <p>Loading collection…</p>
+            <p>Loading {currentHouse}…</p>
           )}
         </div>
 

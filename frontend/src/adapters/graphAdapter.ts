@@ -29,7 +29,10 @@ function toNodeKind(type: ApiNode['type']): GraphNodeKind {
 function toGraphNode(node: ApiNode): GraphNode {
   return {
     id: node.id,
-    label: node.label,
+    label:
+      node.label === 'Spanish painting'
+        ? 'Spanish paintings'
+        : node.label,
     kind: toNodeKind(node.type),
     image: node.image,
     url: node.url,
