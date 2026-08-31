@@ -34,6 +34,19 @@ HOUSE_COLORS = {
 GOLD = "#c9a24b"
 MARBLE = "#d8cdb8"
 
+STATIC_DATA_PATH = Path("docs/data.json")
+
+
+def load_static_data():
+    if not STATIC_DATA_PATH.exists():
+        return None
+
+    with STATIC_DATA_PATH.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+STATIC_DATA = load_static_data()
+
 
 def load_env():
     env = Path(".env")
@@ -105,16 +118,55 @@ def index():
 
 @app.get("/health")
 def health():
-    return {"ok": True, "neo4j_configured": driver is not None}
+    neo4j_connected = False
+
+    if driver:
+        try:
+            driver.verify_connectivity()
+            neo4j_connected = True
+        except Exception:
+            neo4j_connected = False
+
+    return {
+        "ok": True,
+        "neo4j_configured": driver is not None,
+        "neo4j_connected": neo4j_connected,
+        "static_data_available": STATIC_DATA is not None,
+    }
 
 
 @app.get("/houses")
 def houses():
-    _require_db()
-    with driver.session() as s:
-        rows = s.run("MATCH (d:Designer) RETURN d.name AS name ORDER BY name")
-        return [{"id": f"designer:{r['name']}", "label": r["name"],
-                 "color": HOUSE_COLORS.get(r["name"], "#cccccc")} for r in rows]
+    if driver:
+        try:
+            with driver.session() as s:
+                rows = s.run(
+                    "MATCH (d:Designer) "
+                    "RETURN d.name AS name "
+                    "ORDER BY name"
+                )
+
+                return [
+                    {
+                        "id": f"designer:{r['name']}",
+                        "label": r["name"],
+                        "color": HOUSE_COLORS.get(
+                            r["name"],
+                            "#cccccc",
+                        ),
+                    }
+                    for r in rows
+                ]
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        return STATIC_DATA["houses"]
+
+    raise HTTPException(
+        503,
+        "Neither Neo4j nor static graph data is available.",
+    )
 
 
 HOUSE_Q = """
@@ -130,28 +182,70 @@ RETURN d AS designer, garments, collect({sw: sw, arts: arts}) AS sourceGroups
 
 @app.get("/house/{name}")
 def house(name: str):
-    _require_db()
-    with driver.session() as s:
-        rec = s.run(HOUSE_Q, name=name).single()
-    if not rec or rec["designer"] is None:
-        raise HTTPException(404, f"No house named '{name}'")
-    d = rec["designer"]
-    nodes = {node_id(d): to_node(d)}
-    links = []
-    for g in rec["garments"]:
-        nodes[node_id(g)] = to_node(g)
-        links.append({"source": node_id(d), "target": node_id(g), "kind": "created"})
-    for grp in rec["sourceGroups"]:
-        sw = grp.get("sw")
-        if not sw:
-            continue
-        nodes[node_id(sw)] = to_node(sw)
-        links.append({"source": node_id(sw), "target": node_id(d), "kind": "inspired"})
-        for a in grp.get("arts") or []:
-            nodes[node_id(a)] = to_node(a)
-            links.append({"source": node_id(a), "target": node_id(sw), "kind": "example_of"})
-    return {"nodes": list(nodes.values()), "links": links}
+    if driver:
+        try:
+            with driver.session() as s:
+                rec = s.run(HOUSE_Q, name=name).single()
 
+            if rec and rec["designer"] is not None:
+                d = rec["designer"]
+
+                nodes = {
+                    node_id(d): to_node(d)
+                }
+
+                links = []
+
+                for g in rec["garments"]:
+                    nodes[node_id(g)] = to_node(g)
+
+                    links.append({
+                        "source": node_id(d),
+                        "target": node_id(g),
+                        "kind": "created",
+                    })
+
+                for grp in rec["sourceGroups"]:
+                    sw = grp.get("sw")
+
+                    if not sw:
+                        continue
+
+                    nodes[node_id(sw)] = to_node(sw)
+
+                    links.append({
+                        "source": node_id(sw),
+                        "target": node_id(d),
+                        "kind": "inspired",
+                    })
+
+                    for a in grp.get("arts") or []:
+                        nodes[node_id(a)] = to_node(a)
+
+                        links.append({
+                            "source": node_id(a),
+                            "target": node_id(sw),
+                            "kind": "example_of",
+                        })
+
+                return {
+                    "nodes": list(nodes.values()),
+                    "links": links,
+                }
+
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        static_house = STATIC_DATA["house"].get(name)
+
+        if static_house:
+            return static_house
+
+    raise HTTPException(
+        404,
+        f"No house named '{name}'",
+    )
 
 SOURCE_Q = """
 MATCH (sw:SourceWorld {name: $name})
@@ -164,22 +258,56 @@ RETURN sw AS source, arts, collect(DISTINCT d) AS designers
 
 @app.get("/source/{name}")
 def source(name: str):
-    _require_db()
-    with driver.session() as s:
-        rec = s.run(SOURCE_Q, name=name).single()
-    if not rec or rec["source"] is None:
-        raise HTTPException(404, f"No source-world named '{name}'")
-    sw = rec["source"]
-    nodes = {node_id(sw): to_node(sw)}
-    links = []
-    for a in rec["arts"]:
-        nodes[node_id(a)] = to_node(a)
-        links.append({"source": node_id(a), "target": node_id(sw), "kind": "example_of"})
-    for d in rec["designers"]:
-        nodes[node_id(d)] = to_node(d)
-        links.append({"source": node_id(sw), "target": node_id(d), "kind": "inspired"})
-    return {"nodes": list(nodes.values()), "links": links}
+    if driver:
+        try:
+            with driver.session() as s:
+                rec = s.run(SOURCE_Q, name=name).single()
 
+            if rec and rec["source"] is not None:
+                sw = rec["source"]
+
+                nodes = {
+                    node_id(sw): to_node(sw)
+                }
+
+                links = []
+
+                for a in rec["arts"]:
+                    nodes[node_id(a)] = to_node(a)
+
+                    links.append({
+                        "source": node_id(a),
+                        "target": node_id(sw),
+                        "kind": "example_of",
+                    })
+
+                for d in rec["designers"]:
+                    nodes[node_id(d)] = to_node(d)
+
+                    links.append({
+                        "source": node_id(sw),
+                        "target": node_id(d),
+                        "kind": "inspired",
+                    })
+
+                return {
+                    "nodes": list(nodes.values()),
+                    "links": links,
+                }
+
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        static_source = STATIC_DATA["source"].get(name)
+
+        if static_source:
+            return static_source
+
+    raise HTTPException(
+        404,
+        f"No source-world named '{name}'",
+    )
 
 # ---------- exhibitions: Create / Read / Update / Delete ----------
 # A saved show. Its items are stored as a JSON blob (label, image, url, type...)
