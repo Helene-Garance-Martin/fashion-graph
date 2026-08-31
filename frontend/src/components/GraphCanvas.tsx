@@ -42,7 +42,7 @@ function GraphCanvas({ onNodeSelect }: GraphCanvasProps) {
       .attr('stroke', '#999')
 
     const node = svg
-      .selectAll('circle')
+      .selectAll<SVGCircleElement, SimulationNode>('circle')
       .data(nodes)
       .join('circle')
       .attr('r', (d) => (d.kind === 'DESIGNER' ? 24 : 16))
