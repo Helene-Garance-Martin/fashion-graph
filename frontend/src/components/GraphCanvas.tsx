@@ -79,13 +79,19 @@ function GraphCanvas({
   onNodeSelect,
 }: GraphCanvasProps) {
   const svgRef =
-    useRef<SVGSVGElement | null>(null)
+    useRef<SVGSVGElement | null>(
+      null
+    )
 
   const wrapperRef =
-    useRef<HTMLDivElement | null>(null)
+    useRef<HTMLDivElement | null>(
+      null
+    )
 
   const worldRef =
-    useRef<SVGGElement | null>(null)
+    useRef<SVGGElement | null>(
+      null
+    )
 
   const zoomBehaviorRef =
     useRef<
@@ -102,11 +108,16 @@ function GraphCanvas({
 
   const positionCacheRef =
     useRef<
-      Map<string, StoredPosition>
+      Map<
+        string,
+        StoredPosition
+      >
     >(new Map())
 
   const graphKeyRef =
-    useRef<string | null>(null)
+    useRef<string | null>(
+      null
+    )
 
   const onNodeSelectRef =
     useRef(onNodeSelect)
@@ -139,7 +150,9 @@ function GraphCanvas({
     }
 
     const svg =
-      d3.select(svgRef.current)
+      d3.select(
+        svgRef.current
+      )
 
     svg
       .transition()
@@ -152,40 +165,44 @@ function GraphCanvas({
       )
   }
 
-  const getViewportSize = () => {
-    if (!svgRef.current) {
+  const getViewportSize =
+    () => {
+      if (!svgRef.current) {
+        return {
+          width: WORLD_WIDTH,
+          height: WORLD_HEIGHT,
+        }
+      }
+
       return {
-        width: WORLD_WIDTH,
-        height: WORLD_HEIGHT,
+        width:
+          svgRef.current
+            .clientWidth ||
+          WORLD_WIDTH,
+
+        height:
+          svgRef.current
+            .clientHeight ||
+          WORLD_HEIGHT,
       }
     }
 
-    return {
-      width:
-        svgRef.current
-          .clientWidth ||
-        WORLD_WIDTH,
+  const getResetTransform =
+    () => {
+      const {
+        width,
+        height,
+      } = getViewportSize()
 
-      height:
-        svgRef.current
-          .clientHeight ||
-        WORLD_HEIGHT,
+      return d3.zoomIdentity
+        .translate(
+          width / 2 -
+            WORLD_WIDTH / 2,
+
+          height / 2 -
+            WORLD_HEIGHT / 2
+        )
     }
-  }
-
-  const getResetTransform = () => {
-    const {
-      width,
-      height,
-    } = getViewportSize()
-
-    return d3.zoomIdentity.translate(
-      width / 2 -
-        WORLD_WIDTH / 2,
-      height / 2 -
-        WORLD_HEIGHT / 2
-    )
-  }
 
   const handleZoomBy = (
     factor: number
@@ -241,102 +258,110 @@ function GraphCanvas({
           nextX,
           nextY
         )
-        .scale(nextScale),
+        .scale(
+          nextScale
+        ),
       220
     )
   }
 
-  const handleZoomIn = () => {
-    handleZoomBy(1.25)
-  }
-
-  const handleZoomOut = () => {
-    handleZoomBy(0.8)
-  }
-
-  const handleReset = () => {
-    animateToTransform(
-      getResetTransform(),
-      360
-    )
-  }
-
-  const handleFit = () => {
-    if (
-      !svgRef.current ||
-      !worldRef.current
-    ) {
-      return
+  const handleZoomIn =
+    () => {
+      handleZoomBy(1.25)
     }
 
-    const {
-      width,
-      height,
-    } = getViewportSize()
-
-    const bounds =
-      worldRef.current.getBBox()
-
-    if (
-      bounds.width === 0 ||
-      bounds.height === 0
-    ) {
-      return
+  const handleZoomOut =
+    () => {
+      handleZoomBy(0.8)
     }
 
-    const padding = 56
-
-    const availableWidth =
-      Math.max(
-        1,
-        width -
-          padding * 2
+  const handleReset =
+    () => {
+      animateToTransform(
+        getResetTransform(),
+        360
       )
+    }
 
-    const availableHeight =
-      Math.max(
-        1,
-        height -
-          padding * 2
-      )
+  const handleFit =
+    () => {
+      if (
+        !svgRef.current ||
+        !worldRef.current
+      ) {
+        return
+      }
 
-    const scale =
-      Math.max(
-        MIN_ZOOM,
-        Math.min(
-          MAX_ZOOM,
+      const {
+        width,
+        height,
+      } = getViewportSize()
+
+      const bounds =
+        worldRef.current.getBBox()
+
+      if (
+        bounds.width === 0 ||
+        bounds.height === 0
+      ) {
+        return
+      }
+
+      const padding = 56
+
+      const availableWidth =
+        Math.max(
+          1,
+          width -
+            padding * 2
+        )
+
+      const availableHeight =
+        Math.max(
+          1,
+          height -
+            padding * 2
+        )
+
+      const scale =
+        Math.max(
+          MIN_ZOOM,
           Math.min(
-            availableWidth /
-              bounds.width,
-            availableHeight /
-              bounds.height
+            MAX_ZOOM,
+            Math.min(
+              availableWidth /
+                bounds.width,
+
+              availableHeight /
+                bounds.height
+            )
           )
         )
+
+      const centreX =
+        bounds.x +
+        bounds.width / 2
+
+      const centreY =
+        bounds.y +
+        bounds.height / 2
+
+      const transform =
+        d3.zoomIdentity
+          .translate(
+            width / 2 -
+              centreX * scale,
+
+            height / 2 -
+              centreY * scale
+          )
+          .scale(scale)
+
+      animateToTransform(
+        transform,
+        440
       )
-
-    const centreX =
-      bounds.x +
-      bounds.width / 2
-
-    const centreY =
-      bounds.y +
-      bounds.height / 2
-
-    const transform =
-      d3.zoomIdentity
-        .translate(
-          width / 2 -
-            centreX * scale,
-          height / 2 -
-            centreY * scale
-        )
-        .scale(scale)
-
-    animateToTransform(
-      transform,
-      440
-    )
-  }
+    }
 
   useEffect(() => {
     if (!svgRef.current) {
@@ -344,7 +369,9 @@ function GraphCanvas({
     }
 
     const svg =
-      d3.select(svgRef.current)
+      d3.select(
+        svgRef.current
+      )
 
     svg
       .selectAll('*')
@@ -376,43 +403,45 @@ function GraphCanvas({
       graphKeyRef.current =
         graphKey
 
-      positionCacheRef.current.clear()
+      positionCacheRef.current
+        .clear()
 
       zoomTransformRef.current =
         d3.zoomIdentity
     }
 
-    const nodes: SimulationNode[] =
-      graph.nodes.map(
-        (node) => {
-          const cached =
-            positionCacheRef.current.get(
-              node.id
-            )
+    const nodes:
+      SimulationNode[] =
+        graph.nodes.map(
+          (node) => {
+            const cached =
+              positionCacheRef.current
+                .get(node.id)
 
-          if (!cached) {
+            if (!cached) {
+              return {
+                ...node,
+              }
+            }
+
             return {
               ...node,
+
+              x: cached.x,
+              y: cached.y,
+              vx: cached.vx,
+              vy: cached.vy,
             }
           }
+        )
 
-          return {
-            ...node,
-
-            x: cached.x,
-            y: cached.y,
-            vx: cached.vx,
-            vy: cached.vy,
-          }
-        }
-      )
-
-    const links: SimulationLink[] =
-      graph.relationships.map(
-        (relationship) => ({
-          ...relationship,
-        })
-      )
+    const links:
+      SimulationLink[] =
+        graph.relationships.map(
+          (relationship) => ({
+            ...relationship,
+          })
+        )
 
     const primaryDesignerColor =
       nodes.find(
@@ -425,7 +454,10 @@ function GraphCanvas({
       svg.append('defs')
 
     const clipIds =
-      new Map<string, string>()
+      new Map<
+        string,
+        string
+      >()
 
     nodes.forEach(
       (node, index) => {
@@ -449,12 +481,16 @@ function GraphCanvas({
         )
 
         defs
-          .append('clipPath')
+          .append(
+            'clipPath'
+          )
           .attr(
             'id',
             clipId
           )
-          .append('circle')
+          .append(
+            'circle'
+          )
           .attr(
             'r',
             baseRadius(node)
@@ -541,7 +577,8 @@ function GraphCanvas({
 
             world.attr(
               'transform',
-              event.transform.toString()
+              event.transform
+                .toString()
             )
           }
         )
@@ -559,7 +596,8 @@ function GraphCanvas({
     const initialTransform =
       isNewGraph
         ? getResetTransform()
-        : zoomTransformRef.current
+        : zoomTransformRef
+            .current
 
     zoomTransformRef.current =
       initialTransform
@@ -579,7 +617,9 @@ function GraphCanvas({
         .join('line')
         .attr(
           'stroke',
-          (relationship) => {
+          (
+            relationship
+          ) => {
             if (
               relationship.type ===
               'CREATED'
@@ -626,21 +666,22 @@ function GraphCanvas({
           'click',
           (event, d) => {
             if (
-              event.defaultPrevented
+              event
+                .defaultPrevented
             ) {
               return
             }
 
-            onNodeSelectRef.current(
-              d
-            )
+            onNodeSelectRef
+              .current(d)
           }
         )
         .on(
           'mouseenter',
           (event, d) => {
             if (
-              isDraggingNodeRef.current
+              isDraggingNodeRef
+                .current
             ) {
               return
             }
@@ -653,7 +694,8 @@ function GraphCanvas({
             }
 
             const rect =
-              wrapper.getBoundingClientRect()
+              wrapper
+                .getBoundingClientRect()
 
             const x =
               event.clientX -
@@ -702,7 +744,8 @@ function GraphCanvas({
           'mousemove',
           (event, d) => {
             if (
-              isDraggingNodeRef.current
+              isDraggingNodeRef
+                .current
             ) {
               return
             }
@@ -715,7 +758,8 @@ function GraphCanvas({
             }
 
             const rect =
-              wrapper.getBoundingClientRect()
+              wrapper
+                .getBoundingClientRect()
 
             const x =
               event.clientX -
@@ -764,7 +808,8 @@ function GraphCanvas({
           'mouseleave',
           () => {
             if (
-              !isDraggingNodeRef.current
+              !isDraggingNodeRef
+                .current
             ) {
               setHoveredNode(
                 null
@@ -801,7 +846,9 @@ function GraphCanvas({
             d.kind ===
             'GARMENT'
           ) {
-            return primaryDesignerColor
+            return (
+              primaryDesignerColor
+            )
           }
 
           if (
@@ -943,7 +990,8 @@ function GraphCanvas({
       .attr(
         'y',
         (d) =>
-          baseRadius(d) + 18
+          baseRadius(d) +
+          18
       )
       .attr(
         'font-size',
@@ -1051,26 +1099,14 @@ function GraphCanvas({
         .on(
           'start',
           (event, d) => {
-            isDraggingNodeRef.current =
-              true
+            isDraggingNodeRef
+              .current = true
 
             setHoveredNode(
               null
             )
 
-            d3
-              .select(
-                event.sourceEvent
-                  .currentTarget
-              )
-              .style(
-                'cursor',
-                'grabbing'
-              )
-
-            if (
-              !event.active
-            ) {
+            if (!event.active) {
               simulation
                 .alphaTarget(
                   0.3
@@ -1094,29 +1130,16 @@ function GraphCanvas({
         .on(
           'end',
           (event, d) => {
-            if (
-              !event.active
-            ) {
-              simulation.alphaTarget(
-                0
-              )
+            if (!event.active) {
+              simulation
+                .alphaTarget(0)
             }
 
             d.fx = null
             d.fy = null
 
-            isDraggingNodeRef.current =
-              false
-
-            d3
-              .select(
-                event.sourceEvent
-                  .currentTarget
-              )
-              .style(
-                'cursor',
-                'grab'
-              )
+            isDraggingNodeRef
+              .current = false
           }
         )
 
@@ -1180,19 +1203,21 @@ function GraphCanvas({
               return
             }
 
-            positionCacheRef.current.set(
-              node.id,
-              {
-                x: node.x,
-                y: node.y,
-                vx:
-                  node.vx ??
-                  0,
-                vy:
-                  node.vy ??
-                  0,
-              }
-            )
+            positionCacheRef
+              .current
+              .set(
+                node.id,
+                {
+                  x: node.x,
+                  y: node.y,
+                  vx:
+                    node.vx ??
+                    0,
+                  vy:
+                    node.vy ??
+                    0,
+                }
+              )
           }
         )
       }
@@ -1214,7 +1239,9 @@ function GraphCanvas({
     }
 
     const svg =
-      d3.select(svgRef.current)
+      d3.select(
+        svgRef.current
+      )
 
     svg
       .selectAll<
@@ -1312,6 +1339,7 @@ function GraphCanvas({
           className={
             styles.controls
           }
+          role="group"
           aria-label="Graph controls"
         >
           <button
@@ -1325,7 +1353,14 @@ function GraphCanvas({
             aria-label="Zoom in"
             title="Zoom in"
           >
-            +
+            <span
+              className={
+                styles.controlIcon
+              }
+              aria-hidden="true"
+            >
+              +
+            </span>
           </button>
 
           <button
@@ -1339,29 +1374,56 @@ function GraphCanvas({
             aria-label="Zoom out"
             title="Zoom out"
           >
-            −
+            <span
+              className={
+                styles.controlIcon
+              }
+              aria-hidden="true"
+            >
+              −
+            </span>
           </button>
 
           <button
             type="button"
-            className={`${styles.controlButton} ${styles.controlText}`}
+            className={
+              styles.controlButton
+            }
             onClick={
               handleFit
             }
+            aria-label="Fit graph to view"
             title="Fit graph to view"
           >
-            Fit
+            <span
+              className={
+                styles.controlIcon
+              }
+              aria-hidden="true"
+            >
+              ⛶
+            </span>
           </button>
 
           <button
             type="button"
-            className={`${styles.controlButton} ${styles.controlText}`}
+            className={
+              styles.controlButton
+            }
             onClick={
               handleReset
             }
+            aria-label="Reset graph view"
             title="Reset graph view"
           >
-            Reset
+            <span
+              className={
+                styles.controlIcon
+              }
+              aria-hidden="true"
+            >
+              ↺
+            </span>
           </button>
         </div>
 
