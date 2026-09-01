@@ -1,177 +1,305 @@
-import {
-  curatorialProfiles,
-} from '../data/curatorialProfiles'
+import type { GraphNode } from '../types/graph'
+import { curatorialProfiles } from '../data/curatorialProfiles'
 
-import type {
-  GraphNode,
-} from '../types/graph'
+import styles from './CuratorPanel.module.css'
 
 type CuratorPanelProps = {
-  selectedNode:
-    | GraphNode
-    | null
-
-  isInExhibition: boolean
-
+  selectedNode: GraphNode | null
   onAddToExhibition: (
     node: GraphNode
   ) => void
+  isInExhibition: boolean
 }
 
 function CuratorPanel({
   selectedNode,
-  isInExhibition,
   onAddToExhibition,
+  isInExhibition,
 }: CuratorPanelProps) {
   if (!selectedNode) {
     return (
-      <aside>
-        <h2>Curator</h2>
+      <section className={styles.panel}>
+        <h2 className={styles.panelTitle}>
+          Curator
+        </h2>
 
-        <p>
-          Select a node to explore it.
+        <p className={styles.empty}>
+          Select something in the graph.
         </p>
-      </aside>
+      </section>
     )
   }
 
   const profile =
     curatorialProfiles.find(
-      (profile) =>
-        profile.nodeId ===
-        selectedNode.id
+      (item) =>
+        item.nodeId === selectedNode.id
     )
 
-  if (profile) {
-    return (
-      <aside>
-        <h2>Curator</h2>
-
-        <p>
-          {profile.eyebrow}
-        </p>
-
-        <h3>
-          {profile.title}
-        </h3>
-
-        {profile.dates && (
-          <p>
-            {profile.dates}
-          </p>
-        )}
-
-        <p>
-          {profile.summary}
-        </p>
-
-        <h4>Threads</h4>
-
-        <ul>
-          {profile.themes.map(
-            (theme) => (
-              <li key={theme}>
-                {theme}
-              </li>
-            )
-          )}
-        </ul>
-
-        <button
-          type="button"
-          disabled={
-            isInExhibition
-          }
-          onClick={() =>
-            onAddToExhibition(
-              selectedNode
-            )
-          }
-        >
-          {isInExhibition
-            ? 'In exhibition'
-            : 'Add to exhibition'}
-        </button>
-      </aside>
-    )
-  }
+  const isObject =
+    selectedNode.kind === 'ARTWORK' ||
+    selectedNode.kind === 'GARMENT'
 
   const canShowImage =
     selectedNode.kind === 'ARTWORK' &&
-    Boolean(selectedNode.image)
+    Boolean(
+      selectedNode.image ||
+      selectedNode.imageSmall
+    )
+
+  const curatorImage =
+    selectedNode.image ||
+    selectedNode.imageSmall
+
+  const artistName = [
+    selectedNode.artistPrefix,
+    selectedNode.artist,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const hasObjectDetails =
+    Boolean(selectedNode.classification) ||
+    Boolean(selectedNode.dimensions) ||
+    Boolean(selectedNode.description)
+
+  const addButton = (
+    <button
+      type="button"
+      className={`${styles.exhibitionButton} ${
+        isInExhibition
+          ? styles.exhibitionButtonSelected
+          : ''
+      }`}
+      onClick={() =>
+        onAddToExhibition(selectedNode)
+      }
+      disabled={isInExhibition}
+      aria-label={
+        isInExhibition
+          ? `${selectedNode.label} is already in the exhibition`
+          : `Add ${selectedNode.label} to the exhibition`
+      }
+      title={
+        isInExhibition
+          ? 'In exhibition'
+          : 'Add to exhibition'
+      }
+    >
+      {isInExhibition ? '✓' : '+'}
+    </button>
+  )
 
   return (
-    <aside>
-      <h2>Curator</h2>
+    <section className={styles.panel}>
+      <h2 className={styles.panelTitle}>
+        Curator
+      </h2>
 
-      <p>
-        {selectedNode.kind}
-      </p>
+      {profile ? (
+        <div className={styles.profile}>
+          <div className={styles.profileHeader}>
+            <div>
+              <p className={styles.kind}>
+                {profile.eyebrow}
+              </p>
 
-      <h3>
-        {selectedNode.label}
-      </h3>
+              <h3 className={styles.title}>
+                {profile.title}
+              </h3>
+            </div>
 
-      {canShowImage && (
-        <img
-          src={selectedNode.image}
-          alt={selectedNode.label}
-          style={{
-            display: 'block',
-            width: '100%',
-            maxWidth: '320px',
-            height: 'auto',
-            marginBottom: '1rem',
-          }}
-        />
+            <div className={styles.profileAction}>
+              {addButton}
+            </div>
+          </div>
+
+          {profile.dates && (
+            <p className={styles.origin}>
+              {profile.dates}
+            </p>
+          )}
+
+          <p className={styles.summary}>
+            {profile.summary}
+          </p>
+
+          {profile.themes.length > 0 && (
+            <div className={styles.threads}>
+              <p className={styles.threadsTitle}>
+                Threads
+              </p>
+
+              <ul>
+                {profile.themes.map(
+                  (theme) => (
+                    <li key={theme}>
+                      {theme}
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          <p className={styles.kind}>
+            {selectedNode.kind}
+          </p>
+
+          <h3 className={styles.title}>
+            {selectedNode.label}
+          </h3>
+
+          {isObject && (
+            <div className={styles.mediaFrame}>
+              {canShowImage &&
+              curatorImage ? (
+                <img
+                  className={styles.mediaImage}
+                  src={curatorImage}
+                  alt={selectedNode.label}
+                />
+              ) : (
+                <div
+                  className={
+                    styles.mediaPlaceholder
+                  }
+                >
+                  <span
+                    className={
+                      styles.placeholderKind
+                    }
+                  >
+                    {selectedNode.kind}
+                  </span>
+
+                  <strong>
+                    {selectedNode.label}
+                  </strong>
+
+                  {selectedNode.date && (
+                    <span>
+                      {selectedNode.date}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {addButton}
+            </div>
+          )}
+
+          <div className={styles.objectInfo}>
+            {artistName && (
+              <p className={styles.artist}>
+                {artistName}
+              </p>
+            )}
+
+            {(selectedNode.date ||
+              selectedNode.culture) && (
+              <p className={styles.metaLine}>
+                {[
+                  selectedNode.date,
+                  selectedNode.culture,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            )}
+
+            {selectedNode.medium && (
+              <p className={styles.medium}>
+                {selectedNode.medium}
+              </p>
+            )}
+
+            {selectedNode.url && (
+              <a
+                className={styles.metLink}
+                href={selectedNode.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View at The Met ↗
+              </a>
+            )}
+
+            {hasObjectDetails && (
+              <details
+                className={styles.details}
+              >
+                <summary>
+                  Object details
+                </summary>
+
+                <div
+                  className={
+                    styles.detailsBody
+                  }
+                >
+                  {selectedNode.classification && (
+                    <div
+                      className={
+                        styles.detailRow
+                      }
+                    >
+                      <span>
+                        Classification
+                      </span>
+
+                      <p>
+                        {
+                          selectedNode.classification
+                        }
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedNode.dimensions && (
+                    <div
+                      className={
+                        styles.detailRow
+                      }
+                    >
+                      <span>
+                        Dimensions
+                      </span>
+
+                      <p>
+                        {
+                          selectedNode.dimensions
+                        }
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedNode.description && (
+                    <div
+                      className={
+                        styles.detailRow
+                      }
+                    >
+                      <span>
+                        Description
+                      </span>
+
+                      <p>
+                        {
+                          selectedNode.description
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </details>
+            )}
+          </div>
+        </>
       )}
-
-      {selectedNode.date && (
-        <p>
-          {selectedNode.date}
-        </p>
-      )}
-
-      {selectedNode.culture && (
-        <p>
-          {selectedNode.culture}
-        </p>
-      )}
-
-      {selectedNode.description && (
-        <p>
-          {selectedNode.description}
-        </p>
-      )}
-
-      {selectedNode.url && (
-        <p>
-          <a
-            href={selectedNode.url}
-            target="_blank"
-            rel="noreferrer"
-          >
-            View at The Met ↗
-          </a>
-        </p>
-      )}
-
-      <button
-        type="button"
-        disabled={
-          isInExhibition
-        }
-        onClick={() =>
-          onAddToExhibition(
-            selectedNode
-          )
-        }
-      >
-        {isInExhibition
-          ? 'In exhibition'
-          : 'Add to exhibition'}
-      </button>
-    </aside>
+    </section>
   )
 }
 

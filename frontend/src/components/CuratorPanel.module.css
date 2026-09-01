@@ -1,0 +1,248 @@
+.panel {
+  padding: 1.5rem;
+  min-width: 0;
+}
+
+.panelTitle {
+  margin: 0 0 1.75rem;
+  font-size: 1.5rem;
+}
+
+.empty {
+  color: #777;
+}
+
+.kind {
+  margin: 0 0 0.45rem;
+
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0 0 1rem;
+
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.mediaFrame {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: #f6f5f2;
+  border: 1px solid #e3e1dc;
+  border-radius: 10px;
+}
+
+.mediaImage {
+  width: 100%;
+  height: 100%;
+
+  padding: 1rem;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.mediaPlaceholder {
+  width: 100%;
+  height: 100%;
+
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  text-align: center;
+}
+
+.placeholderKind {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #777;
+}
+
+.exhibitionButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+
+  font-size: 1.35rem;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.exhibitionButton:hover:not(:disabled) {
+  background: #fff;
+  border-color: #111;
+}
+
+.exhibitionButtonSelected {
+  font-size: 1rem;
+}
+
+.exhibitionButton:disabled {
+  cursor: default;
+}
+
+.objectInfo {
+  padding-top: 1rem;
+}
+
+.artist {
+  margin: 0 0 0.35rem;
+  font-style: italic;
+}
+
+.metaLine {
+  margin: 0 0 0.35rem;
+}
+
+.medium {
+  margin: 0 0 1rem;
+}
+
+.metLink {
+  display: inline-block;
+
+  margin-bottom: 1rem;
+
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+.details {
+  border-top: 1px solid #e3e1dc;
+  border-bottom: 1px solid #e3e1dc;
+}
+
+.details summary {
+  padding: 0.9rem 0;
+
+  cursor: pointer;
+
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+
+  list-style-position: outside;
+}
+
+.detailsBody {
+  padding: 0 0 1rem;
+}
+
+.detailRow {
+  margin-top: 0.85rem;
+}
+
+.detailRow span {
+  display: block;
+
+  margin-bottom: 0.2rem;
+
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #777;
+}
+
+.detailRow p {
+  margin: 0;
+
+  line-height: 1.45;
+}
+
+.profile {
+  position: relative;
+}
+
+.profileHeader {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.profileHeader .title {
+  margin-bottom: 0;
+}
+
+.profileAction {
+  position: relative;
+
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.profileAction .exhibitionButton {
+  top: 0;
+  right: 0;
+}
+
+.origin {
+  margin: 0.45rem 0 1rem;
+
+  color: #666;
+  font-style: italic;
+}
+
+.summary {
+  margin: 0 0 1.35rem;
+
+  line-height: 1.5;
+}
+
+.threads {
+  padding-top: 0.25rem;
+}
+
+.threadsTitle {
+  margin: 0 0 0.65rem;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.threads ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.threads li {
+  margin: 0.25rem 0;
+}
