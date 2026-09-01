@@ -510,27 +510,26 @@ function GraphCanvas({
       world.node()
 
     const zoom =
-      d3
+    d3
         .zoom<
-          SVGSVGElement,
-          unknown
+        SVGSVGElement,
+        unknown
         >()
         .scaleExtent([
-          MIN_ZOOM,
-          MAX_ZOOM,
+        MIN_ZOOM,
+        MAX_ZOOM,
         ])
-        .extent(() => [
-          [0, 0],
-          [
-            svgRef.current
-              ?.clientWidth ??
-              WORLD_WIDTH,
-
-            svgRef.current
-              ?.clientHeight ??
-              WORLD_HEIGHT,
-          ],
-        ])
+        .extent(
+        (): [[number, number], [number, number]] => [
+            [0, 0],
+            [
+            svgRef.current?.clientWidth ??
+                WORLD_WIDTH,
+            svgRef.current?.clientHeight ??
+                WORLD_HEIGHT,
+            ],
+        ]
+        )
         .filter(
           (event) => {
             if (
