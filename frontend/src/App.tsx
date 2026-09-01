@@ -153,16 +153,21 @@ function App() {
         )
         .slice(0, garmentLimit)
 
-    const visibleArtworkIds = new Set<string>()
+    const visibleArtworkIds =
+      new Set<string>()
 
-    Object.entries(artworkLimits).forEach(
+    Object.entries(
+      artworkLimits
+    ).forEach(
       ([sourceId, limit]) => {
         const artworkIds =
           graphData.relationships
             .filter(
               (relationship) =>
-                relationship.type === 'EXAMPLE_OF' &&
-                relationship.target === sourceId
+                relationship.type ===
+                  'EXAMPLE_OF' &&
+                relationship.target ===
+                  sourceId
             )
             .map(
               (relationship) =>
@@ -180,7 +185,9 @@ function App() {
       graphData.nodes.filter(
         (node) =>
           node.kind === 'ARTWORK' &&
-          visibleArtworkIds.has(node.id)
+          visibleArtworkIds.has(
+            node.id
+          )
       )
 
     const nodes = [
@@ -191,14 +198,20 @@ function App() {
 
     const visibleIds =
       new Set(
-        nodes.map((node) => node.id)
+        nodes.map(
+          (node) => node.id
+        )
       )
 
     const relationships =
       graphData.relationships.filter(
         (relationship) =>
-          visibleIds.has(relationship.source) &&
-          visibleIds.has(relationship.target)
+          visibleIds.has(
+            relationship.source
+          ) &&
+          visibleIds.has(
+            relationship.target
+          )
       )
 
     return {
@@ -213,12 +226,15 @@ function App() {
 
   const handleSearchSubmit = () => {
     const wanted =
-      searchValue.trim().toLowerCase()
+      searchValue
+        .trim()
+        .toLowerCase()
 
     const match =
       searchOptions.find(
         (option) =>
-          option.label.toLowerCase() ===
+          option.label
+            .toLowerCase() ===
           wanted
       )
 
@@ -239,39 +255,52 @@ function App() {
       return
     }
 
-    if (node.kind === 'DESIGNER') {
+    if (
+      node.kind === 'DESIGNER'
+    ) {
       const totalGarments =
         graphData.nodes.filter(
           (candidate) =>
-            candidate.kind === 'GARMENT'
+            candidate.kind ===
+            'GARMENT'
         ).length
 
       setGarmentLimit(
         (currentLimit) =>
           Math.min(
-            currentLimit + GARMENT_BATCH_SIZE,
+            currentLimit +
+              GARMENT_BATCH_SIZE,
             totalGarments
           )
       )
     }
 
-    if (node.kind === 'SOURCE') {
+    if (
+      node.kind === 'SOURCE'
+    ) {
       const totalArtworks =
         graphData.relationships.filter(
           (relationship) =>
-            relationship.type === 'EXAMPLE_OF' &&
-            relationship.target === node.id
+            relationship.type ===
+              'EXAMPLE_OF' &&
+            relationship.target ===
+              node.id
         ).length
 
       setArtworkLimits(
         (currentLimits) => ({
           ...currentLimits,
 
-          [node.id]: Math.min(
-            (currentLimits[node.id] ?? 0) +
-              ARTWORK_BATCH_SIZE,
-            totalArtworks
-          ),
+          [node.id]:
+            Math.min(
+              (
+                currentLimits[
+                  node.id
+                ] ?? 0
+              ) +
+                ARTWORK_BATCH_SIZE,
+              totalArtworks
+            ),
         })
       )
     }
@@ -316,35 +345,47 @@ function App() {
     selectedNode !== null &&
     exhibitionItems.some(
       (item) =>
-        item.id === selectedNode.id
+        item.id ===
+        selectedNode.id
     )
 
   return (
     <div className={styles.page}>
       <Header
         searchValue={searchValue}
-        searchOptions={searchOptions}
-        onSearchChange={setSearchValue}
-        onSearchSubmit={handleSearchSubmit}
+        searchOptions={
+          searchOptions
+        }
+        onSearchChange={
+          setSearchValue
+        }
+        onSearchSubmit={
+          handleSearchSubmit
+        }
       />
 
-        <main
-          className={styles.main}
-          style={{
-            gridTemplateColumns: isCuratorOpen
-              ? 'minmax(0, 1fr) 360px'
-              : 'minmax(0, 1fr) 48px',
-          }}
+      <main
+        className={
+          styles.main
+        }
+      >
+        <div
+          className={
+            styles.graph
+          }
         >
-        <div className={styles.graph}>
           {graphError ? (
             <p>
               Unable to load graph.
             </p>
           ) : visibleGraph ? (
             <GraphCanvas
-              graph={visibleGraph}
-              selectedNode={selectedNode}
+              graph={
+                visibleGraph
+              }
+              selectedNode={
+                selectedNode
+              }
               onNodeSelect={
                 handleNodeSelect
               }
@@ -352,13 +393,18 @@ function App() {
           ) : (
             <p>
               Loading{' '}
-              {currentSelection.label}…
+              {
+                currentSelection.label
+              }
+              …
             </p>
           )}
         </div>
 
         <aside
-          className={`${styles.curator} ${
+          className={`${
+            styles.curator
+          } ${
             !isCuratorOpen
               ? styles.curatorCollapsed
               : ''
@@ -366,10 +412,13 @@ function App() {
         >
           <button
             type="button"
-            className={styles.curatorToggle}
+            className={
+              styles.curatorToggle
+            }
             onClick={() => {
               setIsCuratorOpen(
-                (current) => !current
+                (current) =>
+                  !current
               )
             }}
             aria-label={
@@ -377,40 +426,50 @@ function App() {
                 ? 'Close curator'
                 : 'Open curator'
             }
-            aria-expanded={isCuratorOpen}
+            aria-expanded={
+              isCuratorOpen
+            }
             title={
               isCuratorOpen
                 ? 'Close curator'
                 : 'Open curator'
             }
           >
-            {isCuratorOpen ? '›' : '‹'}
+            {isCuratorOpen
+              ? '›'
+              : '‹'}
           </button>
 
-          {isCuratorOpen && (
-            <div
-              className={
-                styles.curatorContent
+          <div
+            className={`${
+              styles.curatorContent
+            } ${
+              !isCuratorOpen
+                ? styles.curatorContentHidden
+                : ''
+            }`}
+          >
+            <CuratorPanel
+              selectedNode={
+                selectedNode
               }
-            >
-              <CuratorPanel
-                selectedNode={selectedNode}
-                isInExhibition={
-                  isSelectedNodeInExhibition
-                }
-                onAddToExhibition={
-                  handleAddToExhibition
-                }
-              />
+              isInExhibition={
+                isSelectedNodeInExhibition
+              }
+              onAddToExhibition={
+                handleAddToExhibition
+              }
+            />
 
-              <ExhibitionPanel
-                items={exhibitionItems}
-                onRemove={
-                  handleRemoveFromExhibition
-                }
-              />
-            </div>
-          )}
+            <ExhibitionPanel
+              items={
+                exhibitionItems
+              }
+              onRemove={
+                handleRemoveFromExhibition
+              }
+            />
+          </div>
         </aside>
       </main>
     </div>
