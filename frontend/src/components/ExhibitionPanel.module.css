@@ -1,11 +1,13 @@
 .panel {
   margin-top: 2rem;
   padding-top: 1.5rem;
+
   border-top: 1px solid #ddd;
 }
 
 .heading {
   margin: 0 0 1rem;
+
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -19,10 +21,32 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0;
+
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
   margin: 0;
-  padding: 0;
+  padding: 0 0.4rem 0 0;
+
   list-style: none;
+
+  scrollbar-width: thin;
+  scrollbar-color: #c8c6c0 transparent;
+}
+
+.list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: #c8c6c0;
+  border-radius: 999px;
 }
 
 .item {
@@ -31,21 +55,32 @@
   justify-content: space-between;
   gap: 1rem;
 
-  padding: 0.8rem 0;
+  padding: 0.9rem 0;
+
   border-bottom: 1px solid #ddd;
 }
 
 .label {
+  min-width: 0;
+
   font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .remove {
+  flex: 0 0 auto;
+
   padding: 0;
+
   border: 0;
+
   background: none;
+
   font: inherit;
   font-size: 0.8rem;
+
   cursor: pointer;
+
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }

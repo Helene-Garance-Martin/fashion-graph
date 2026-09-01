@@ -88,6 +88,9 @@ function App() {
   const [graphError, setGraphError] =
     useState(false)
 
+  const [isCuratorOpen, setIsCuratorOpen] =
+    useState(true)
+
   const houseOptions: SearchOption[] =
     houses.map((house) => ({
       id: house.id,
@@ -325,7 +328,14 @@ function App() {
         onSearchSubmit={handleSearchSubmit}
       />
 
-      <main className={styles.main}>
+        <main
+          className={styles.main}
+          style={{
+            gridTemplateColumns: isCuratorOpen
+              ? 'minmax(0, 1fr) 360px'
+              : 'minmax(0, 1fr) 48px',
+          }}
+        >
         <div className={styles.graph}>
           {graphError ? (
             <p>
@@ -347,24 +357,61 @@ function App() {
           )}
         </div>
 
-        <div className={styles.curator}>
-          <CuratorPanel
-            selectedNode={selectedNode}
-            isInExhibition={
-              isSelectedNodeInExhibition
+        <aside
+          className={`${styles.curator} ${
+            !isCuratorOpen
+              ? styles.curatorCollapsed
+              : ''
+          }`}
+        >
+          <button
+            type="button"
+            className={styles.curatorToggle}
+            onClick={() => {
+              setIsCuratorOpen(
+                (current) => !current
+              )
+            }}
+            aria-label={
+              isCuratorOpen
+                ? 'Close curator'
+                : 'Open curator'
             }
-            onAddToExhibition={
-              handleAddToExhibition
+            aria-expanded={isCuratorOpen}
+            title={
+              isCuratorOpen
+                ? 'Close curator'
+                : 'Open curator'
             }
-          />
+          >
+            {isCuratorOpen ? '›' : '‹'}
+          </button>
 
-          <ExhibitionPanel
-            items={exhibitionItems}
-            onRemove={
-              handleRemoveFromExhibition
-            }
-          />
-        </div>
+          {isCuratorOpen && (
+            <div
+              className={
+                styles.curatorContent
+              }
+            >
+              <CuratorPanel
+                selectedNode={selectedNode}
+                isInExhibition={
+                  isSelectedNodeInExhibition
+                }
+                onAddToExhibition={
+                  handleAddToExhibition
+                }
+              />
+
+              <ExhibitionPanel
+                items={exhibitionItems}
+                onRemove={
+                  handleRemoveFromExhibition
+                }
+              />
+            </div>
+          )}
+        </aside>
       </main>
     </div>
   )
