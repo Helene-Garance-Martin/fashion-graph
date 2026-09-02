@@ -16,10 +16,15 @@
 
 .title {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
 
+  font-family: var(--font-brand);
+  font-weight: 500;
+
+  font-size: 2rem;
+  line-height: 1.05;
+
+  letter-spacing: -0.025em;
+}
 .subtitle {
   margin: 0;
   font-size: 0.9rem;

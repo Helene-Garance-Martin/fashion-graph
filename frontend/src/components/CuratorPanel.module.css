@@ -1,30 +1,51 @@
 .panel {
-  padding: 1.5rem;
   min-width: 0;
+
+  padding: 1.5rem;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
 }
 
 .panelTitle {
   margin: 0 0 1.75rem;
-  font-size: 1.5rem;
+
+  font-family: var(--font-curatorial);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.1;
 }
 
 .empty {
+  margin: 0;
+
   color: #777;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
+  line-height: 1.5;
 }
 
 .kind {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.5rem;
 
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  font-family: var(--font-interface);
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
 .title {
   margin: 0 0 1rem;
 
-  font-size: 1.35rem;
-  line-height: 1.15;
+  font-family: var(--font-curatorial);
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.18;
+
+  letter-spacing: -0.01em;
 }
 
 .mediaFrame {
@@ -40,17 +61,18 @@
   overflow: hidden;
 
   background: #f6f5f2;
+
   border: 1px solid #e3e1dc;
   border-radius: 10px;
 }
 
 .mediaImage {
+  display: block;
+
   width: 100%;
   height: 100%;
 
   padding: 1rem;
-
-  display: block;
 
   object-fit: contain;
 }
@@ -71,10 +93,14 @@
 }
 
 .placeholderKind {
+  color: #777;
+
+  font-family: var(--font-interface);
   font-size: 0.68rem;
+  font-weight: 500;
+
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #777;
 }
 
 .exhibitionButton {
@@ -97,7 +123,9 @@
   background: rgba(255, 255, 255, 0.92);
   color: #111;
 
+  font-family: var(--font-interface);
   font-size: 1.35rem;
+  font-weight: 300;
   line-height: 1;
 
   cursor: pointer;
@@ -110,6 +138,7 @@
 
 .exhibitionButtonSelected {
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .exhibitionButton:disabled {
@@ -118,19 +147,37 @@
 
 .objectInfo {
   padding-top: 1rem;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
 }
 
 .artist {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
+
+  font-family: var(--font-curatorial);
+  font-weight: 300;
   font-style: italic;
+
+  line-height: 1.4;
 }
 
 .metaLine {
   margin: 0 0 0.35rem;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
+
+  line-height: 1.4;
 }
 
 .medium {
   margin: 0 0 1rem;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
+
+  line-height: 1.45;
 }
 
 .metLink {
@@ -139,6 +186,10 @@
   margin-bottom: 1rem;
 
   color: inherit;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
+
   text-underline-offset: 0.2em;
 }
 
@@ -152,8 +203,11 @@
 
   cursor: pointer;
 
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
+  font-family: var(--font-interface);
+  font-size: 0.78rem;
+  font-weight: 500;
+
+  letter-spacing: 0.05em;
 
   list-style-position: outside;
 }
@@ -169,19 +223,25 @@
 .detailRow span {
   display: block;
 
-  margin-bottom: 0.2rem;
-
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: 0.25rem;
 
   color: #777;
+
+  font-family: var(--font-interface);
+  font-size: 0.66rem;
+  font-weight: 500;
+
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
 .detailRow p {
   margin: 0;
 
-  line-height: 1.45;
+  font-family: var(--font-interface);
+  font-weight: 300;
+
+  line-height: 1.5;
 }
 
 .profile {
@@ -190,9 +250,9 @@
 
 .profileHeader {
   display: flex;
-  gap: 1rem;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .profileHeader .title {
@@ -203,6 +263,7 @@
   position: relative;
 
   flex: 0 0 36px;
+
   width: 36px;
   height: 36px;
 }
@@ -213,16 +274,25 @@
 }
 
 .origin {
-  margin: 0.45rem 0 1rem;
+  margin: 0.5rem 0 1rem;
 
   color: #666;
+
+  font-family: var(--font-curatorial);
+  font-weight: 300;
   font-style: italic;
+
+  line-height: 1.4;
 }
 
 .summary {
-  margin: 0 0 1.35rem;
+  margin: 0 0 1.4rem;
 
-  line-height: 1.5;
+  font-family: var(--font-interface);
+  font-weight: 300;
+
+  font-size: 0.98rem;
+  line-height: 1.55;
 }
 
 .threads {
@@ -230,19 +300,27 @@
 }
 
 .threadsTitle {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.7rem;
 
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-family: var(--font-interface);
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .threads ul {
   margin: 0;
+
   padding-left: 1.25rem;
 }
 
 .threads li {
-  margin: 0.25rem 0;
+  margin: 0.3rem 0;
+
+  font-family: var(--font-interface);
+  font-weight: 300;
+
+  line-height: 1.4;
 }

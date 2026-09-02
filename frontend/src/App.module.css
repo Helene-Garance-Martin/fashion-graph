@@ -44,6 +44,9 @@
 
   overscroll-behavior: contain;
 
+  padding-bottom: 4.5rem;
+    box-sizing: border-box;
+
   background: #f7f7f7;
 
   transition:
