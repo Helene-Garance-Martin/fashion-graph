@@ -1,43 +1,33 @@
-import type {
-  ApiGraphResponse,
-  ApiNode,
-} from '../types/api'
+import type { ApiGraphResponse, ApiNode } from "../types/api";
 
 import type {
   GraphData,
   GraphNode,
   GraphNodeKind,
   GraphRelationship,
-} from '../types/graph'
+} from "../types/graph";
 
-function toNodeKind(
-  type: ApiNode['type']
-): GraphNodeKind {
+function toNodeKind(type: ApiNode["type"]): GraphNodeKind {
   switch (type) {
-    case 'designer':
-      return 'DESIGNER'
+    case "designer":
+      return "DESIGNER";
 
-    case 'garment':
-      return 'GARMENT'
+    case "garment":
+      return "GARMENT";
 
-    case 'sourceworld':
-      return 'SOURCE'
+    case "sourceworld":
+      return "SOURCE";
 
-    case 'artwork':
-      return 'ARTWORK'
+    case "artwork":
+      return "ARTWORK";
   }
 }
 
-function toGraphNode(
-  node: ApiNode
-): GraphNode {
+function toGraphNode(node: ApiNode): GraphNode {
   const graphNode: GraphNode = {
     id: node.id,
 
-    label:
-      node.label === 'Spanish painting'
-        ? 'Spanish paintings'
-        : node.label,
+    label: node.label === "Spanish painting" ? "Spanish paintings" : node.label,
 
     kind: toNodeKind(node.type),
 
@@ -59,56 +49,44 @@ function toGraphNode(
     medium: node.medium,
     dimensions: node.dimensions,
     classification: node.classification,
-  }
+  };
 
-  if (node.id === 'artwork:437173') {
-    console.log(
-      'AFTER ADAPTER:',
-      graphNode.artist,
-      graphNode.date,
-      graphNode.medium
-    )
-  }
-
-  return graphNode
+  return graphNode;
 }
 
 function toRelationship(
-  link: ApiGraphResponse['links'][number]
+  link: ApiGraphResponse["links"][number],
 ): GraphRelationship {
   switch (link.kind) {
-    case 'created':
+    case "created":
       return {
         source: link.source,
         target: link.target,
-        type: 'CREATED',
-        provenance: 'MET_METADATA',
-      }
+        type: "CREATED",
+        provenance: "MET_METADATA",
+      };
 
-    case 'example_of':
+    case "example_of":
       return {
         source: link.source,
         target: link.target,
-        type: 'EXAMPLE_OF',
-        provenance: 'MET_METADATA',
-      }
+        type: "EXAMPLE_OF",
+        provenance: "MET_METADATA",
+      };
 
-    case 'inspired':
+    case "inspired":
       return {
         source: link.source,
         target: link.target,
-        type: 'INSPIRED',
-        provenance: 'CURATED',
-      }
+        type: "INSPIRED",
+        provenance: "CURATED",
+      };
   }
 }
 
-export function toGraphData(
-  response: ApiGraphResponse
-): GraphData {
+export function toGraphData(response: ApiGraphResponse): GraphData {
   return {
     nodes: response.nodes.map(toGraphNode),
-    relationships:
-      response.links.map(toRelationship),
-  }
+    relationships: response.links.map(toRelationship),
+  };
 }

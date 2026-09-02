@@ -1,0 +1,187 @@
+.editor {
+  min-height: 100vh;
+
+  padding: 2rem 3rem 4rem;
+
+  background: #f7f6f2;
+  color: #171717;
+}
+
+.header {
+  display: grid;
+  grid-template-columns:
+    140px
+    minmax(0, 1fr)
+    auto;
+  align-items: start;
+  gap: 2rem;
+
+  padding-bottom: 2rem;
+
+  border-bottom: 1px solid #d8d5ce;
+}
+
+.backButton {
+  width: fit-content;
+
+  padding: 0;
+
+  border: 0;
+
+  background: none;
+  color: inherit;
+
+  font-family: var(--font-interface);
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.eyebrow {
+  margin: 0 0 0.7rem;
+
+  font-family: var(--font-interface);
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.titleInput {
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+  color: inherit;
+
+  font-family: var(--font-curatorial);
+  font-size: clamp(2rem, 4vw, 4.5rem);
+  font-weight: 400;
+
+  line-height: 1.05;
+}
+
+.count {
+  margin: 0;
+
+  font-family: var(--font-interface);
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  color: #777;
+}
+
+.diaList {
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 3rem;
+}
+
+.dia {
+  display: grid;
+  grid-template-columns:
+    64px
+    minmax(180px, 280px)
+    minmax(0, 1fr);
+
+  gap: 2rem;
+
+  padding: 1.5rem 0;
+
+  border-bottom: 1px solid #d8d5ce;
+}
+
+.diaNumber {
+  padding-top: 0.2rem;
+
+  font-family: var(--font-interface);
+  font-size: 0.7rem;
+  font-weight: 500;
+
+  color: #888;
+}
+
+.media {
+  aspect-ratio: 4 / 3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background: #fff;
+
+  border: 1px solid #e0ddd6;
+  border-radius: 10px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+
+  padding: 1rem;
+
+  object-fit: contain;
+}
+
+.placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #888;
+
+  font-family: var(--font-interface);
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  letter-spacing: 0.1em;
+}
+
+.info {
+  align-self: center;
+}
+
+.kind {
+  margin: 0 0 0.5rem;
+
+  font-family: var(--font-interface);
+  font-size: 0.68rem;
+  font-weight: 500;
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.diaTitle {
+  max-width: 700px;
+
+  margin: 0 0 0.8rem;
+
+  font-family: var(--font-curatorial);
+  font-size: 1.6rem;
+  font-weight: 400;
+
+  line-height: 1.2;
+}
+
+.meta {
+  margin: 0.2rem 0;
+
+  font-family: var(--font-interface);
+  font-size: 0.82rem;
+  font-weight: 300;
+
+  color: #555;
+}
