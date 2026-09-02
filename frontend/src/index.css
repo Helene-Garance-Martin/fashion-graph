@@ -3,11 +3,9 @@
 }
 
 :root {
-  --font-brand: "Avenir Next", "Avenir", "Outfit", sans-serif;
-
+  --font-brand: "Tenor Sans", sans-serif;
   --font-curatorial: "Tenor Sans", sans-serif;
-
-  --font-interface: "Outfit", sans-serif;
+  --font-interface: "Tenor Sans", sans-serif;
 
   font-family: var(--font-interface);
 
@@ -18,8 +16,8 @@
 body {
   margin: 0;
 
-  font-family: var(--font-interface);
-  font-weight: 300;
+  /* font-family: var(--font-interface);
+  font-weight: 300; */
 
   color: #171717;
   background: #fff;
