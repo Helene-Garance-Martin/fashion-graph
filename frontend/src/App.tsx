@@ -16,6 +16,8 @@ import type { GraphData, GraphNode } from "./types/graph";
 
 import type { Show } from "./types/show";
 
+import { saveShow } from "./store/showStore";
+
 import styles from "./App.module.css";
 
 const SOURCE_OPTIONS: SearchOption[] = [
@@ -241,7 +243,7 @@ function App() {
     const show: Show = {
       id: crypto.randomUUID(),
 
-      title: "Untitled Show",
+      title: "",
 
       dias: exhibitionItems.map((node, index) => ({
         id: crypto.randomUUID(),
@@ -275,6 +277,16 @@ function App() {
     });
   };
 
+  const handleSaveShow = () => {
+    if (!activeShow) {
+      return;
+    }
+
+    const savedShow = saveShow(activeShow);
+
+    setActiveShow(savedShow);
+  };
+
   const handleBackToExplore = () => {
     setActiveShow(null);
   };
@@ -289,6 +301,7 @@ function App() {
         show={activeShow}
         onBack={handleBackToExplore}
         onTitleChange={handleShowTitleChange}
+        onSave={handleSaveShow}
       />
     );
   }

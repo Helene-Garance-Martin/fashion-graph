@@ -64,7 +64,12 @@
   font-size: clamp(2rem, 4vw, 4.5rem);
   font-weight: 400;
 
-  line-height: 1.05;
+  line-height: 1.17;
+}
+
+.titleInput::placeholder {
+  color: #171717;
+  opacity: 1;
 }
 
 .count {

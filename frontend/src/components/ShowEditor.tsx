@@ -6,9 +6,10 @@ type ShowEditorProps = {
   show: Show;
   onBack: () => void;
   onTitleChange: (title: string) => void;
+  onSave: () => void;
 };
 
-function ShowEditor({ show, onBack, onTitleChange }: ShowEditorProps) {
+function ShowEditor({ show, onBack, onTitleChange, onSave }: ShowEditorProps) {
   return (
     <main className={styles.editor}>
       <header className={styles.header}>
@@ -22,6 +23,7 @@ function ShowEditor({ show, onBack, onTitleChange }: ShowEditorProps) {
           <input
             className={styles.titleInput}
             value={show.title}
+            placeholder="Untitled Show"
             onChange={(event) => {
               onTitleChange(event.target.value);
             }}
@@ -29,9 +31,15 @@ function ShowEditor({ show, onBack, onTitleChange }: ShowEditorProps) {
           />
         </div>
 
-        <p className={styles.count}>
-          {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
-        </p>
+        <div className={styles.headerActions}>
+          <p className={styles.count}>
+            {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
+          </p>
+
+          <button type="button" className={styles.saveButton} onClick={onSave}>
+            Save Show
+          </button>
+        </div>
       </header>
 
       <section className={styles.diaList}>
