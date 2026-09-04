@@ -391,3 +391,17 @@
     transform 240ms ease,
     visibility 0s 240ms;
 }
+
+.media {
+  cursor: grab;
+  touch-action: none;
+}
+
+.media:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: 0.55;
+  z-index: 2;
+}

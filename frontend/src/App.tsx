@@ -316,6 +316,43 @@ function App() {
     }
   };
 
+  const handleReorderDias = (activeDiaId: string, overDiaId: string) => {
+    setActiveShow((currentShow) => {
+      if (!currentShow) {
+        return null;
+      }
+
+      const oldIndex = currentShow.dias.findIndex(
+        (dia) => dia.id === activeDiaId,
+      );
+
+      const newIndex = currentShow.dias.findIndex(
+        (dia) => dia.id === overDiaId,
+      );
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return currentShow;
+      }
+
+      const reordered = [...currentShow.dias];
+
+      const [movedDia] = reordered.splice(oldIndex, 1);
+
+      reordered.splice(newIndex, 0, movedDia);
+
+      const dias = reordered.map((dia, index) => ({
+        ...dia,
+        order: index,
+      }));
+
+      return {
+        ...currentShow,
+        dias,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
+
   const handleBackToExplore = () => {
     setActiveShow(null);
   };
@@ -334,6 +371,7 @@ function App() {
         onSave={handleSaveShow}
         onEditShow={handleEditShow}
         onDeleteShow={handleDeleteShow}
+        onReorderDias={handleReorderDias}
       />
     );
   }
