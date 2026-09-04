@@ -16,7 +16,7 @@ import type { GraphData, GraphNode } from "./types/graph";
 
 import type { Show } from "./types/show";
 
-import { saveShow } from "./store/showStore";
+import { deleteShow, getShows, saveShow } from "./store/showStore";
 
 import styles from "./App.module.css";
 
@@ -76,6 +76,7 @@ function App() {
   const [isCuratorOpen, setIsCuratorOpen] = useState(true);
 
   const [activeShow, setActiveShow] = useState<Show | null>(null);
+  const [savedShows, setSavedShows] = useState<Show[]>(() => getShows());
 
   const houseOptions: SearchOption[] = houses.map((house) => ({
     id: house.id,
@@ -285,6 +286,34 @@ function App() {
     const savedShow = saveShow(activeShow);
 
     setActiveShow(savedShow);
+
+    setSavedShows(getShows());
+  };
+
+  const handleEditShow = (show: Show) => {
+    setActiveShow(show);
+  };
+
+  const handleDeleteShow = (show: Show) => {
+    const displayTitle = show.title.trim() || "Untitled Show";
+
+    const confirmed = window.confirm(
+      `Delete "${displayTitle}"?\n\nThis will remove the show and its ${show.dias.length} dias.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteShow(show.id);
+
+    const remainingShows = getShows();
+
+    setSavedShows(remainingShows);
+
+    if (activeShow?.id === show.id) {
+      setActiveShow(remainingShows[0] ?? null);
+    }
   };
 
   const handleBackToExplore = () => {
@@ -299,9 +328,12 @@ function App() {
     return (
       <ShowEditor
         show={activeShow}
+        savedShows={savedShows}
         onBack={handleBackToExplore}
         onTitleChange={handleShowTitleChange}
         onSave={handleSaveShow}
+        onEditShow={handleEditShow}
+        onDeleteShow={handleDeleteShow}
       />
     );
   }

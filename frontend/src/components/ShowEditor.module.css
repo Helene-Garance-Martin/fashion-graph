@@ -1,5 +1,20 @@
+.workspace {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+
+  overflow: hidden;
+
+  background: #f7f6f2;
+}
+
 .editor {
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 100vh;
+
+  overflow-y: auto;
 
   padding: 2rem 3rem 4rem;
 
@@ -64,7 +79,7 @@
   font-size: clamp(2rem, 4vw, 4.5rem);
   font-weight: 400;
 
-  line-height: 1.17;
+  line-height: 1.18s;
 }
 
 .titleInput::placeholder {
@@ -197,4 +212,182 @@
   font-weight: 300;
 
   color: #555;
+}
+
+.workspace {
+  width: 100%;
+  height: 100vh;
+
+  display: flex;
+
+  overflow: hidden;
+
+  background: #f7f6f2;
+}
+
+.editor {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 100vh;
+
+  overflow-y: auto;
+
+  padding: 2rem 3rem 4rem;
+
+  background: #f7f6f2;
+  color: #171717;
+}
+
+.showsRail {
+  position: relative;
+
+  flex: 0 0 320px;
+  width: 320px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border-left: 1px solid #ddd9d0;
+
+  background: #f1efe9;
+
+  transition:
+    width 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    flex-basis 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.showsRailCollapsed {
+  flex-basis: 48px;
+  width: 48px;
+}
+
+.showsToggle {
+  position: sticky;
+  top: 0;
+
+  z-index: 3;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: auto;
+
+  border: 0;
+
+  background: transparent;
+  color: #171717;
+
+  font-family: var(--font-interface);
+  font-size: 1.4rem;
+
+  cursor: pointer;
+}
+
+.showsContent {
+  width: 320px;
+
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateX(0);
+
+  transition:
+    opacity 180ms ease,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+.showsContentHidden {
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateX(14px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 120ms ease,
+    transform 240ms ease,
+    visibility 0s 240ms;
+}
+
+.showsRail {
+  position: relative;
+
+  flex: 0 0 320px;
+  width: 320px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border-left: 1px solid #ddd9d0;
+
+  background: #f1efe9;
+
+  transition:
+    width 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    flex-basis 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.showsRailCollapsed {
+  flex-basis: 48px;
+  width: 48px;
+}
+
+.showsToggle {
+  position: sticky;
+  top: 0;
+
+  z-index: 3;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: auto;
+
+  border: 0;
+
+  background: transparent;
+  color: #171717;
+
+  font-family: var(--font-interface);
+  font-size: 1.4rem;
+
+  cursor: pointer;
+}
+
+.showsContent {
+  width: 320px;
+
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateX(0);
+
+  transition:
+    opacity 180ms ease,
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+.showsContentHidden {
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateX(14px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 120ms ease,
+    transform 240ms ease,
+    visibility 0s 240ms;
 }
