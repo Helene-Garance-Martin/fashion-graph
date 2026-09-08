@@ -1,14 +1,28 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import type { Show } from "../types/show";
+import { useShows } from "../hooks/useShows";
 
 import styles from "./ShowsPage.module.css";
 
-type ShowsPageProps = {
-  shows: Show[];
-};
+function ShowsPage() {
+  const navigate = useNavigate();
 
-function ShowsPage({ shows }: ShowsPageProps) {
+  const { shows, remove } = useShows();
+
+  const handleDelete = (showId: string, title: string, diaCount: number) => {
+    const displayTitle = title.trim() || "Untitled Show";
+
+    const confirmed = window.confirm(
+      `Delete "${displayTitle}"?\n\nThis will remove the show and its ${diaCount} dias.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    remove(showId);
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
@@ -39,17 +53,41 @@ function ShowsPage({ shows }: ShowsPageProps) {
         <ul className={styles.list}>
           {shows.map((show) => (
             <li key={show.id} className={styles.item}>
-              <Link to={`/shows/${show.id}/edit`} className={styles.showLink}>
-                <span className={styles.title}>
-                  {show.title.trim() || "Untitled Show"}
-                </span>
+              <div className={styles.showRow}>
+                <button
+                  type="button"
+                  className={styles.showMain}
+                  onClick={() => navigate(`/shows/${show.id}/edit`)}
+                >
+                  <span className={styles.title}>
+                    {show.title.trim() || "Untitled Show"}
+                  </span>
 
-                <span className={styles.meta}>
-                  {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
-                </span>
+                  <span className={styles.meta}>
+                    {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
+                  </span>
+                </button>
 
-                <span className={styles.edit}>Edit →</span>
-              </Link>
+                <div className={styles.actions}>
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={() => navigate(`/shows/${show.id}/edit`)}
+                  >
+                    Edit →
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() =>
+                      handleDelete(show.id, show.title, show.dias.length)
+                    }
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>

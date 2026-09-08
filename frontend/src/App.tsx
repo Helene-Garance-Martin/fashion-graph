@@ -257,9 +257,11 @@ function App() {
       updatedAt: now,
     };
 
-    setActiveShow(show);
-
-    navigate(`/shows/${show.id}/edit`);
+    navigate(`/shows/${show.id}/edit`, {
+      state: {
+        draftShow: show,
+      },
+    });
   };
 
   const handleShowTitleChange = (title: string) => {
@@ -386,24 +388,9 @@ function App() {
         }
       />
 
-      <Route path="/shows" element={<ShowsPage shows={savedShows} />} />
+      <Route path="/shows" element={<ShowsPage />} />
 
-      <Route
-        path="/shows/:showId/edit"
-        element={
-          <ShowEditPage
-            activeShow={activeShow}
-            savedShows={savedShows}
-            onSetActiveShow={setActiveShow}
-            onBack={handleBackToExplore}
-            onTitleChange={handleShowTitleChange}
-            onSave={handleSaveShow}
-            onEditShow={handleEditShow}
-            onDeleteShow={handleDeleteShow}
-            onReorderDias={handleReorderDias}
-          />
-        }
-      />
+      <Route path="/shows/:showId/edit" element={<ShowEditPage />} />
     </Routes>
   );
 }

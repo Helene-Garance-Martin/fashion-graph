@@ -126,10 +126,6 @@
   transition: transform 160ms ease;
 }
 
-.showLink:hover .edit {
-  transform: translateX(3px);
-}
-
 .empty {
   padding: 3rem 0;
 
@@ -162,12 +158,83 @@
     padding: 1.5rem;
   }
 
-  .showLink {
+  .showRow {
+    display: grid;
     grid-template-columns:
       minmax(0, 1fr)
       auto;
 
-    gap: 0.75rem 1rem;
+    align-items: center;
+
+    gap: 2rem;
+
+    padding: 1.5rem 0;
+  }
+
+  .showMain {
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
+    align-items: center;
+
+    gap: 2rem;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+    color: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+
+    gap: 1.25rem;
+  }
+
+  .editButton,
+  .deleteButton {
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+    color: inherit;
+
+    font-family: var(--font-interface);
+    font-size: 0.72rem;
+    font-weight: 500;
+
+    cursor: pointer;
+  }
+
+  .editButton {
+    transition: transform 160ms ease;
+  }
+
+  .editButton:hover {
+    transform: translateX(3px);
+  }
+
+  .deleteButton {
+    color: #777;
+
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+  }
+
+  .deleteButton:hover {
+    color: #171717;
   }
 
   .meta {
