@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
-import Header from "./components/Header";
-import GraphCanvas from "./components/GraphCanvas";
-import CuratorPanel from "./components/CuratorPanel";
-import ExhibitionPanel from "./components/ExhibitionPanel";
-import ShowEditor from "./components/ShowEditor";
+import ShowsPage from "./pages/ShowsPage";
+import ExplorePage from "./pages/ExplorePage";
+import ShowEditPage from "./pages/ShowEditPage";
+
+import { useEffect, useMemo, useState } from "react";
 
 import { getHouse, getHouses, getSource } from "./api/graphApi";
 
@@ -17,8 +17,6 @@ import type { GraphData, GraphNode } from "./types/graph";
 import type { Show } from "./types/show";
 
 import { deleteShow, getShows, saveShow } from "./store/showStore";
-
-import styles from "./App.module.css";
 
 const SOURCE_OPTIONS: SearchOption[] = [
   {
@@ -52,6 +50,8 @@ const GARMENT_BATCH_SIZE = 10;
 const ARTWORK_BATCH_SIZE = 6;
 
 function App() {
+  const navigate = useNavigate();
+
   const [houses, setHouses] = useState<ApiHouse[]>([]);
 
   const [currentSelection, setCurrentSelection] =
@@ -72,8 +72,6 @@ function App() {
   );
 
   const [graphError, setGraphError] = useState(false);
-
-  const [isCuratorOpen, setIsCuratorOpen] = useState(true);
 
   const [activeShow, setActiveShow] = useState<Show | null>(null);
   const [savedShows, setSavedShows] = useState<Show[]>(() => getShows());
@@ -260,6 +258,8 @@ function App() {
     };
 
     setActiveShow(show);
+
+    navigate(`/shows/${show.id}/edit`);
   };
 
   const handleShowTitleChange = (title: string) => {
@@ -355,89 +355,56 @@ function App() {
 
   const handleBackToExplore = () => {
     setActiveShow(null);
+    navigate("/");
   };
 
   const isSelectedNodeInExhibition =
     selectedNode !== null &&
     exhibitionItems.some((item) => item.id === selectedNode.id);
 
-  if (activeShow) {
-    return (
-      <ShowEditor
-        show={activeShow}
-        savedShows={savedShows}
-        onBack={handleBackToExplore}
-        onTitleChange={handleShowTitleChange}
-        onSave={handleSaveShow}
-        onEditShow={handleEditShow}
-        onDeleteShow={handleDeleteShow}
-        onReorderDias={handleReorderDias}
-      />
-    );
-  }
-
   return (
-    <div className={styles.page}>
-      <Header
-        searchValue={searchValue}
-        searchOptions={searchOptions}
-        onSearchChange={setSearchValue}
-        onSearchSubmit={handleSearchSubmit}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <ExplorePage
+            searchValue={searchValue}
+            searchOptions={searchOptions}
+            graphError={graphError}
+            graph={visibleGraph}
+            selectedNode={selectedNode}
+            currentSelectionLabel={currentSelection.label}
+            exhibitionItems={exhibitionItems}
+            isSelectedNodeInExhibition={isSelectedNodeInExhibition}
+            onSearchChange={setSearchValue}
+            onSearchSubmit={handleSearchSubmit}
+            onNodeSelect={handleNodeSelect}
+            onAddToExhibition={handleAddToExhibition}
+            onRemoveFromExhibition={handleRemoveFromExhibition}
+            onCreateShow={handleCreateShow}
+          />
+        }
       />
 
-      <main className={styles.main}>
-        <div className={styles.graph}>
-          {graphError ? (
-            <p>Unable to load graph.</p>
-          ) : visibleGraph ? (
-            <GraphCanvas
-              graph={visibleGraph}
-              selectedNode={selectedNode}
-              onNodeSelect={handleNodeSelect}
-            />
-          ) : (
-            <p>Loading {currentSelection.label}…</p>
-          )}
-        </div>
+      <Route path="/shows" element={<ShowsPage shows={savedShows} />} />
 
-        <aside
-          className={`${styles.curator} ${
-            !isCuratorOpen ? styles.curatorCollapsed : ""
-          }`}
-        >
-          <button
-            type="button"
-            className={styles.curatorToggle}
-            onClick={() => {
-              setIsCuratorOpen((current) => !current);
-            }}
-            aria-label={isCuratorOpen ? "Close curator" : "Open curator"}
-            aria-expanded={isCuratorOpen}
-            title={isCuratorOpen ? "Close curator" : "Open curator"}
-          >
-            {isCuratorOpen ? "›" : "‹"}
-          </button>
-
-          <div
-            className={`${styles.curatorContent} ${
-              !isCuratorOpen ? styles.curatorContentHidden : ""
-            }`}
-          >
-            <CuratorPanel
-              selectedNode={selectedNode}
-              isInExhibition={isSelectedNodeInExhibition}
-              onAddToExhibition={handleAddToExhibition}
-            />
-
-            <ExhibitionPanel
-              items={exhibitionItems}
-              onRemove={handleRemoveFromExhibition}
-              onCreateShow={handleCreateShow}
-            />
-          </div>
-        </aside>
-      </main>
-    </div>
+      <Route
+        path="/shows/:showId/edit"
+        element={
+          <ShowEditPage
+            activeShow={activeShow}
+            savedShows={savedShows}
+            onSetActiveShow={setActiveShow}
+            onBack={handleBackToExplore}
+            onTitleChange={handleShowTitleChange}
+            onSave={handleSaveShow}
+            onEditShow={handleEditShow}
+            onDeleteShow={handleDeleteShow}
+            onReorderDias={handleReorderDias}
+          />
+        }
+      />
+    </Routes>
   );
 }
 
