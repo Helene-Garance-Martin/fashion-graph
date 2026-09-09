@@ -153,88 +153,88 @@
   text-underline-offset: 0.22em;
 }
 
+.showRow {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 2rem;
+
+  padding: 1.45rem 0;
+
+  transition: background-color 160ms ease;
+}
+
+.showMain {
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+
+  align-items: baseline;
+  gap: 2rem;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+  color: inherit;
+
+  text-align: left;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.editButton,
+.deleteButton {
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  font-family: var(--font-interface);
+  font-size: 0.7rem;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.editButton {
+  color: #171717;
+
+  transition: transform 160ms ease;
+}
+
+.editButton:hover {
+  transform: translateX(3px);
+}
+
+.deleteButton {
+  color: #85817a;
+
+  text-decoration: none;
+
+  transition: color 160ms ease;
+}
+
+.deleteButton:hover {
+  color: #171717;
+}
+
 @media (max-width: 700px) {
   .page {
     padding: 1.5rem;
-  }
-
-  .showRow {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr)
-      auto;
-
-    align-items: center;
-
-    gap: 2rem;
-
-    padding: 1.5rem 0;
-  }
-
-  .showMain {
-    min-width: 0;
-
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr)
-      auto;
-
-    align-items: center;
-
-    gap: 2rem;
-
-    padding: 0;
-
-    border: 0;
-
-    background: transparent;
-    color: inherit;
-
-    text-align: left;
-
-    cursor: pointer;
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-
-    gap: 1.25rem;
-  }
-
-  .editButton,
-  .deleteButton {
-    padding: 0;
-
-    border: 0;
-
-    background: transparent;
-    color: inherit;
-
-    font-family: var(--font-interface);
-    font-size: 0.72rem;
-    font-weight: 500;
-
-    cursor: pointer;
-  }
-
-  .editButton {
-    transition: transform 160ms ease;
-  }
-
-  .editButton:hover {
-    transform: translateX(3px);
-  }
-
-  .deleteButton {
-    color: #777;
-
-    text-decoration: underline;
-    text-underline-offset: 0.22em;
-  }
-
-  .deleteButton:hover {
-    color: #171717;
   }
 
   .meta {
