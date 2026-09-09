@@ -89,11 +89,6 @@ def load_raw_met_objects():
 RAW_MET_OBJECTS = load_raw_met_objects()
 
 
-RAW_MET_PATHS = [
-    Path("data/objects.json"),
-    Path("data/sources.json"),
-]
-
 
 def iter_met_objects(value):
     """Find Met object records regardless of how the old JSON is nested."""
