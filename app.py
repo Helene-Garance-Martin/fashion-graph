@@ -206,8 +206,16 @@ driver = GraphDatabase.driver(URI, auth=(USER, PWD)) if (URI and PWD) else None
 if driver:
     try:
         with driver.session() as _s:
-            _s.run("CREATE CONSTRAINT exhibition_id IF NOT EXISTS "
-                   "FOR (e:Exhibition) REQUIRE e.id IS UNIQUE")
+            _s.run(
+                "CREATE CONSTRAINT exhibition_id IF NOT EXISTS "
+                "FOR (e:Exhibition) REQUIRE e.id IS UNIQUE"
+            )
+
+            _s.run(
+                "CREATE CONSTRAINT show_id IF NOT EXISTS "
+                "FOR (s:Show) REQUIRE s.id IS UNIQUE"
+            )
+
     except Exception:
         pass
 
@@ -530,3 +538,201 @@ def delete_exhibition(eid: str):
     if not r:
         raise HTTPException(404, f"No exhibition '{eid}'")
     return {"deleted": eid}
+
+    # ---------- shows: Twinning the Codex ----------
+
+class ShowNode(BaseModel):
+    id: str
+    label: str
+    kind: str
+
+    color: str | None = None
+
+    image: str | None = None
+    imageSmall: str | None = None
+
+    url: str | None = None
+    date: str | None = None
+    culture: str | None = None
+    description: str | None = None
+
+    artist: str | None = None
+    artistRole: str | None = None
+    artistPrefix: str | None = None
+
+    medium: str | None = None
+    dimensions: str | None = None
+    classification: str | None = None
+
+
+class DiaIn(BaseModel):
+    id: str
+    node: ShowNode
+    order: int
+    caption: str | None = None
+
+
+class ShowIn(BaseModel):
+    id: str
+    title: str = ""
+    dias: list[DiaIn]
+    createdAt: str
+    updatedAt: str
+
+
+def _show_out(show):
+    return {
+        "id": show["id"],
+        "title": show.get("title") or "",
+        "dias": json.loads(show.get("dias") or "[]"),
+        "createdAt": show.get("createdAt"),
+        "updatedAt": show.get("updatedAt"),
+    }
+
+
+@app.post("/shows")
+def create_show(show: ShowIn):
+    _require_db()
+
+    with driver.session() as s:
+        existing = s.run(
+            "MATCH (show:Show {id:$id}) "
+            "RETURN show",
+            id=show.id,
+        ).single()
+
+        if existing:
+            raise HTTPException(
+                409,
+                f"Show '{show.id}' already exists",
+            )
+
+        now = datetime.now(timezone.utc).isoformat()
+
+        result = s.run(
+            """
+            CREATE (show:Show {
+                id: $id,
+                title: $title,
+                dias: $dias,
+                createdAt: $createdAt,
+                updatedAt: $updatedAt
+            })
+            RETURN show
+            """,
+            id=show.id,
+            title=show.title,
+            dias=json.dumps([
+                dia.model_dump()
+                for dia in show.dias
+            ]),
+            createdAt=show.createdAt,
+            updatedAt=now,
+        ).single()
+
+    return _show_out(result["show"])
+
+
+@app.get("/shows")
+def list_shows():
+    _require_db()
+
+    with driver.session() as s:
+        rows = s.run(
+            """
+            MATCH (show:Show)
+            RETURN show
+            ORDER BY show.updatedAt DESC
+            """
+        )
+
+        return [
+            _show_out(row["show"])
+            for row in rows
+        ]
+
+
+@app.get("/shows/{show_id}")
+def get_show(show_id: str):
+    _require_db()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (show:Show {id:$id})
+            RETURN show
+            """,
+            id=show_id,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return _show_out(result["show"])
+
+
+@app.put("/shows/{show_id}")
+def update_show(show_id: str, show: ShowIn):
+    _require_db()
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (saved:Show {id:$id})
+
+            SET saved.title = $title,
+                saved.dias = $dias,
+                saved.updatedAt = $updatedAt
+
+            RETURN saved
+            """,
+            id=show_id,
+            title=show.title,
+            dias=json.dumps([
+                dia.model_dump()
+                for dia in show.dias
+            ]),
+            updatedAt=now,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return _show_out(result["saved"])
+
+
+@app.delete("/shows/{show_id}")
+def delete_show(show_id: str):
+    _require_db()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (show:Show {id:$id})
+
+            WITH show, show.id AS deleted
+
+            DETACH DELETE show
+
+            RETURN deleted
+            """,
+            id=show_id,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return {
+        "deleted": show_id,
+    }
