@@ -16,8 +16,6 @@ import type { GraphData, GraphNode } from "./types/graph";
 
 import type { Show } from "./types/show";
 
-import { deleteShow, getShows, saveShow } from "./store/showStore";
-
 const SOURCE_OPTIONS: SearchOption[] = [
   {
     id: "sourceworld:Ancient Greek sculpture",
@@ -72,9 +70,6 @@ function App() {
   );
 
   const [graphError, setGraphError] = useState(false);
-
-  const [activeShow, setActiveShow] = useState<Show | null>(null);
-  const [savedShows, setSavedShows] = useState<Show[]>(() => getShows());
 
   const houseOptions: SearchOption[] = houses.map((house) => ({
     id: house.id,
@@ -262,102 +257,6 @@ function App() {
         draftShow: show,
       },
     });
-  };
-
-  const handleShowTitleChange = (title: string) => {
-    setActiveShow((currentShow) => {
-      if (!currentShow) {
-        return null;
-      }
-
-      return {
-        ...currentShow,
-
-        title,
-
-        updatedAt: new Date().toISOString(),
-      };
-    });
-  };
-
-  const handleSaveShow = () => {
-    if (!activeShow) {
-      return;
-    }
-
-    const savedShow = saveShow(activeShow);
-
-    setActiveShow(savedShow);
-
-    setSavedShows(getShows());
-  };
-
-  const handleEditShow = (show: Show) => {
-    setActiveShow(show);
-  };
-
-  const handleDeleteShow = (show: Show) => {
-    const displayTitle = show.title.trim() || "Untitled Show";
-
-    const confirmed = window.confirm(
-      `Delete "${displayTitle}"?\n\nThis will remove the show and its ${show.dias.length} dias.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    deleteShow(show.id);
-
-    const remainingShows = getShows();
-
-    setSavedShows(remainingShows);
-
-    if (activeShow?.id === show.id) {
-      setActiveShow(remainingShows[0] ?? null);
-    }
-  };
-
-  const handleReorderDias = (activeDiaId: string, overDiaId: string) => {
-    setActiveShow((currentShow) => {
-      if (!currentShow) {
-        return null;
-      }
-
-      const oldIndex = currentShow.dias.findIndex(
-        (dia) => dia.id === activeDiaId,
-      );
-
-      const newIndex = currentShow.dias.findIndex(
-        (dia) => dia.id === overDiaId,
-      );
-
-      if (oldIndex === -1 || newIndex === -1) {
-        return currentShow;
-      }
-
-      const reordered = [...currentShow.dias];
-
-      const [movedDia] = reordered.splice(oldIndex, 1);
-
-      reordered.splice(newIndex, 0, movedDia);
-
-      const dias = reordered.map((dia, index) => ({
-        ...dia,
-        order: index,
-      }));
-
-      return {
-        ...currentShow,
-        dias,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-  };
-
-  const handleBackToExplore = () => {
-    setActiveShow(null);
-    navigate("/");
   };
 
   const isSelectedNodeInExhibition =
