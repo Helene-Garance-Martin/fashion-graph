@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useShows } from "../hooks/useShows";
@@ -7,9 +8,15 @@ import styles from "./ShowsPage.module.css";
 function ShowsPage() {
   const navigate = useNavigate();
 
-  const { shows, remove } = useShows();
+  const { shows, loading, error, remove, refreshShows } = useShows();
 
-  const handleDelete = (showId: string, title: string, diaCount: number) => {
+  const [deletingShowId, setDeletingShowId] = useState<string | null>(null);
+
+  const handleDelete = async (
+    showId: string,
+    title: string,
+    diaCount: number,
+  ) => {
     const displayTitle = title.trim() || "Untitled Show";
 
     const confirmed = window.confirm(
@@ -20,7 +27,24 @@ function ShowsPage() {
       return;
     }
 
-    remove(showId);
+    setDeletingShowId(showId);
+
+    try {
+      await remove(showId);
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unknown API error.";
+
+      window.alert(`Couldn't delete this Show.\n\n${message}`);
+    } finally {
+      setDeletingShowId(null);
+    }
+  };
+
+  const handleRetry = async () => {
+    await refreshShows();
   };
 
   return (
@@ -41,7 +65,28 @@ function ShowsPage() {
         <h1 className={styles.heading}>My Shows</h1>
       </header>
 
-      {shows.length === 0 ? (
+      {error && (
+        <section className={styles.empty}>
+          <p className={styles.emptyText}>
+            Couldn&apos;t refresh your Shows. Your locally saved Shows are still
+            available.
+          </p>
+
+          <button
+            type="button"
+            className={styles.createLink}
+            onClick={handleRetry}
+          >
+            Try again →
+          </button>
+        </section>
+      )}
+
+      {loading && shows.length === 0 ? (
+        <section className={styles.empty}>
+          <p className={styles.emptyText}>Loading Shows…</p>
+        </section>
+      ) : shows.length === 0 ? (
         <section className={styles.empty}>
           <p className={styles.emptyText}>No saved shows yet.</p>
 
@@ -51,45 +96,51 @@ function ShowsPage() {
         </section>
       ) : (
         <ul className={styles.list}>
-          {shows.map((show) => (
-            <li key={show.id} className={styles.item}>
-              <div className={styles.showRow}>
-                <button
-                  type="button"
-                  className={styles.showMain}
-                  onClick={() => navigate(`/shows/${show.id}/edit`)}
-                >
-                  <span className={styles.title}>
-                    {show.title.trim() || "Untitled Show"}
-                  </span>
+          {shows.map((show) => {
+            const isDeleting = deletingShowId === show.id;
 
-                  <span className={styles.meta}>
-                    {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
-                  </span>
-                </button>
-
-                <div className={styles.actions}>
+            return (
+              <li key={show.id} className={styles.item}>
+                <div className={styles.showRow}>
                   <button
                     type="button"
-                    className={styles.editButton}
+                    className={styles.showMain}
                     onClick={() => navigate(`/shows/${show.id}/edit`)}
                   >
-                    Edit →
+                    <span className={styles.title}>
+                      {show.title.trim() || "Untitled Show"}
+                    </span>
+
+                    <span className={styles.meta}>
+                      {show.dias.length}{" "}
+                      {show.dias.length === 1 ? "dia" : "dias"}
+                    </span>
                   </button>
 
-                  <button
-                    type="button"
-                    className={styles.deleteButton}
-                    onClick={() =>
-                      handleDelete(show.id, show.title, show.dias.length)
-                    }
-                  >
-                    Delete
-                  </button>
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.editButton}
+                      onClick={() => navigate(`/shows/${show.id}/edit`)}
+                    >
+                      Edit →
+                    </button>
+
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      disabled={isDeleting}
+                      onClick={() =>
+                        void handleDelete(show.id, show.title, show.dias.length)
+                      }
+                    >
+                      {isDeleting ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>

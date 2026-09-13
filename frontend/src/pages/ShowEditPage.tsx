@@ -8,7 +8,6 @@ import {
 } from "react-router-dom";
 
 import ShowEditor from "../components/ShowEditor";
-
 import { useShows } from "../hooks/useShows";
 
 import type { Show } from "../types/show";
@@ -18,14 +17,11 @@ type RouteState = {
 };
 
 function ShowEditPage() {
-  const { showId } = useParams<{
-    showId: string;
-  }>();
-
+  const { showId } = useParams<{ showId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { shows, save, remove, find } = useShows();
+  const { shows, loading, error, save, remove, find } = useShows();
 
   const routeState = location.state as RouteState | null;
 
@@ -36,28 +32,25 @@ function ShowEditPage() {
       return draftShow;
     }
 
-    if (!showId) {
-      return null;
-    }
+    if (!showId) return null;
 
     return find(showId);
   });
 
   useEffect(() => {
-    if (!showId) {
-      return;
-    }
-
-    if (show?.id === showId) {
-      return;
-    }
+    if (!showId) return;
+    if (show?.id === showId) return;
 
     if (draftShow && draftShow.id === showId) {
       setShow(draftShow);
       return;
     }
 
-    setShow(find(showId));
+    const storedShow = find(showId);
+
+    if (storedShow) {
+      setShow(storedShow);
+    }
   }, [showId, show?.id, draftShow, find]);
 
   const handleBack = () => {
@@ -66,9 +59,7 @@ function ShowEditPage() {
 
   const handleTitleChange = (title: string) => {
     setShow((currentShow) => {
-      if (!currentShow) {
-        return null;
-      }
+      if (!currentShow) return null;
 
       return {
         ...currentShow,
@@ -78,14 +69,23 @@ function ShowEditPage() {
     });
   };
 
-  const handleSave = () => {
-    if (!show) {
-      return;
+  const handleSave = async () => {
+    if (!show) return;
+
+    try {
+      const savedShow = await save(show);
+
+      setShow(savedShow);
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unknown API error.";
+
+      window.alert(
+        `Couldn't save this Show.\n\n${message}\n\nYour changes are still here.`,
+      );
     }
-
-    const savedShow = save(show);
-
-    setShow(savedShow);
   };
 
   const handleEditShow = (selectedShow: Show) => {
@@ -94,42 +94,47 @@ function ShowEditPage() {
     navigate(`/shows/${selectedShow.id}/edit`);
   };
 
-  const handleDeleteShow = (showToDelete: Show) => {
+  const handleDeleteShow = async (showToDelete: Show) => {
     const displayTitle = showToDelete.title.trim() || "Untitled Show";
 
     const confirmed = window.confirm(
       `Delete "${displayTitle}"?\n\nThis will remove the show and its ${showToDelete.dias.length} dias.`,
     );
 
-    if (!confirmed) {
-      return;
+    if (!confirmed) return;
+
+    try {
+      const remainingShows = await remove(showToDelete.id);
+
+      if (showToDelete.id !== show?.id) {
+        return;
+      }
+
+      const nextShow = remainingShows[0];
+
+      if (nextShow) {
+        setShow(nextShow);
+
+        navigate(`/shows/${nextShow.id}/edit`);
+
+        return;
+      }
+
+      setShow(null);
+      navigate("/shows");
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unknown API error.";
+
+      window.alert(`Couldn't delete this Show.\n\n${message}`);
     }
-
-    const remainingShows = remove(showToDelete.id);
-
-    if (showToDelete.id !== show?.id) {
-      return;
-    }
-
-    const nextShow = remainingShows[0];
-
-    if (nextShow) {
-      setShow(nextShow);
-
-      navigate(`/shows/${nextShow.id}/edit`);
-
-      return;
-    }
-
-    setShow(null);
-    navigate("/shows");
   };
 
   const handleReorderDias = (activeDiaId: string, overDiaId: string) => {
     setShow((currentShow) => {
-      if (!currentShow) {
-        return null;
-      }
+      if (!currentShow) return null;
 
       const oldIndex = currentShow.dias.findIndex(
         (dia) => dia.id === activeDiaId,
@@ -167,15 +172,21 @@ function ShowEditPage() {
   }
 
   if (!show || show.id !== showId) {
-    const storedShow = find(showId);
-
-    const routeDraft = draftShow?.id === showId ? draftShow : null;
-
-    if (!storedShow && !routeDraft) {
-      return <Navigate to="/shows" replace />;
+    if (loading) {
+      return <p>Loading Show…</p>;
     }
 
-    return <p>Loading show…</p>;
+    const storedShow = find(showId);
+
+    if (storedShow) {
+      return <p>Loading Show…</p>;
+    }
+
+    if (error) {
+      return <p>Couldn&apos;t load this Show. {error}</p>;
+    }
+
+    return <Navigate to="/shows" replace />;
   }
 
   return (
