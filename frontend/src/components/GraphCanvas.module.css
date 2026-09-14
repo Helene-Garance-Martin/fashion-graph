@@ -1,0 +1,223 @@
+.section {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+}
+
+.graphHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+
+  flex: 0 0 auto;
+
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.heading {
+  margin: 0;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hint {
+  margin: 0;
+
+  color: #8a8882;
+
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+.wrapper {
+  position: relative;
+
+  flex: 1 1 auto;
+
+  width: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  background: #fff;
+}
+
+.svg {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  background: #fff;
+
+  cursor: grab;
+
+  touch-action: none;
+  user-select: none;
+}
+
+.svg:active {
+  cursor: grabbing;
+}
+
+/* Floating graph camera controls */
+
+.controls {
+  position: absolute;
+  left: 1rem;
+  bottom: 4.2rem;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  padding: 0.35rem;
+
+  border: 1px solid #ddd7ca;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.05),
+    0 10px 24px rgba(0, 0, 0, 0.08);
+
+  backdrop-filter: blur(10px);
+}
+
+.controlButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.25rem;
+  height: 2.25rem;
+
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+
+  background: transparent;
+  color: #2a2a2a;
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.controlButton:hover {
+  background: #f1efe8;
+}
+
+.controlButton:active {
+  transform: scale(0.96);
+}
+
+.controlButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(201, 162, 75, 0.35);
+  background: #f6f1e3;
+}
+
+.controlIcon {
+  display: inline-block;
+  line-height: 1;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.controlText {
+  min-width: auto;
+
+  padding-inline: 0.7rem;
+}
+
+/* Curatorial hover label */
+
+.tooltip {
+  position: absolute;
+
+  z-index: 30;
+
+  width: 190px;
+
+  padding: 0.75rem;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border: 1px solid #d8d8d8;
+  border-radius: 7px;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+
+  font-size: 0.8rem;
+  line-height: 1.35;
+
+  pointer-events: none;
+}
+
+.tooltipImage {
+  display: block;
+
+  width: auto;
+  max-width: 120px;
+
+  height: auto;
+  max-height: 145px;
+
+  margin-bottom: 0.6rem;
+
+  object-fit: contain;
+}
+
+.tooltipKind {
+  margin: 0 0 0.3rem;
+
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tooltipTitle {
+  margin: 0 0 0.3rem;
+
+  font-weight: 600;
+}
+
+.tooltipArtist {
+  margin: 0 0 0.25rem;
+
+  font-style: italic;
+}
+
+.tooltipMeta {
+  margin: 0.1rem 0;
+}
+
+.tooltipDescription {
+  margin: 0.45rem 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .controlButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,31 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --font-brand: "Tenor Sans", sans-serif;
+  --font-curatorial: "Tenor Sans", sans-serif;
+  --font-interface: "Tenor Sans", sans-serif;
+
+  font-family: var(--font-interface);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+
+  /* font-family: var(--font-interface);
+  font-weight: 300; */
+
+  color: #171717;
+  background: #fff;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

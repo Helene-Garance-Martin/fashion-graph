@@ -1,0 +1,4 @@
+.search {
+  width: min(360px, 40vw);
+  padding: 0.65rem 0.8rem;
+}

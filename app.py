@@ -34,6 +34,158 @@ HOUSE_COLORS = {
 GOLD = "#c9a24b"
 MARBLE = "#d8cdb8"
 
+STATIC_DATA_PATH = Path("docs/data.json")
+
+
+def load_static_data():
+    if not STATIC_DATA_PATH.exists():
+        return None
+
+    with STATIC_DATA_PATH.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+STATIC_DATA = load_static_data()
+
+RAW_MET_PATHS = [
+    Path("data/objects.json"),
+    Path("data/sources.json"),
+]
+
+
+def iter_met_objects(value):
+    """Find Met object records regardless of how the old JSON is nested."""
+    if isinstance(value, dict):
+        if value.get("objectID") is not None:
+            yield value
+
+        for child in value.values():
+            yield from iter_met_objects(child)
+
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_met_objects(child)
+
+
+def load_raw_met_objects():
+    objects = {}
+
+    for path in RAW_MET_PATHS:
+        if not path.exists():
+            continue
+
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        for obj in iter_met_objects(payload):
+            object_id = obj.get("objectID")
+
+            if object_id is not None:
+                objects[str(object_id)] = obj
+
+    return objects
+
+
+RAW_MET_OBJECTS = load_raw_met_objects()
+
+
+
+def iter_met_objects(value):
+    """Find Met object records regardless of how the old JSON is nested."""
+    if isinstance(value, dict):
+        if value.get("objectID") is not None:
+            yield value
+
+        for child in value.values():
+            yield from iter_met_objects(child)
+
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_met_objects(child)
+
+
+def load_raw_met_objects():
+    objects = {}
+
+    for path in RAW_MET_PATHS:
+        if not path.exists():
+            continue
+
+        with path.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+
+        for obj in iter_met_objects(payload):
+            object_id = obj.get("objectID")
+
+            if object_id is not None:
+                objects[str(object_id)] = obj
+
+    return objects
+
+
+RAW_MET_OBJECTS = load_raw_met_objects()
+
+
+def enrich_static_graph(graph):
+    if not graph:
+        return graph
+
+    for node in graph.get("nodes", []):
+        if node.get("type") not in {"garment", "artwork"}:
+            continue
+
+        _, _, object_id = node.get("id", "").partition(":")
+
+        raw = RAW_MET_OBJECTS.get(object_id)
+
+        if not raw:
+            continue
+
+        node["artist"] = raw.get("artistDisplayName") or ""
+        node["artistRole"] = raw.get("artistRole") or ""
+        node["artistPrefix"] = raw.get("artistPrefix") or ""
+
+        node["date"] = (
+            raw.get("objectDate")
+            or node.get("date")
+            or ""
+        )
+
+        node["medium"] = (
+            raw.get("medium")
+            or node.get("medium")
+            or ""
+        )
+
+        node["dimensions"] = (
+            raw.get("dimensions")
+            or node.get("dimensions")
+            or ""
+        )
+
+        node["classification"] = (
+            raw.get("classification")
+            or node.get("classification")
+            or ""
+        )
+
+        if not node.get("culture"):
+            node["culture"] = raw.get("culture") or ""
+
+        if node.get("type") == "artwork":
+            node["imageSmall"] = (
+                raw.get("primaryImageSmall")
+                or ""
+            )
+
+            node["image"] = (
+                raw.get("primaryImage")
+                or node.get("image")
+                or ""
+            )
+
+    return graph
+
 
 def load_env():
     env = Path(".env")
@@ -54,8 +206,16 @@ driver = GraphDatabase.driver(URI, auth=(USER, PWD)) if (URI and PWD) else None
 if driver:
     try:
         with driver.session() as _s:
-            _s.run("CREATE CONSTRAINT exhibition_id IF NOT EXISTS "
-                   "FOR (e:Exhibition) REQUIRE e.id IS UNIQUE")
+            _s.run(
+                "CREATE CONSTRAINT exhibition_id IF NOT EXISTS "
+                "FOR (e:Exhibition) REQUIRE e.id IS UNIQUE"
+            )
+
+            _s.run(
+                "CREATE CONSTRAINT show_id IF NOT EXISTS "
+                "FOR (s:Show) REQUIRE s.id IS UNIQUE"
+            )
+
     except Exception:
         pass
 
@@ -105,16 +265,55 @@ def index():
 
 @app.get("/health")
 def health():
-    return {"ok": True, "neo4j_configured": driver is not None}
+    neo4j_connected = False
+
+    if driver:
+        try:
+            driver.verify_connectivity()
+            neo4j_connected = True
+        except Exception:
+            neo4j_connected = False
+
+    return {
+        "ok": True,
+        "neo4j_configured": driver is not None,
+        "neo4j_connected": neo4j_connected,
+        "static_data_available": STATIC_DATA is not None,
+    }
 
 
 @app.get("/houses")
 def houses():
-    _require_db()
-    with driver.session() as s:
-        rows = s.run("MATCH (d:Designer) RETURN d.name AS name ORDER BY name")
-        return [{"id": f"designer:{r['name']}", "label": r["name"],
-                 "color": HOUSE_COLORS.get(r["name"], "#cccccc")} for r in rows]
+    if driver:
+        try:
+            with driver.session() as s:
+                rows = s.run(
+                    "MATCH (d:Designer) "
+                    "RETURN d.name AS name "
+                    "ORDER BY name"
+                )
+
+                return [
+                    {
+                        "id": f"designer:{r['name']}",
+                        "label": r["name"],
+                        "color": HOUSE_COLORS.get(
+                            r["name"],
+                            "#cccccc",
+                        ),
+                    }
+                    for r in rows
+                ]
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        return STATIC_DATA["houses"]
+
+    raise HTTPException(
+        503,
+        "Neither Neo4j nor static graph data is available.",
+    )
 
 
 HOUSE_Q = """
@@ -130,28 +329,70 @@ RETURN d AS designer, garments, collect({sw: sw, arts: arts}) AS sourceGroups
 
 @app.get("/house/{name}")
 def house(name: str):
-    _require_db()
-    with driver.session() as s:
-        rec = s.run(HOUSE_Q, name=name).single()
-    if not rec or rec["designer"] is None:
-        raise HTTPException(404, f"No house named '{name}'")
-    d = rec["designer"]
-    nodes = {node_id(d): to_node(d)}
-    links = []
-    for g in rec["garments"]:
-        nodes[node_id(g)] = to_node(g)
-        links.append({"source": node_id(d), "target": node_id(g), "kind": "created"})
-    for grp in rec["sourceGroups"]:
-        sw = grp.get("sw")
-        if not sw:
-            continue
-        nodes[node_id(sw)] = to_node(sw)
-        links.append({"source": node_id(sw), "target": node_id(d), "kind": "inspired"})
-        for a in grp.get("arts") or []:
-            nodes[node_id(a)] = to_node(a)
-            links.append({"source": node_id(a), "target": node_id(sw), "kind": "example_of"})
-    return {"nodes": list(nodes.values()), "links": links}
+    if driver:
+        try:
+            with driver.session() as s:
+                rec = s.run(HOUSE_Q, name=name).single()
 
+            if rec and rec["designer"] is not None:
+                d = rec["designer"]
+
+                nodes = {
+                    node_id(d): to_node(d)
+                }
+
+                links = []
+
+                for g in rec["garments"]:
+                    nodes[node_id(g)] = to_node(g)
+
+                    links.append({
+                        "source": node_id(d),
+                        "target": node_id(g),
+                        "kind": "created",
+                    })
+
+                for grp in rec["sourceGroups"]:
+                    sw = grp.get("sw")
+
+                    if not sw:
+                        continue
+
+                    nodes[node_id(sw)] = to_node(sw)
+
+                    links.append({
+                        "source": node_id(sw),
+                        "target": node_id(d),
+                        "kind": "inspired",
+                    })
+
+                    for a in grp.get("arts") or []:
+                        nodes[node_id(a)] = to_node(a)
+
+                        links.append({
+                            "source": node_id(a),
+                            "target": node_id(sw),
+                            "kind": "example_of",
+                        })
+
+                return {
+                    "nodes": list(nodes.values()),
+                    "links": links,
+                }
+
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        static_house = STATIC_DATA["house"].get(name)
+
+        if static_house:
+            return enrich_static_graph(static_house)
+
+    raise HTTPException(
+        404,
+        f"No house named '{name}'",
+    )
 
 SOURCE_Q = """
 MATCH (sw:SourceWorld {name: $name})
@@ -164,22 +405,56 @@ RETURN sw AS source, arts, collect(DISTINCT d) AS designers
 
 @app.get("/source/{name}")
 def source(name: str):
-    _require_db()
-    with driver.session() as s:
-        rec = s.run(SOURCE_Q, name=name).single()
-    if not rec or rec["source"] is None:
-        raise HTTPException(404, f"No source-world named '{name}'")
-    sw = rec["source"]
-    nodes = {node_id(sw): to_node(sw)}
-    links = []
-    for a in rec["arts"]:
-        nodes[node_id(a)] = to_node(a)
-        links.append({"source": node_id(a), "target": node_id(sw), "kind": "example_of"})
-    for d in rec["designers"]:
-        nodes[node_id(d)] = to_node(d)
-        links.append({"source": node_id(sw), "target": node_id(d), "kind": "inspired"})
-    return {"nodes": list(nodes.values()), "links": links}
+    if driver:
+        try:
+            with driver.session() as s:
+                rec = s.run(SOURCE_Q, name=name).single()
 
+            if rec and rec["source"] is not None:
+                sw = rec["source"]
+
+                nodes = {
+                    node_id(sw): to_node(sw)
+                }
+
+                links = []
+
+                for a in rec["arts"]:
+                    nodes[node_id(a)] = to_node(a)
+
+                    links.append({
+                        "source": node_id(a),
+                        "target": node_id(sw),
+                        "kind": "example_of",
+                    })
+
+                for d in rec["designers"]:
+                    nodes[node_id(d)] = to_node(d)
+
+                    links.append({
+                        "source": node_id(sw),
+                        "target": node_id(d),
+                        "kind": "inspired",
+                    })
+
+                return {
+                    "nodes": list(nodes.values()),
+                    "links": links,
+                }
+
+        except Exception:
+            pass
+
+    if STATIC_DATA:
+        static_source = STATIC_DATA["source"].get(name)
+
+        if static_source:
+            return enrich_static_graph(static_source)
+
+    raise HTTPException(
+        404,
+        f"No source-world named '{name}'",
+    )
 
 # ---------- exhibitions: Create / Read / Update / Delete ----------
 # A saved show. Its items are stored as a JSON blob (label, image, url, type...)
@@ -263,3 +538,201 @@ def delete_exhibition(eid: str):
     if not r:
         raise HTTPException(404, f"No exhibition '{eid}'")
     return {"deleted": eid}
+
+    # ---------- shows: Twinning the Codex ----------
+
+class ShowNode(BaseModel):
+    id: str
+    label: str
+    kind: str
+
+    color: str | None = None
+
+    image: str | None = None
+    imageSmall: str | None = None
+
+    url: str | None = None
+    date: str | None = None
+    culture: str | None = None
+    description: str | None = None
+
+    artist: str | None = None
+    artistRole: str | None = None
+    artistPrefix: str | None = None
+
+    medium: str | None = None
+    dimensions: str | None = None
+    classification: str | None = None
+
+
+class DiaIn(BaseModel):
+    id: str
+    node: ShowNode
+    order: int
+    caption: str | None = None
+
+
+class ShowIn(BaseModel):
+    id: str
+    title: str = ""
+    dias: list[DiaIn]
+    createdAt: str
+    updatedAt: str
+
+
+def _show_out(show):
+    return {
+        "id": show["id"],
+        "title": show.get("title") or "",
+        "dias": json.loads(show.get("dias") or "[]"),
+        "createdAt": show.get("createdAt"),
+        "updatedAt": show.get("updatedAt"),
+    }
+
+
+@app.post("/shows")
+def create_show(show: ShowIn):
+    _require_db()
+
+    with driver.session() as s:
+        existing = s.run(
+            "MATCH (show:Show {id:$id}) "
+            "RETURN show",
+            id=show.id,
+        ).single()
+
+        if existing:
+            raise HTTPException(
+                409,
+                f"Show '{show.id}' already exists",
+            )
+
+        now = datetime.now(timezone.utc).isoformat()
+
+        result = s.run(
+            """
+            CREATE (show:Show {
+                id: $id,
+                title: $title,
+                dias: $dias,
+                createdAt: $createdAt,
+                updatedAt: $updatedAt
+            })
+            RETURN show
+            """,
+            id=show.id,
+            title=show.title,
+            dias=json.dumps([
+                dia.model_dump()
+                for dia in show.dias
+            ]),
+            createdAt=show.createdAt,
+            updatedAt=now,
+        ).single()
+
+    return _show_out(result["show"])
+
+
+@app.get("/shows")
+def list_shows():
+    _require_db()
+
+    with driver.session() as s:
+        rows = s.run(
+            """
+            MATCH (show:Show)
+            RETURN show
+            ORDER BY show.updatedAt DESC
+            """
+        )
+
+        return [
+            _show_out(row["show"])
+            for row in rows
+        ]
+
+
+@app.get("/shows/{show_id}")
+def get_show(show_id: str):
+    _require_db()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (show:Show {id:$id})
+            RETURN show
+            """,
+            id=show_id,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return _show_out(result["show"])
+
+
+@app.put("/shows/{show_id}")
+def update_show(show_id: str, show: ShowIn):
+    _require_db()
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (saved:Show {id:$id})
+
+            SET saved.title = $title,
+                saved.dias = $dias,
+                saved.updatedAt = $updatedAt
+
+            RETURN saved
+            """,
+            id=show_id,
+            title=show.title,
+            dias=json.dumps([
+                dia.model_dump()
+                for dia in show.dias
+            ]),
+            updatedAt=now,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return _show_out(result["saved"])
+
+
+@app.delete("/shows/{show_id}")
+def delete_show(show_id: str):
+    _require_db()
+
+    with driver.session() as s:
+        result = s.run(
+            """
+            MATCH (show:Show {id:$id})
+
+            WITH show, show.id AS deleted
+
+            DETACH DELETE show
+
+            RETURN deleted
+            """,
+            id=show_id,
+        ).single()
+
+    if not result:
+        raise HTTPException(
+            404,
+            f"No show '{show_id}'",
+        )
+
+    return {
+        "deleted": show_id,
+    }

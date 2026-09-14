@@ -1,0 +1,154 @@
+.panel {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+
+  border-top: 1px solid #ddd;
+}
+
+.heading {
+  margin: 0 0 1rem;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.empty {
+  font-size: 0.9rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  margin: 0;
+  padding: 0 0.4rem 0 0;
+
+  list-style: none;
+
+  scrollbar-width: thin;
+  scrollbar-color: #c8c6c0 transparent;
+}
+
+.list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: #c8c6c0;
+  border-radius: 999px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 0.9rem 0;
+
+  border-bottom: 1px solid #ddd;
+}
+
+.label {
+  min-width: 0;
+
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.remove {
+  flex: 0 0 auto;
+
+  /* padding: 0; */
+
+  border: 0;
+
+  background: none;
+
+  font: inherit;
+  font-size: 0.8rem;
+
+  cursor: pointer;
+
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.count {
+  font-family: var(--font-interface);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #777;
+}
+
+.createShow {
+  width: 100%;
+
+  margin-top: 1.25rem;
+  padding: 0.8rem 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  border: 1px solid #1c1c1c;
+  border-radius: 10px;
+
+  background: #fff;
+  color: #171717;
+
+  font-family: var(--font-interface);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.createShow:hover:not(:disabled) {
+  background: #171717;
+  color: #fff;
+}
+
+.createShow:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.createShow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.arrow {
+  font-size: 1rem;
+
+  transition: transform 180ms ease;
+}
+
+.createShow:hover:not(:disabled) .arrow {
+  transform: translateX(3px);
+}
