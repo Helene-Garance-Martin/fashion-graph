@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+
 import { getHealth } from "../api/graphApi";
+
 import type { HealthResponse } from "../api/graphApi";
 
 function ApiStatus() {
@@ -8,13 +10,31 @@ function ApiStatus() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    getHealth()
-      .then((data) => {
+    let isActive = true;
+
+    const checkHealth = async () => {
+      try {
+        const data = await getHealth();
+
+        if (!isActive) return;
+
         setHealth(data);
-      })
-      .catch(() => {
+        setError(false);
+      } catch {
+        if (!isActive) return;
+
         setError(true);
-      });
+      }
+    };
+
+    void checkHealth();
+
+    const intervalId = window.setInterval(checkHealth, 10_000);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   if (error) {
