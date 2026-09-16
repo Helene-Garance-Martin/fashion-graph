@@ -47,6 +47,9 @@ function baseRadius(node: GraphNode) {
     case "SOURCE":
       return 16;
 
+    case "CONCEPT":
+      return 13;
+
     case "GARMENT":
       return 7;
 
@@ -464,6 +467,10 @@ function GraphCanvas({ graph, selectedNode, onNodeSelect }: GraphCanvasProps) {
           return d.color ?? "#c9a24b";
         }
 
+        if (d.kind === "CONCEPT") {
+          return "#f4efe6";
+        }
+
         return "#e3dccf";
       })
       .attr("fill-opacity", (d) => (d.kind === "GARMENT" ? 0.45 : 1));
@@ -489,18 +496,41 @@ function GraphCanvas({ graph, selectedNode, onNodeSelect }: GraphCanvasProps) {
       .attr("class", "node-outline")
       .attr("r", (d) => baseRadius(d))
       .attr("fill", "none")
-      .attr("stroke", (d) => (d.kind === "ARTWORK" ? "#b8b0a4" : "none"))
-      .attr("stroke-width", (d) => (d.kind === "ARTWORK" ? 0.8 : 0))
+      .attr("stroke", (d) => {
+        if (d.kind === "ARTWORK") {
+          return "#b8b0a4";
+        }
+
+        if (d.kind === "CONCEPT") {
+          return "#8f8678";
+        }
+
+        return "none";
+      })
+      .attr("stroke-width", (d) => {
+        if (d.kind === "ARTWORK") {
+          return 0.8;
+        }
+
+        if (d.kind === "CONCEPT") {
+          return 1.2;
+        }
+
+        return 0;
+      })
       .attr("vector-effect", "non-scaling-stroke")
       .attr("pointer-events", "none");
 
     nodeGroup
-      .filter((d) => d.kind === "DESIGNER" || d.kind === "SOURCE")
+      .filter(
+        (d) =>
+          d.kind === "DESIGNER" || d.kind === "SOURCE" || d.kind === "CONCEPT",
+      )
       .append("text")
       .text((d) => d.label)
       .attr("text-anchor", "middle")
       .attr("y", (d) => baseRadius(d) + 18)
-      .attr("font-size", 14)
+      .attr("font-size", (d) => (d.kind === "CONCEPT" ? 12 : 14))
       .attr("pointer-events", "none");
 
     const simulation = d3

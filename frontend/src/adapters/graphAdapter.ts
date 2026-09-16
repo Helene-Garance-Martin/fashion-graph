@@ -20,6 +20,9 @@ function toNodeKind(type: ApiNode["type"]): GraphNodeKind {
 
     case "artwork":
       return "ARTWORK";
+
+    case "concept":
+      return "CONCEPT";
   }
 }
 
@@ -27,7 +30,10 @@ function toGraphNode(node: ApiNode): GraphNode {
   const graphNode: GraphNode = {
     id: node.id,
 
-    label: node.label === "Spanish painting" ? "Spanish paintings" : node.label,
+    label:
+      node.label === "Spanish painting"
+        ? "Spanish paintings"
+        : node.label,
 
     kind: toNodeKind(node.type),
 
@@ -81,10 +87,20 @@ function toRelationship(
         type: "INSPIRED",
         provenance: "CURATED",
       };
+
+    case "has_concept":
+      return {
+        source: link.source,
+        target: link.target,
+        type: "HAS_CONCEPT",
+        provenance: "CURATED",
+      };
   }
 }
 
-export function toGraphData(response: ApiGraphResponse): GraphData {
+export function toGraphData(
+  response: ApiGraphResponse,
+): GraphData {
   return {
     nodes: response.nodes.map(toGraphNode),
     relationships: response.links.map(toRelationship),
