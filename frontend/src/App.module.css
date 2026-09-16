@@ -45,23 +45,13 @@
   overscroll-behavior: contain;
 
   padding-bottom: 4.5rem;
-    box-sizing: border-box;
+  box-sizing: border-box;
 
   background: #f7f7f7;
 
   transition:
-    width 360ms cubic-bezier(
-      0.22,
-      1,
-      0.36,
-      1
-    ),
-    flex-basis 360ms cubic-bezier(
-      0.22,
-      1,
-      0.36,
-      1
-    );
+    width 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    flex-basis 360ms cubic-bezier(0.22, 1, 0.36, 1);
 
   scrollbar-width: thin;
   scrollbar-color: #c8c6c0 transparent;
@@ -78,18 +68,16 @@
   width: 360px;
   min-width: 360px;
 
+  box-sizing: border-box;
+  padding: 0.25rem 1.25rem 1.5rem;
+
   opacity: 1;
   visibility: visible;
   transform: translateX(0);
 
   transition:
     opacity 150ms ease,
-    transform 240ms cubic-bezier(
-      0.22,
-      1,
-      0.36,
-      1
-    ),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 0s;
 }
 
@@ -103,12 +91,7 @@
 
   transition:
     opacity 150ms ease,
-    transform 240ms cubic-bezier(
-      0.22,
-      1,
-      0.36,
-      1
-    ),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 240ms;
 }
 
@@ -132,12 +115,7 @@
   border: 1px solid #d7d5cf;
   border-radius: 8px;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    0.94
-  );
+  background: rgba(255, 255, 255, 0.94);
 
   color: #111;
 
@@ -156,13 +134,10 @@
   background: #fff;
 }
 
-.curatorCollapsed
-.curatorToggle {
+.curatorCollapsed .curatorToggle {
   float: none;
 
-  margin:
-    0.75rem
-    auto;
+  margin: 0.75rem auto;
 }
 
 .curator::-webkit-scrollbar {
@@ -178,10 +153,7 @@
   border-radius: 999px;
 }
 
-@media (
-  prefers-reduced-motion:
-  reduce
-) {
+@media (prefers-reduced-motion: reduce) {
   .curator,
   .curatorContent {
     transition: none;
