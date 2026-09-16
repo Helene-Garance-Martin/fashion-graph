@@ -1,4 +1,4 @@
-import type { ApiGraphResponse, ApiHouse } from "../types/api";
+import type { ApiConcept, ApiGraphResponse, ApiHouse } from "../types/api";
 
 import { API_URL } from "./config";
 
@@ -44,6 +44,28 @@ export async function getSource(name: string): Promise<ApiGraphResponse> {
 
   if (!response.ok) {
     throw new Error(`Source request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getConcepts(): Promise<ApiConcept[]> {
+  const response = await fetch(`${API_URL}/concepts`);
+
+  if (!response.ok) {
+    throw new Error(`Concepts request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getConcept(name: string): Promise<ApiGraphResponse> {
+  const response = await fetch(
+    `${API_URL}/concept/${encodeURIComponent(name)}`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Concept request failed: ${response.status}`);
   }
 
   return response.json();

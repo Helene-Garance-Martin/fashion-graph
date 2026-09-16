@@ -6,11 +6,22 @@ import ShowEditPage from "./pages/ShowEditPage";
 
 import { useEffect, useMemo, useState } from "react";
 
-import { getHouse, getHouses, getSource } from "./api/graphApi";
+import {
+  getConcept,
+  getConcepts,
+  getHouse,
+  getHouses,
+  getSource,
+} from "./api/graphApi";
 
 import { toGraphData } from "./adapters/graphAdapter";
 
-import type { ApiHouse, SearchOption } from "./types/api";
+import type {
+  ApiConcept,
+  ApiGraphResponse,
+  ApiHouse,
+  SearchOption,
+} from "./types/api";
 
 import type { GraphData, GraphNode } from "./types/graph";
 
@@ -51,6 +62,7 @@ function App() {
   const navigate = useNavigate();
 
   const [houses, setHouses] = useState<ApiHouse[]>([]);
+  const [concepts, setConcepts] = useState<ApiConcept[]>([]);
 
   const [currentSelection, setCurrentSelection] =
     useState<SearchOption>(INITIAL_SELECTION);
@@ -78,11 +90,21 @@ function App() {
     apiName: house.label,
   }));
 
-  const searchOptions = [...houseOptions, ...SOURCE_OPTIONS];
+  const conceptOptions: SearchOption[] = concepts.map((concept) => ({
+    id: concept.id,
+    label: concept.label,
+    kind: "CONCEPT",
+    apiName: concept.label,
+  }));
+
+  const searchOptions = [...houseOptions, ...SOURCE_OPTIONS, ...conceptOptions];
 
   useEffect(() => {
-    getHouses()
-      .then(setHouses)
+    Promise.all([getHouses(), getConcepts()])
+      .then(([houseData, conceptData]) => {
+        setHouses(houseData);
+        setConcepts(conceptData);
+      })
       .catch(() => {
         setGraphError(true);
       });
@@ -95,11 +117,21 @@ function App() {
     setArtworkLimits({});
     setGraphError(false);
 
-    const request =
-      currentSelection.kind === "HOUSE"
-        ? getHouse(currentSelection.apiName)
-        : getSource(currentSelection.apiName);
+    let request: Promise<ApiGraphResponse>;
 
+    switch (currentSelection.kind) {
+      case "HOUSE":
+        request = getHouse(currentSelection.apiName);
+        break;
+
+      case "SOURCE":
+        request = getSource(currentSelection.apiName);
+        break;
+
+      case "CONCEPT":
+        request = getConcept(currentSelection.apiName);
+        break;
+    }
     request
       .then((response) => {
         setGraphData(toGraphData(response));
@@ -113,14 +145,49 @@ function App() {
     if (!graphData) {
       return null;
     }
-
+    if (currentSelection.kind === "CONCEPT") {
+      return graphData;
+    }
     const structuralNodes = graphData.nodes.filter(
       (node) => node.kind === "DESIGNER" || node.kind === "SOURCE",
     );
 
-    const garments = graphData.nodes
-      .filter((node) => node.kind === "GARMENT")
-      .slice(0, garmentLimit);
+    const conceptLinkedGarmentIds = new Set(
+      graphData.relationships
+        .filter((relationship) => relationship.type === "HAS_CONCEPT")
+        .map((relationship) => relationship.source),
+    );
+
+    const allGarments = graphData.nodes.filter(
+      (node) => node.kind === "GARMENT",
+    );
+
+    const orderedGarments = [
+      ...allGarments.filter((garment) =>
+        conceptLinkedGarmentIds.has(garment.id),
+      ),
+      ...allGarments.filter(
+        (garment) => !conceptLinkedGarmentIds.has(garment.id),
+      ),
+    ];
+
+    const garments = orderedGarments.slice(0, garmentLimit);
+
+    const visibleGarmentIds = new Set(garments.map((garment) => garment.id));
+
+    const visibleConceptIds = new Set(
+      graphData.relationships
+        .filter(
+          (relationship) =>
+            relationship.type === "HAS_CONCEPT" &&
+            visibleGarmentIds.has(relationship.source),
+        )
+        .map((relationship) => relationship.target),
+    );
+
+    const concepts = graphData.nodes.filter(
+      (node) => node.kind === "CONCEPT" && visibleConceptIds.has(node.id),
+    );
 
     const visibleArtworkIds = new Set<string>();
 
@@ -143,8 +210,7 @@ function App() {
       (node) => node.kind === "ARTWORK" && visibleArtworkIds.has(node.id),
     );
 
-    const nodes = [...structuralNodes, ...garments, ...artworks];
-
+    const nodes = [...structuralNodes, ...garments, ...concepts, ...artworks];
     const visibleIds = new Set(nodes.map((node) => node.id));
 
     const relationships = graphData.relationships.filter(
