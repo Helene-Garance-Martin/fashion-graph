@@ -90,26 +90,41 @@
   display: contents;
 }
 
-.saveButton {
-  grid-column: 2;
-  grid-row: 1;
-
-  align-self: center;
-
-  margin-right: 3rem;
-
-  white-space: nowrap;
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
 }
 
 .count {
-  grid-column: 1 / -1;
-  grid-row: 3;
+  margin: 0;
 
-  margin: -0.45rem 0 0;
+  font-family: var(--font-interface);
+  font-size: 0.75rem;
+  font-weight: 500;
 
-  white-space: nowrap;
+  color: #777;
 }
 
+.saveButton {
+  padding: 0.55rem 0.75rem;
+
+  border: 1px solid #999;
+  border-radius: 2px;
+
+  background: transparent;
+  color: #171717;
+
+  font-family: var(--font-interface);
+  font-size: 0.78rem;
+
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  border-color: #171717;
+}
 .diaList {
   display: flex;
   flex-direction: column;
