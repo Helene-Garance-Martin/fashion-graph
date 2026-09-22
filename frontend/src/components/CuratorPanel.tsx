@@ -85,6 +85,32 @@ function CuratorPanel({
 
           <p className={styles.summary}>{profile.summary}</p>
 
+          {profile.atlasNote && (
+            <div className={styles.threads}>
+              <p className={styles.threadsTitle}>In this atlas</p>
+              <p>{profile.atlasNote}</p>
+            </div>
+          )}
+
+          {profile.etymology && (
+            <div className={styles.threads}>
+              <p className={styles.threadsTitle}>Word</p>
+              <p>{profile.etymology}</p>
+            </div>
+          )}
+
+          {profile.metDepartments && profile.metDepartments.length > 0 && (
+            <div className={styles.threads}>
+              <p className={styles.threadsTitle}>At the Met</p>
+
+              <ul>
+                {profile.metDepartments.map((department) => (
+                  <li key={department}>{department}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {profile.themes.length > 0 && (
             <div className={styles.threads}>
               <p className={styles.threadsTitle}>Threads</p>
