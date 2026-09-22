@@ -225,8 +225,8 @@ function App() {
     };
   }, [graphData, garmentLimit, artworkLimits]);
 
-  const handleSearchSubmit = () => {
-    const wanted = searchValue.trim().toLowerCase();
+  const handleSearchSubmit = (value = searchValue) => {
+    const wanted = value.trim().toLowerCase();
 
     const match = searchOptions.find(
       (option) => option.label.toLowerCase() === wanted,
@@ -237,7 +237,6 @@ function App() {
     }
 
     setSearchValue(match.label);
-
     setCurrentSelection(match);
   };
 

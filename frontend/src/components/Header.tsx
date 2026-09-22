@@ -8,7 +8,7 @@ type HeaderProps = {
   searchValue: string;
   searchOptions: SearchOption[];
   onSearchChange: (value: string) => void;
-  onSearchSubmit: () => void;
+  onSearchSubmit: (value?: string) => void;
 };
 
 function Header({

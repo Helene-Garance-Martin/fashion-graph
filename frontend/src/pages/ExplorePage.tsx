@@ -25,7 +25,7 @@ type ExplorePageProps = {
 
   onSearchChange: (value: string) => void;
 
-  onSearchSubmit: () => void;
+  onSearchSubmit: (value?: string) => void;
 
   onNodeSelect: (node: GraphNode) => void;
 

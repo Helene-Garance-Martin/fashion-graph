@@ -1,24 +1,19 @@
-import type { SearchOption } from '../types/api'
-import styles from './SearchBar.module.css'
+import type { SearchOption } from "../types/api";
+import styles from "./SearchBar.module.css";
 
 type SearchBarProps = {
-  value: string
-  options: SearchOption[]
-  onChange: (value: string) => void
-  onSubmit: () => void
-}
+  value: string;
+  options: SearchOption[];
+  onChange: (value: string) => void;
+  onSubmit: (value?: string) => void;
+};
 
-function SearchBar({
-  value,
-  options,
-  onChange,
-  onSubmit,
-}: SearchBarProps) {
+function SearchBar({ value, options, onChange, onSubmit }: SearchBarProps) {
   return (
     <form
       onSubmit={(event) => {
-        event.preventDefault()
-        onSubmit()
+        event.preventDefault();
+        onSubmit(value);
       }}
     >
       <input
@@ -26,8 +21,24 @@ function SearchBar({
         type="search"
         list="atlas-options"
         value={value}
-        placeholder="Search designers or source worlds..."
-        onChange={(event) => onChange(event.target.value)}
+        placeholder="Search designers, source worlds or concepts..."
+        onFocus={(event) => {
+          event.currentTarget.select();
+        }}
+        onChange={(event) => {
+          const nextValue = event.currentTarget.value;
+
+          onChange(nextValue);
+
+          const exactMatch = options.some(
+            (option) =>
+              option.label.toLowerCase() === nextValue.trim().toLowerCase(),
+          );
+
+          if (exactMatch) {
+            onSubmit(nextValue);
+          }
+        }}
       />
 
       <datalist id="atlas-options">
@@ -36,15 +47,17 @@ function SearchBar({
             key={option.id}
             value={option.label}
             label={
-              option.kind === 'HOUSE'
-                ? 'Designer'
-                : 'Source world'
+              option.kind === "HOUSE"
+                ? "Designer"
+                : option.kind === "SOURCE"
+                  ? "Source world"
+                  : "Concept"
             }
           />
         ))}
       </datalist>
     </form>
-  )
+  );
 }
 
-export default SearchBar
+export default SearchBar;
