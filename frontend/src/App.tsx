@@ -27,6 +27,8 @@ import type { GraphData, GraphNode } from "./types/graph";
 
 import type { Show } from "./types/show";
 
+import { canAddToExhibition } from "./utils/exhibition";
+
 const SOURCE_OPTIONS: SearchOption[] = [
   {
     id: "sourceworld:Ancient Greek sculpture",
@@ -275,6 +277,10 @@ function App() {
   };
 
   const handleAddToExhibition = (node: GraphNode) => {
+    if (!canAddToExhibition(node)) {
+      return;
+    }
+
     setExhibitionItems((currentItems) => {
       const alreadyExists = currentItems.some((item) => item.id === node.id);
 
@@ -293,7 +299,9 @@ function App() {
   };
 
   const handleCreateShow = () => {
-    if (exhibitionItems.length === 0) {
+    const eligibleItems = exhibitionItems.filter(canAddToExhibition);
+
+    if (eligibleItems.length === 0) {
       return;
     }
 
@@ -304,7 +312,7 @@ function App() {
 
       title: "",
 
-      dias: exhibitionItems.map((node, index) => ({
+      dias: eligibleItems.map((node, index) => ({
         id: crypto.randomUUID(),
 
         node,

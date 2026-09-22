@@ -1,15 +1,14 @@
-import type { GraphNode } from '../types/graph'
-import { curatorialProfiles } from '../data/curatorialProfiles'
+import type { GraphNode } from "../types/graph";
+import { curatorialProfiles } from "../data/curatorialProfiles";
+import { canAddToExhibition } from "../utils/exhibition";
 
-import styles from './CuratorPanel.module.css'
+import styles from "./CuratorPanel.module.css";
 
 type CuratorPanelProps = {
-  selectedNode: GraphNode | null
-  onAddToExhibition: (
-    node: GraphNode
-  ) => void
-  isInExhibition: boolean
-}
+  selectedNode: GraphNode | null;
+  onAddToExhibition: (node: GraphNode) => void;
+  isInExhibition: boolean;
+};
 
 function CuratorPanel({
   selectedNode,
@@ -19,201 +18,128 @@ function CuratorPanel({
   if (!selectedNode) {
     return (
       <section className={styles.panel}>
-        <h2 className={styles.panelTitle}>
-          Curator
-        </h2>
+        <h2 className={styles.panelTitle}>Curator</h2>
 
-        <p className={styles.empty}>
-          Select something in the graph.
-        </p>
+        <p className={styles.empty}>Select something in the graph.</p>
       </section>
-    )
+    );
   }
 
-  const profile =
-    curatorialProfiles.find(
-      (item) =>
-        item.nodeId === selectedNode.id
-    )
+  const profile = curatorialProfiles.find(
+    (item) => item.nodeId === selectedNode.id,
+  );
 
-  const isObject =
-    selectedNode.kind === 'ARTWORK' ||
-    selectedNode.kind === 'GARMENT'
+  const isObject = canAddToExhibition(selectedNode);
 
   const canShowImage =
-    selectedNode.kind === 'ARTWORK' &&
-    Boolean(
-      selectedNode.image ||
-      selectedNode.imageSmall
-    )
+    selectedNode.kind === "ARTWORK" &&
+    Boolean(selectedNode.image || selectedNode.imageSmall);
 
-  const curatorImage =
-    selectedNode.image ||
-    selectedNode.imageSmall
+  const curatorImage = selectedNode.image || selectedNode.imageSmall;
 
-  const artistName = [
-    selectedNode.artistPrefix,
-    selectedNode.artist,
-  ]
+  const artistName = [selectedNode.artistPrefix, selectedNode.artist]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 
   const hasObjectDetails =
     Boolean(selectedNode.classification) ||
     Boolean(selectedNode.dimensions) ||
-    Boolean(selectedNode.description)
+    Boolean(selectedNode.description);
 
   const addButton = (
     <button
       type="button"
       className={`${styles.exhibitionButton} ${
-        isInExhibition
-          ? styles.exhibitionButtonSelected
-          : ''
+        isInExhibition ? styles.exhibitionButtonSelected : ""
       }`}
-      onClick={() =>
-        onAddToExhibition(selectedNode)
-      }
+      onClick={() => onAddToExhibition(selectedNode)}
       disabled={isInExhibition}
       aria-label={
         isInExhibition
           ? `${selectedNode.label} is already in the exhibition`
           : `Add ${selectedNode.label} to the exhibition`
       }
-      title={
-        isInExhibition
-          ? 'In exhibition'
-          : 'Add to exhibition'
-      }
+      title={isInExhibition ? "In exhibition" : "Add to exhibition"}
     >
-      {isInExhibition ? '✓' : '+'}
+      {isInExhibition ? "✓" : "+"}
     </button>
-  )
+  );
 
   return (
     <section className={styles.panel}>
-      <h2 className={styles.panelTitle}>
-        Curator
-      </h2>
+      <h2 className={styles.panelTitle}>Curator</h2>
 
       {profile ? (
         <div className={styles.profile}>
           <div className={styles.profileHeader}>
             <div>
-              <p className={styles.kind}>
-                {profile.eyebrow}
-              </p>
+              <p className={styles.kind}>{profile.eyebrow}</p>
 
-              <h3 className={styles.title}>
-                {profile.title}
-              </h3>
+              <h3 className={styles.title}>{profile.title}</h3>
             </div>
 
-            <div className={styles.profileAction}>
-              {addButton}
-            </div>
+            <div className={styles.profileAction}>{isObject && addButton}</div>
           </div>
 
-          {profile.dates && (
-            <p className={styles.origin}>
-              {profile.dates}
-            </p>
-          )}
+          {profile.dates && <p className={styles.origin}>{profile.dates}</p>}
 
-          <p className={styles.summary}>
-            {profile.summary}
-          </p>
+          <p className={styles.summary}>{profile.summary}</p>
 
           {profile.themes.length > 0 && (
             <div className={styles.threads}>
-              <p className={styles.threadsTitle}>
-                Threads
-              </p>
+              <p className={styles.threadsTitle}>Threads</p>
 
               <ul>
-                {profile.themes.map(
-                  (theme) => (
-                    <li key={theme}>
-                      {theme}
-                    </li>
-                  )
-                )}
+                {profile.themes.map((theme) => (
+                  <li key={theme}>{theme}</li>
+                ))}
               </ul>
             </div>
           )}
         </div>
       ) : (
         <>
-          <p className={styles.kind}>
-            {selectedNode.kind}
-          </p>
+          <p className={styles.kind}>{selectedNode.kind}</p>
 
-          <h3 className={styles.title}>
-            {selectedNode.label}
-          </h3>
+          <h3 className={styles.title}>{selectedNode.label}</h3>
 
           {isObject && (
             <div className={styles.mediaFrame}>
-              {canShowImage &&
-              curatorImage ? (
+              {canShowImage && curatorImage ? (
                 <img
                   className={styles.mediaImage}
                   src={curatorImage}
                   alt={selectedNode.label}
                 />
               ) : (
-                <div
-                  className={
-                    styles.mediaPlaceholder
-                  }
-                >
-                  <span
-                    className={
-                      styles.placeholderKind
-                    }
-                  >
+                <div className={styles.mediaPlaceholder}>
+                  <span className={styles.placeholderKind}>
                     {selectedNode.kind}
                   </span>
 
-                  <strong>
-                    {selectedNode.label}
-                  </strong>
+                  <strong>{selectedNode.label}</strong>
 
-                  {selectedNode.date && (
-                    <span>
-                      {selectedNode.date}
-                    </span>
-                  )}
+                  {selectedNode.date && <span>{selectedNode.date}</span>}
                 </div>
               )}
 
-              {addButton}
+              {isObject && addButton}
             </div>
           )}
 
           <div className={styles.objectInfo}>
-            {artistName && (
-              <p className={styles.artist}>
-                {artistName}
-              </p>
-            )}
+            {artistName && <p className={styles.artist}>{artistName}</p>}
 
-            {(selectedNode.date ||
-              selectedNode.culture) && (
+            {(selectedNode.date || selectedNode.culture) && (
               <p className={styles.metaLine}>
-                {[
-                  selectedNode.date,
-                  selectedNode.culture,
-                ]
+                {[selectedNode.date, selectedNode.culture]
                   .filter(Boolean)
-                  .join(' · ')}
+                  .join(" · ")}
               </p>
             )}
 
             {selectedNode.medium && (
-              <p className={styles.medium}>
-                {selectedNode.medium}
-              </p>
+              <p className={styles.medium}>{selectedNode.medium}</p>
             )}
 
             {selectedNode.url && (
@@ -228,69 +154,31 @@ function CuratorPanel({
             )}
 
             {hasObjectDetails && (
-              <details
-                className={styles.details}
-              >
-                <summary>
-                  Object details
-                </summary>
+              <details className={styles.details}>
+                <summary>Object details</summary>
 
-                <div
-                  className={
-                    styles.detailsBody
-                  }
-                >
+                <div className={styles.detailsBody}>
                   {selectedNode.classification && (
-                    <div
-                      className={
-                        styles.detailRow
-                      }
-                    >
-                      <span>
-                        Classification
-                      </span>
+                    <div className={styles.detailRow}>
+                      <span>Classification</span>
 
-                      <p>
-                        {
-                          selectedNode.classification
-                        }
-                      </p>
+                      <p>{selectedNode.classification}</p>
                     </div>
                   )}
 
                   {selectedNode.dimensions && (
-                    <div
-                      className={
-                        styles.detailRow
-                      }
-                    >
-                      <span>
-                        Dimensions
-                      </span>
+                    <div className={styles.detailRow}>
+                      <span>Dimensions</span>
 
-                      <p>
-                        {
-                          selectedNode.dimensions
-                        }
-                      </p>
+                      <p>{selectedNode.dimensions}</p>
                     </div>
                   )}
 
                   {selectedNode.description && (
-                    <div
-                      className={
-                        styles.detailRow
-                      }
-                    >
-                      <span>
-                        Description
-                      </span>
+                    <div className={styles.detailRow}>
+                      <span>Description</span>
 
-                      <p>
-                        {
-                          selectedNode.description
-                        }
-                      </p>
+                      <p>{selectedNode.description}</p>
                     </div>
                   )}
                 </div>
@@ -300,7 +188,7 @@ function CuratorPanel({
         </>
       )}
     </section>
-  )
+  );
 }
 
-export default CuratorPanel
+export default CuratorPanel;
