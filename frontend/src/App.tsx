@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import ShowsPage from "./pages/ShowsPage";
 import ExplorePage from "./pages/ExplorePage";
 import ShowEditPage from "./pages/ShowEditPage";
+import ShowPresentPage from "./pages/ShowPresentPage";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -363,6 +364,7 @@ function App() {
       <Route path="/shows" element={<ShowsPage />} />
 
       <Route path="/shows/:showId/edit" element={<ShowEditPage />} />
+      <Route path="/shows/:showId/present" element={<ShowPresentPage />} />
     </Routes>
   );
 }
