@@ -11,6 +11,7 @@
 
   background: #0b0b0b;
   color: #f1efe9;
+  touch-action: pan-y;
 }
 
 .topBar {

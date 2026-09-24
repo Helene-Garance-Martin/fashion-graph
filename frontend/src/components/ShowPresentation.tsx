@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 
 import type { Show } from "../types/show";
 
@@ -18,6 +25,11 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
 
   const hideTimerRef = useRef<number | null>(null);
   const controlsHoveredRef = useRef(false);
+
+  const touchStartRef = useRef<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const dias = useMemo(
     () => [...show.dias].sort((a, b) => a.order - b.order),
@@ -67,6 +79,53 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
     setCurrentIndex((index) => Math.min(dias.length - 1, index + 1));
   }, [dias.length]);
 
+  const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
+    revealControls();
+
+    if (event.pointerType !== "touch") {
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+
+    if (target.closest('[data-presentation-control="true"]')) {
+      return;
+    }
+
+    touchStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  };
+
+  const handlePointerUp = (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType !== "touch" || !touchStartRef.current) {
+      return;
+    }
+
+    const start = touchStartRef.current;
+
+    touchStartRef.current = null;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+
+    const isHorizontalSwipe =
+      Math.abs(deltaX) >= 50 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2;
+
+    if (!isHorizontalSwipe) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      goNext();
+    } else {
+      goPrevious();
+    }
+
+    revealControls();
+  };
+
   const handleFullscreen = async () => {
     revealControls();
 
@@ -87,6 +146,7 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(Boolean(document.fullscreenElement));
+
       revealControls();
     };
 
@@ -115,11 +175,12 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
 
       if (event.key === "Escape") {
         /*
-         * When fullscreen is active, the browser owns the first Escape:
+         * When fullscreen is active,
+         * the browser owns the first Escape:
          *
          * fullscreen → presentation
          *
-         * A second Escape then returns to the editor.
+         * A second Escape returns to the editor.
          */
         if (document.fullscreenElement) {
           return;
@@ -138,19 +199,25 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
 
   const controlInteractionProps = {
     "data-presentation-control": "true",
+
     onPointerEnter: () => {
       controlsHoveredRef.current = true;
+
       clearHideTimer();
       setControlsVisible(true);
     },
+
     onPointerLeave: () => {
       controlsHoveredRef.current = false;
+
       scheduleControlsHide();
     },
+
     onFocus: () => {
       clearHideTimer();
       setControlsVisible(true);
     },
+
     onBlur: () => {
       scheduleControlsHide();
     },
@@ -161,7 +228,11 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
       <main
         className={styles.presentation}
         onPointerMove={revealControls}
-        onPointerDown={revealControls}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={() => {
+          touchStartRef.current = null;
+        }}
       >
         <button type="button" className={styles.exitButton} onClick={onExit}>
           ← Exit
@@ -192,7 +263,11 @@ function ShowPresentation({ show, onExit }: ShowPresentationProps) {
         !controlsVisible ? styles.presentationIdle : ""
       }`}
       onPointerMove={revealControls}
-      onPointerDown={revealControls}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => {
+        touchStartRef.current = null;
+      }}
       onFocusCapture={revealControls}
     >
       <header className={styles.topBar}>
