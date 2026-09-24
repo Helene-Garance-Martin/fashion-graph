@@ -24,6 +24,41 @@
   min-height: 2rem;
 }
 
+.fullscreenButton {
+  justify-self: end;
+
+  border: 0;
+  padding: 0;
+
+  background: transparent;
+  color: #aaa;
+
+  font-family: var(--font-interface);
+  font-size: 0.72rem;
+
+  cursor: pointer;
+}
+
+.fullscreenButton:hover {
+  color: #fff;
+}
+
+.chrome {
+  opacity: 1;
+
+  transition: opacity 220ms ease;
+}
+
+.chromeHidden {
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.presentationIdle {
+  cursor: none;
+}
+
 .exitButton {
   justify-self: start;
 
@@ -270,5 +305,17 @@
 
   .next {
     right: 0;
+  }
+}
+
+@media (pointer: coarse) {
+  .presentationIdle {
+    cursor: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome {
+    transition: none;
   }
 }
