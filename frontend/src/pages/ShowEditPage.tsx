@@ -88,6 +88,55 @@ function ShowEditPage() {
     }
   };
 
+  const handlePresent = async () => {
+    if (!show) return;
+
+    const isMobile = window.matchMedia("(max-width: 700px)").matches;
+
+    const presentationTab = isMobile
+      ? null
+      : window.open("about:blank", "_blank");
+
+    if (!isMobile && !presentationTab) {
+      window.alert("Your browser blocked the presentation tab.");
+      return;
+    }
+
+    try {
+      const savedShow = await save(show);
+
+      setShow(savedShow);
+
+      const presentationPath = `/shows/${savedShow.id}/present`;
+
+      if (isMobile) {
+        navigate(presentationPath);
+        return;
+      }
+
+      if (presentationTab) {
+        presentationTab.opener = null;
+
+        const presentationUrl =
+          `${window.location.origin}${import.meta.env.BASE_URL}` +
+          `shows/${savedShow.id}/present`;
+
+        presentationTab.location.href = presentationUrl;
+      }
+    } catch (caughtError) {
+      presentationTab?.close();
+
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unknown API error.";
+
+      window.alert(
+        `Couldn't open the presentation.\n\n${message}\n\nYour changes are still here.`,
+      );
+    }
+  };
+
   const handleEditShow = (selectedShow: Show) => {
     setShow(selectedShow);
 
@@ -196,6 +245,7 @@ function ShowEditPage() {
       onBack={handleBack}
       onTitleChange={handleTitleChange}
       onSave={handleSave}
+      onPresent={handlePresent}
       onEditShow={handleEditShow}
       onDeleteShow={handleDeleteShow}
       onReorderDias={handleReorderDias}

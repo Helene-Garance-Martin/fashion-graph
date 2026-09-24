@@ -87,16 +87,42 @@
 }
 
 .headerActions {
-  display: contents;
-}
-
-.headerActions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.45rem;
 }
 
+.actionButtons {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.presentButton,
+.saveButton {
+  padding: 0.55rem 0.75rem;
+
+  border: 1px solid #999;
+  border-radius: 2px;
+
+  background: transparent;
+  color: #171717;
+
+  font-family: var(--font-interface);
+  font-size: 0.78rem;
+
+  cursor: pointer;
+}
+
+.presentButton:hover:not(:disabled),
+.saveButton:hover {
+  border-color: #171717;
+}
+
+.presentButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 .count {
   margin: 0;
 
@@ -371,7 +397,7 @@
     font-size: 2rem;
   }
 
-  .saveButton {
+  .actionButtons {
     grid-column: 2;
     grid-row: 1;
 

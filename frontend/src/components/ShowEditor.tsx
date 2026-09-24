@@ -31,6 +31,7 @@ type ShowEditorProps = {
   onBack: () => void;
   onTitleChange: (title: string) => void;
   onSave: () => void;
+  onPresent: () => void;
   onEditShow: (show: Show) => void;
   onDeleteShow: (show: Show) => void;
   onReorderDias: (activeDiaId: string, overDiaId: string) => void;
@@ -104,6 +105,7 @@ function ShowEditor({
   onBack,
   onTitleChange,
   onSave,
+  onPresent,
   onEditShow,
   onDeleteShow,
   onReorderDias,
@@ -158,13 +160,24 @@ function ShowEditor({
               {show.dias.length} {show.dias.length === 1 ? "dia" : "dias"}
             </p>
 
-            <button
-              type="button"
-              className={styles.saveButton}
-              onClick={onSave}
-            >
-              Save Show
-            </button>
+            <div className={styles.actionButtons}>
+              <button
+                type="button"
+                className={styles.presentButton}
+                onClick={onPresent}
+                disabled={show.dias.length === 0}
+              >
+                Present ↗
+              </button>
+
+              <button
+                type="button"
+                className={styles.saveButton}
+                onClick={onSave}
+              >
+                Save Show
+              </button>
+            </div>
           </div>
         </header>
 
