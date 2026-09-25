@@ -1,6 +1,13 @@
 * {
   box-sizing: border-box;
 }
+@font-face {
+  font-family: "Love";
+  src: url("./assets/fonts/Love-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
 :root {
   --font-brand: "Tenor Sans", sans-serif;
@@ -28,4 +35,8 @@ input,
 select,
 textarea {
   font: inherit;
+}
+h1 {
+  font-family: "Love", var(--font-curatorial);
+  font-weight: 400;
 }

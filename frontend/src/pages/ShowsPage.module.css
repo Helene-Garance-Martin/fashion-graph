@@ -62,7 +62,6 @@
 .heading {
   margin: 0;
 
-  font-family: var(--font-curatorial);
   font-size: clamp(2.6rem, 5vw, 5rem);
   font-weight: 400;
 
