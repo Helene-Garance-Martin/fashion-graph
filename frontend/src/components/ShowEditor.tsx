@@ -167,7 +167,7 @@ function ShowEditor({
                 onClick={onPresent}
                 disabled={show.dias.length === 0}
               >
-                Present ↗
+                Present <span aria-hidden="true">{"\u2197\uFE0E"}</span>
               </button>
 
               <button
@@ -175,7 +175,7 @@ function ShowEditor({
                 className={styles.saveButton}
                 onClick={onSave}
               >
-                Save Show
+                View at The Met <span aria-hidden="true">{"\u2197\uFE0E"}</span>
               </button>
             </div>
           </div>
