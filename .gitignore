@@ -1,3 +1,20 @@
 __pycache__/
 *.pyc
 .env
+
+# Python virtual environments
+.venv/
+venv/
+
+# VS Code local settings
+.vscode/
+
+# LoRA experiment datasets
+experiments/**/data/images/
+
+# LoRA training outputs / checkpoints
+experiments/**/outputs/
+experiments/**/checkpoints/
+
+# Jupyter
+.ipynb_checkpoints/
