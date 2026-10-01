@@ -6,8 +6,6 @@ __pycache__/
 .venv/
 venv/
 
-# VS Code local settings
-.vscode/
 
 # LoRA experiment datasets
 experiments/**/data/images/
