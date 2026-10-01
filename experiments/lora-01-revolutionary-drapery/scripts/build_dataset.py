@@ -30,8 +30,12 @@ OBJECT_IDS = [
 BASE_DIR = Path(__file__).resolve().parent.parent
 IMAGE_DIR = BASE_DIR / "data" / "images"
 METADATA_FILE = BASE_DIR / "data" / "metadata.jsonl"
+CAPTIONS_FILE = BASE_DIR / "data" / "captions.json"
 
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+with CAPTIONS_FILE.open("r", encoding="utf-8") as f:
+    captions = json.load(f)
 
 if METADATA_FILE.exists():
     METADATA_FILE.unlink()
@@ -79,7 +83,7 @@ for index, object_id in enumerate(OBJECT_IDS, start=1):
         "public_domain": obj.get("isPublicDomain"),
         "object_url": obj.get("objectURL"),
         "image_url": image_url,
-        "caption": "",
+        "caption": captions.get(str(object_id), ""),
     }
 
     with METADATA_FILE.open("a", encoding="utf-8") as f:
