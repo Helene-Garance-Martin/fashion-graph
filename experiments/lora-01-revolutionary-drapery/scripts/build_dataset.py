@@ -8,7 +8,7 @@ OBJECT_IDS = [
     733639,
     247499,
     251273,
-    248371,
+    449475,
     250208,
     733660,
     245839,
@@ -20,7 +20,7 @@ OBJECT_IDS = [
     107926,
     137682,
     137702,
-    380627,
+    254766,
     376657,
     362150,
     759755,
@@ -32,6 +32,10 @@ IMAGE_DIR = BASE_DIR / "data" / "images"
 METADATA_FILE = BASE_DIR / "data" / "metadata.jsonl"
 
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+if METADATA_FILE.exists():
+    METADATA_FILE.unlink()
+
 
 
 def get_met_object(object_id):
