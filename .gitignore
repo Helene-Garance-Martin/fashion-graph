@@ -16,3 +16,6 @@ experiments/**/checkpoints/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Prepared LoRA training dataset
+experiments/**/training-data/
