@@ -31,6 +31,49 @@ Each probe was generated using the same SDXL base model and generation settings 
 
 The BASE images were regenerated in the same runtime and on the same GPU as the checkpoint images, allowing the sequence to function as a controlled comparison of LoRA influence across training.
 
+### Generation settings
+
+All checkpoint comparisons used:
+
+- **Base model:** `stabilityai/stable-diffusion-xl-base-1.0`
+- **Pipeline:** Hugging Face Diffusers `StableDiffusionXLPipeline`
+- **Resolution:** 1024 × 1024
+- **Inference steps:** 30
+- **Guidance scale:** 7.0
+- **Precision:** FP16
+- **LoRA checkpoints:** 100, 300 and 500 training steps
+- **LoRA strength:** 1.0
+- **Seeds:** 101 (BODY), 202 (CLOTH), 303 (SPACE)
+- **Hardware:** NVIDIA GeForce RTX 5090
+- **Runtime:** PyTorch 2.11.0 + CUDA 12.8, Diffusers 0.41.0
+
+For each probe, the prompt, seed, resolution and generation settings were held constant across BASE, 100, 300 and 500. The BASE images were regenerated in the same runtime and on the same GPU as the LoRA checkpoints rather than reused from the experiment's earlier baseline generation.
+
+This isolates **training stage** as the deliberately varied condition within the checkpoint comparison and reduces the possibility that differences arise from changes in hardware or runtime.
+
+### LoRA training configuration
+
+The LoRA was trained on a deliberately heterogeneous corpus of **20 public-domain works from The Metropolitan Museum of Art Open Access collection**.
+
+Key training parameters:
+
+- **Base model:** SDXL 1.0
+- **Training resolution:** 1024 × 1024
+- **LoRA rank:** 8
+- **Batch size:** 1
+- **Gradient accumulation:** 4
+- **Maximum training steps:** 500
+- **Learning rate:** 0.0001
+- **Learning-rate scheduler:** constant
+- **Precision:** FP16
+- **Gradient checkpointing:** enabled
+- **Text encoder:** frozen
+- **Random horizontal flip:** disabled
+- **Checkpoint interval:** every 100 steps
+- **Training seed:** 42
+
+The relatively low LoRA rank and frozen text encoder were chosen to keep the adaptation constrained. Checkpoints were retained not to identify an automatically "best" model, but to observe how the character of the adaptation changed during training.
+
 ## Reading the checkpoints
 
 The comparison does not suggest a single optimum training duration across all prompts.
