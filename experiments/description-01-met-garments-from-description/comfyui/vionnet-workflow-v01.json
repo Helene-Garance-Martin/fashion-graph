@@ -1,0 +1,422 @@
+{
+  "id": "020a9367-bf72-41f9-8e8f-3aab6bf94f0d",
+  "revision": 0,
+  "last_node_id": 51,
+  "last_link_id": 8730671508847978,
+  "nodes": [
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:7",
+      "type": "SaveImage",
+      "pos": [1700, 270],
+      "size": [550, 720],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4905340017014863
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "widgets_values": ["sdxl_simple"],
+      "widgets_values_named": {
+        "filename_prefix": "sdxl_simple"
+      },
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:10",
+      "type": "CLIPTextEncode",
+      "pos": [530, 270],
+      "size": [400, 200],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3857513906237121
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [3827673756077694]
+        }
+      ],
+      "title": "Positive Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "widgets_values": [
+        "A full-length woman's silk negligée with a long fluid skirt and a softly wrapped bodice. The upper garment is muted warm salmon pink, gathered around a deep V neckline and crossing softly over the torso. Very full loose sleeves fall from the shoulders and narrow into broad pale peach-cream cuffs. A wide wrapped sash encircles the waist, tied loosely at the front with long hanging ends. The floor-length skirt is pale peach-cream, falling in long soft folds. Fashion design esquisse on pale paper, elegant elongated but healthy figure, economical black ink contour, loose confident hand-drawn lines, sparse construction marks, restrained hatching, flat areas of garment colour, atelier working-sheet quality, exploratory rather than polished, garment silhouette and drape clearly legible."
+      ],
+      "widgets_values_named": {
+        "text": "A full-length woman's silk negligée with a long fluid skirt and a softly wrapped bodice. The upper garment is muted warm salmon pink, gathered around a deep V neckline and crossing softly over the torso. Very full loose sleeves fall from the shoulders and narrow into broad pale peach-cream cuffs. A wide wrapped sash encircles the waist, tied loosely at the front with long hanging ends. The floor-length skirt is pale peach-cream, falling in long soft folds. Fashion design esquisse on pale paper, elegant elongated but healthy figure, economical black ink contour, loose confident hand-drawn lines, sparse construction marks, restrained hatching, flat areas of garment colour, atelier working-sheet quality, exploratory rather than polished, garment silhouette and drape clearly legible."
+      },
+      "color": "#232",
+      "bgcolor": "#353",
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:11",
+      "type": "CLIPTextEncode",
+      "pos": [540, 550],
+      "size": [400, 200],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4457143275440270
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [4281659089208154]
+        }
+      ],
+      "title": "Negative Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode",
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "widgets_values": [
+        "lowres, blurry, out of focus, deformed, bad anatomy, extra limbs, mutated hands, watermark, text, logo, signature, oversaturated"
+      ],
+      "widgets_values_named": {
+        "text": "lowres, blurry, out of focus, deformed, bad anatomy, extra limbs, mutated hands, watermark, text, logo, signature, oversaturated"
+      },
+      "color": "#223",
+      "bgcolor": "#335",
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      "type": "KSampler",
+      "pos": [1030, 270],
+      "size": [270, 270],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3864895554391146
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 3827673756077694
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 4281659089208154
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 636114098954109
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [8256829283577592]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler",
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "widgets_values": [
+        812045847300606,
+        "fixed",
+        25,
+        7,
+        "dpmpp_2m",
+        "karras",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 812045847300606,
+        "control_after_generate": "fixed",
+        "steps": 25,
+        "cfg": 7,
+        "sampler_name": "dpmpp_2m",
+        "scheduler": "karras",
+        "denoise": 1
+      },
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:13",
+      "type": "EmptyLatentImage",
+      "pos": [600, 890],
+      "size": [270, 120],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [636114098954109]
+        }
+      ],
+      "title": "Empty Latent",
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "widgets_values": [832, 1216, 1],
+      "widgets_values_named": {
+        "width": 832,
+        "height": 1216,
+        "batch_size": 1
+      },
+      "color": "#323",
+      "bgcolor": "#535",
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:14",
+      "type": "VAEDecode",
+      "pos": [1400, 270],
+      "size": [230, 60],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 8256829283577592
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4981521544089948
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [4905340017014863]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode",
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0"
+      },
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:15",
+      "type": "CheckpointLoaderSimple",
+      "pos": [80, 270],
+      "size": [350, 110],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [3864895554391146]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [3857513906237121, 4457143275440270]
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [4981521544089948]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple",
+        "cnr_id": "comfy-core",
+        "models": [
+          {
+            "directory": "checkpoints",
+            "name": "sd_xl_base_1.0.safetensors",
+            "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors?download=true"
+          }
+        ],
+        "ver": "0.33.0"
+      },
+      "widgets_values": ["sd_xl_base_1.0.safetensors"],
+      "widgets_values_named": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      },
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    },
+    {
+      "id": "insert:849878323102f78d0f0060e930e0133d:root:node:16",
+      "type": "MarkdownNote",
+      "pos": [-440, 270],
+      "size": [470, 590],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Note: Model Link",
+      "properties": {},
+      "widgets_values": [
+        "Guide: [Subgraph](https://docs.comfy.org/interface/features/subgraph)\n\n## Model Link\n\n**checkpoints**\n\n- [sd_xl_base_1.0.safetensors](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors?download=true) (6.46 GB)\n\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   └── 📂 checkpoints/\n│       └── sd_xl_base_1.0.safetensors\n```\n\n## Report Issue\n\nNote: Please update ComfyUI first ([guide](https://docs.comfy.org/installation/update_comfyui)) and prepare required models. Desktop/Cloud updates follow stable releases, so some nightly-supported models may not be available yet.\n\n- Cannot run / runtime errors: [ComfyUI/issues](https://github.com/comfyanonymous/ComfyUI/issues)\n- UI / frontend issues: [ComfyUI_frontend/issues](https://github.com/Comfy-Org/ComfyUI_frontend/issues)\n- Workflow issues: [workflow_templates/issues](https://github.com/Comfy-Org/workflow_templates/issues)\n"
+      ],
+      "widgets_values_named": {
+        "text": "Guide: [Subgraph](https://docs.comfy.org/interface/features/subgraph)\n\n## Model Link\n\n**checkpoints**\n\n- [sd_xl_base_1.0.safetensors](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors?download=true) (6.46 GB)\n\n\n## Model Storage Location\n\n```\n📂 ComfyUI/\n├── 📂 models/\n│   └── 📂 checkpoints/\n│       └── sd_xl_base_1.0.safetensors\n```\n\n## Report Issue\n\nNote: Please update ComfyUI first ([guide](https://docs.comfy.org/installation/update_comfyui)) and prepare required models. Desktop/Cloud updates follow stable releases, so some nightly-supported models may not be available yet.\n\n- Cannot run / runtime errors: [ComfyUI/issues](https://github.com/comfyanonymous/ComfyUI/issues)\n- UI / frontend issues: [ComfyUI_frontend/issues](https://github.com/Comfy-Org/ComfyUI_frontend/issues)\n- Workflow issues: [workflow_templates/issues](https://github.com/Comfy-Org/workflow_templates/issues)\n"
+      },
+      "color": "#222",
+      "bgcolor": "#000",
+      "__incarnation": "0",
+      "extensions": {
+        "__incarnation": "0"
+      }
+    }
+  ],
+  "links": [
+    [
+      3827673756077694,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:10",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      1,
+      "CONDITIONING"
+    ],
+    [
+      4281659089208154,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:11",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      2,
+      "CONDITIONING"
+    ],
+    [
+      636114098954109,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:13",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      3,
+      "LATENT"
+    ],
+    [
+      8256829283577592,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:14",
+      0,
+      "LATENT"
+    ],
+    [
+      4905340017014863,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:14",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:7",
+      0,
+      "IMAGE"
+    ],
+    [
+      3864895554391146,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:15",
+      0,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:12",
+      0,
+      "MODEL"
+    ],
+    [
+      3857513906237121,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:15",
+      1,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:10",
+      0,
+      "CLIP"
+    ],
+    [
+      4457143275440270,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:15",
+      1,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:11",
+      0,
+      "CLIP"
+    ],
+    [
+      4981521544089948,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:15",
+      2,
+      "insert:849878323102f78d0f0060e930e0133d:root:node:14",
+      1,
+      "VAE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.37161419226344555,
+      "offset": [1160.231778030336, 62.084911586310454]
+    },
+    "frontendVersion": "1.54.16",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
